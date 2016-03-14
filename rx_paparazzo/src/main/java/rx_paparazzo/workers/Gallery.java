@@ -23,12 +23,14 @@ import java.util.List;
 import rx.Observable;
 import rx_paparazzo.entities.Config;
 import rx_paparazzo.interactors.CropImage;
+import rx_paparazzo.interactors.GrantPermissions;
 import rx_paparazzo.interactors.PickImage;
 import rx_paparazzo.interactors.PickImages;
 import rx_paparazzo.interactors.SaveImage;
 
 public final class Gallery {
     private final Activity activity;
+    private final GrantPermissions grantPermissions;
     private final PickImages pickImages;
     private final PickImage pickImage;
     private final CropImage cropImage;
@@ -37,10 +39,21 @@ public final class Gallery {
 
     public Gallery(Activity activity) {
         this.activity = activity;
+        this.grantPermissions = new GrantPermissions();
         this.pickImage = new PickImage();
         this.pickImages = new PickImages();
         this.cropImage = new CropImage();
         this.saveImage = new SaveImage();
+    }
+
+    //Testing purposes
+    public Gallery(Activity activity, GrantPermissions grantPermissions, PickImage pickImage, PickImages pickImages, CropImage cropImage, SaveImage saveImage) {
+        this.activity = activity;
+        this.grantPermissions = grantPermissions;
+        this.pickImage = pickImage;
+        this.pickImages = pickImages;
+        this.cropImage = cropImage;
+        this.saveImage = saveImage;
     }
 
     public Gallery with(Config config) {
@@ -49,13 +62,15 @@ public final class Gallery {
     }
 
     public Observable<String> pickImage() {
-        return pickImage.with(activity).react()
+        return grantPermissions.with(activity, config.getFolder()).react()
+                .flatMap(granted -> pickImage.with(activity).react())
                 .flatMap(uri -> cropImage.with(activity, config, uri).react())
                 .flatMap(uri -> saveImage.with(activity, uri).react());
     }
 
     public Observable<List<String>> pickImages() {
-        return pickImages.with(activity).react()
+        return grantPermissions.with(activity, config.getFolder()).react()
+                .flatMap(granted -> pickImages.with(activity).react())
                 .flatMapIterable(uris -> uris)
                 .flatMap(uri -> cropImage.with(activity, config, uri).react())
                 .flatMap(uri -> saveImage.with(activity, uri).react())

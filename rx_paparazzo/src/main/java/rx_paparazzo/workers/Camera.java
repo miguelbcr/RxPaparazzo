@@ -21,6 +21,7 @@ import android.app.Activity;
 import rx.Observable;
 import rx_paparazzo.entities.Config;
 import rx_paparazzo.interactors.CropImage;
+import rx_paparazzo.interactors.GrantPermissions;
 import rx_paparazzo.interactors.SaveImage;
 import rx_paparazzo.interactors.TakePhoto;
 
@@ -29,14 +30,26 @@ public final class Camera {
     private final TakePhoto takePhoto;
     private final CropImage cropImage;
     private final SaveImage saveImage;
+    private final GrantPermissions grantPermissions;
     private Config config;
 
     public Camera(Activity activity) {
         this.activity = activity;
+        this.grantPermissions = new GrantPermissions();
         this.takePhoto = new TakePhoto();
         this.cropImage = new CropImage();
         this.saveImage = new SaveImage();
     }
+
+    //Testing purposes
+    public Camera(Activity activity, GrantPermissions grantPermissions, TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage) {
+        this.activity = activity;
+        this.grantPermissions = grantPermissions;
+        this.takePhoto = takePhoto;
+        this.cropImage = cropImage;
+        this.saveImage = saveImage;
+    }
+
 
     public Camera with(Config config) {
         this.config = config;
@@ -44,7 +57,8 @@ public final class Camera {
     }
 
     public Observable<String> takePhoto() {
-        return takePhoto.with(activity).react()
+        return grantPermissions.with(activity, config.getFolder()).react()
+                .flatMap(granted -> takePhoto.with(activity).react())
                 .flatMap(uri -> cropImage.with(activity, config, uri).react())
                 .flatMap(uri -> saveImage.with(activity, uri).react());
     }

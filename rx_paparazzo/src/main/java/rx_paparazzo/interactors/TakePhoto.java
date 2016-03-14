@@ -17,9 +17,12 @@
 package rx_paparazzo.interactors;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.net.Uri;
+import android.provider.MediaStore;
 
 import rx.Observable;
+import rx_activity_result.RxActivityResult;
 
 public class TakePhoto extends UseCase<Uri>{
     private Activity activity;
@@ -30,7 +33,15 @@ public class TakePhoto extends UseCase<Uri>{
     }
 
     @Override public Observable<Uri> react() {
-        //if back return userBack()
-        return Observable.just(null);
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+        return RxActivityResult.startIntent(takePictureIntent, activity)
+                .flatMap(result -> {
+                    if (result.resultCode() == Activity.RESULT_OK) {
+                        return Observable.just(result.data().getData());
+                    } else {
+                        return oBrokeChain();
+                    }
+                });
     }
 }

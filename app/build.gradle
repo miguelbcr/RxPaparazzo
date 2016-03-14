@@ -17,7 +17,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.refineriaweb.rxpaparazzo"
+        applicationId "com.refineriaweb.app"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1

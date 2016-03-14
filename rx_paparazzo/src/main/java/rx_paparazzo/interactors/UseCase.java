@@ -21,8 +21,9 @@ import rx.Observable;
 abstract class UseCase<D> {
     public abstract Observable<D> react();
 
-    protected Observable oUserBack() {
-        return Observable.create(subscriber -> subscriber.onError(new RuntimeException()))
+    protected Observable oBrokeChain() {
+        return Observable.<D>create(subscriber -> subscriber.onError(new RuntimeException()))
                 .onErrorResumeNext(throwable -> Observable.empty());
     }
+
 }
