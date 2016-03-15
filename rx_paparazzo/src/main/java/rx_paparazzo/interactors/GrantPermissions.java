@@ -39,10 +39,10 @@ public class GrantPermissions extends UseCase<Void> {
 
         return Observable.just(folder == Folder.Private)
                 .flatMap(privateFolder -> {
-                    if (!privateFolder) return Observable.just(true);
-                    if (permissions.isGranted(Manifest.permission.CAMERA)) return Observable.just(true);
-                    return permissions.request(Manifest.permission.CAMERA);
+                    if (privateFolder) return Observable.just(true);
+                    if (permissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) return Observable.just(true);
+                    return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE);
                 })
-                .flatMap(granted -> granted ? Observable.<Void>just(null) : oBrokeChain());
+                .flatMap(granted -> granted ? Observable.<Void>just(null) : oBreakChain());
     }
 }

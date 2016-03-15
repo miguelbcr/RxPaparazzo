@@ -50,7 +50,6 @@ public final class Camera {
         this.saveImage = saveImage;
     }
 
-
     public Camera with(Config config) {
         this.config = config;
         return this;

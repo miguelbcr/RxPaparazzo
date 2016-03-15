@@ -32,7 +32,6 @@ public class SaveImage extends UseCase<String> {
     }
 
     @Override public Observable<String> react() {
-
-        return Observable.just(null);
+        return new GetPath().with(context, uri).react();
     }
 }

@@ -72,11 +72,11 @@ public final class RxPaparazzo {
         }
 
         public Observable<String> usingGallery() {
-            return gallery.pickImage();
+            return gallery.with(config).pickImage();
         }
 
         public Observable<String> usingCamera() {
-            return camera.takePhoto();
+            return camera.with(config).takePhoto();
         }
     }
 

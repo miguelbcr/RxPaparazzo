@@ -19,6 +19,7 @@ package rx_paparazzo.interactors;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Environment;
 import android.provider.MediaStore;
 
 import rx.Observable;
@@ -26,21 +27,31 @@ import rx_activity_result.RxActivityResult;
 
 public class TakePhoto extends UseCase<Uri>{
     private Activity activity;
+    private Uri uri;
 
     public TakePhoto with(Activity activity) {
         this.activity = activity;
+        this.uri = getUri();
         return this;
+    }
+
+    private Uri getUri() {
+        return Uri.fromFile(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS))
+            .buildUpon()
+            .appendPath("shoot.jpg")
+            .build();
     }
 
     @Override public Observable<Uri> react() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
 
         return RxActivityResult.startIntent(takePictureIntent, activity)
                 .flatMap(result -> {
                     if (result.resultCode() == Activity.RESULT_OK) {
-                        return Observable.just(result.data().getData());
+                        return Observable.just(uri);
                     } else {
-                        return oBrokeChain();
+                        return oBreakChain();
                     }
                 });
     }
