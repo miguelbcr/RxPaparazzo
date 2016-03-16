@@ -31,6 +31,7 @@ import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.exceptions.Exceptions;
 
 final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
@@ -102,17 +103,13 @@ final class GetPath extends UseCase<String> {
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-            if (cursor != null && cursor.moveToFirst()) {
-                final int columnIndex = cursor.getColumnIndexOrThrow(column);
-                return cursor.getString(columnIndex);
-            }
+            final int columnIndex = cursor.getColumnIndexOrThrow(column);
+            return cursor.getString(columnIndex);
         } catch (Exception e) {
-            e.printStackTrace();
+            throw Exceptions.propagate(e);
         } finally {
             if (cursor != null) cursor.close();
         }
-
-        return null;
     }
 
     private boolean isExternalStorageDocument(Uri uri) {
