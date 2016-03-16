@@ -14,24 +14,7 @@
  * limitations under the License.
  */
 
-package com.refineriaweb.rx_paparazzo.library.interactors;
+package com.refineriaweb.rx_paparazzo.library.entities;
 
-import android.net.Uri;
-
-import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
-
-import javax.inject.Inject;
-
-import rx.Observable;
-
-public final class PickImage extends UseCase<Uri>{
-    private final TargetUi targetUi;
-
-    @Inject public PickImage(TargetUi targetUi) {
-        this.targetUi = targetUi;
-    }
-
-    @Override public Observable<Uri> react() {
-        return Observable.just(null);
-    }
+public class UserCanceledException extends RuntimeException {
 }

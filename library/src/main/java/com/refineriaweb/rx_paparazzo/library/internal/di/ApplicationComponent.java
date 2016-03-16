@@ -14,24 +14,18 @@
  * limitations under the License.
  */
 
-package com.refineriaweb.rx_paparazzo.library.interactors;
+package com.refineriaweb.rx_paparazzo.library.internal.di;
 
-import android.net.Uri;
+import com.refineriaweb.rx_paparazzo.library.workers.Camera;
+import com.refineriaweb.rx_paparazzo.library.workers.Gallery;
 
-import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
+import javax.inject.Singleton;
 
-import javax.inject.Inject;
+import dagger.Component;
 
-import rx.Observable;
-
-public final class PickImage extends UseCase<Uri>{
-    private final TargetUi targetUi;
-
-    @Inject public PickImage(TargetUi targetUi) {
-        this.targetUi = targetUi;
-    }
-
-    @Override public Observable<Uri> react() {
-        return Observable.just(null);
-    }
+@Component(modules = ApplicationModule.class)
+@Singleton
+public interface ApplicationComponent {
+    Camera camera();
+    Gallery gallery();
 }

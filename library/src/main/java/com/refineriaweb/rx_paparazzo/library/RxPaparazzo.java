@@ -17,13 +17,16 @@
 package com.refineriaweb.rx_paparazzo.library;
 
 import android.app.Activity;
+import android.support.v4.app.Fragment;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
+import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
 import com.refineriaweb.rx_paparazzo.library.entities.Style;
-import com.refineriaweb.rx_paparazzo.library.workers.Camera;
-import com.refineriaweb.rx_paparazzo.library.workers.Gallery;
+import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationComponent;
+import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationModule;
+import com.refineriaweb.rx_paparazzo.library.internal.di.DaggerApplicationComponent;
 
 import java.util.List;
 
@@ -31,79 +34,88 @@ import rx.Observable;
 
 public final class RxPaparazzo {
 
-    public static BuilderImage takeImage(Activity activity) {
-        return new BuilderImage(activity);
+    public static <T extends Activity> BuilderImage<T> takeImage(T activity) {
+        return new BuilderImage<T>(activity);
     }
 
-    public static BuilderImages takeImages(Activity activity) {
-        return new BuilderImages(activity);
+    public static <T extends Activity> BuilderImages<T> takeImages(T activity) {
+        return new BuilderImages<T>(activity);
     }
 
-    private abstract static class Builder {
+    public static <T extends Fragment> BuilderImage<T> takeImage(T fragment) {
+        return new BuilderImage<T>(fragment);
+    }
+
+    public static <T extends Fragment> BuilderImages<T> takeImages(T fragment) {
+        return new BuilderImages<T>(fragment);
+    }
+
+    private abstract static class Builder<T> {
         protected final Config config;
-        protected final Camera camera;
-        protected final Gallery gallery;
+        protected final ApplicationComponent applicationComponent;
 
-        public Builder(Activity activity) {
-            this.camera = new Camera(activity);
-            this.gallery = new Gallery(activity);
+        public Builder(T ui) {
             this.config = new Config();
+            this.applicationComponent = DaggerApplicationComponent.builder()
+                    .applicationModule(new ApplicationModule(config, ui))
+                    .build();
         }
     }
 
-    public static class BuilderImage extends Builder {
+    public static class BuilderImage<T> extends Builder<T> {
 
-        public BuilderImage(Activity activity) {
-            super(activity);
+        public BuilderImage(T ui) {
+            super(ui);
         }
 
-        public BuilderImage output(Folder folder) {
+        public BuilderImage<T> output(Folder folder) {
             this.config.setFolder(folder);
             return this;
         }
 
-        public BuilderImage size(Size size) {
+        public BuilderImage<T> size(Size size) {
             this.config.setSize(size);
             return this;
         }
 
-        public BuilderImage crop(Style style) {
+        public BuilderImage<T> crop(Style style) {
             this.config.setCrop(style);
             return this;
         }
 
-        public Observable<String> usingGallery() {
-            return gallery.with(config).pickImage();
+        public Observable<Response<T, String>> usingGallery() {
+            return applicationComponent.gallery().pickImage();
         }
 
-        public Observable<String> usingCamera() {
-            return camera.with(config).takePhoto();
+        public Observable<Response<T, String>> usingCamera() {
+            return applicationComponent.camera().takePhoto();
         }
     }
 
-    public static class BuilderImages extends Builder {
+    public static class BuilderImages<T> extends Builder<T> {
 
-        public BuilderImages(Activity activity) {
-            super(activity);
+        public BuilderImages(T ui) {
+            super(ui);
         }
 
-        public BuilderImages output(Folder folder) {
+        public BuilderImages<T> output(Folder folder) {
             this.config.setFolder(folder);
             return this;
         }
 
-        public BuilderImages size(Size size) {
+        public BuilderImages<T> size(Size size) {
             this.config.setSize(size);
             return this;
         }
 
-        public BuilderImages crop(Style style) {
+        public BuilderImages<T> crop(Style style) {
             this.config.setCrop(style);
             return this;
         }
 
-        public Observable<List<String>> usingGallery() {
-            return gallery.pickImages();
+
+        public Observable<Response<T, List<String>>> usingGallery() {
+            return applicationComponent.gallery().pickImages();
         }
     }
 }

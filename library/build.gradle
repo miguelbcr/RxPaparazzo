@@ -1,6 +1,7 @@
 apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'android-apt'
 
 group='com.github.RefineriaWeb'
 
@@ -12,6 +13,7 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        classpath "com.neenbedankt.gradle.plugins:android-apt:1.8"
     }
 }
 
@@ -47,6 +49,10 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'com.github.VictorAlbertos:RxActivityResult:0.2'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.5.2@aar'
+
+    apt "com.google.dagger:dagger-compiler:2.0.2"
+    compile "com.google.dagger:dagger:2.0.2"
+    compile "org.glassfish:javax.annotation:10.0-b28"
 
     testCompile 'junit:junit:4.12'
     testCompile "org.mockito:mockito-core:1.10.19"

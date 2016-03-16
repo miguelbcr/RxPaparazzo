@@ -16,50 +16,37 @@
 
 package com.refineriaweb.rx_paparazzo.library.workers;
 
-import android.app.Activity;
-
-import com.refineriaweb.rx_paparazzo.library.entities.Config;
+import com.refineriaweb.rx_paparazzo.library.entities.Response;
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.CropImage;
 import com.refineriaweb.rx_paparazzo.library.interactors.GrantPermissions;
 import com.refineriaweb.rx_paparazzo.library.interactors.SaveImage;
 import com.refineriaweb.rx_paparazzo.library.interactors.TakePhoto;
 
+import javax.inject.Inject;
+
 import rx.Observable;
 
 public final class Camera {
-    private final Activity activity;
     private final TakePhoto takePhoto;
     private final CropImage cropImage;
     private final SaveImage saveImage;
     private final GrantPermissions grantPermissions;
-    private Config config;
+    private final TargetUi targetUi;
 
-    public Camera(Activity activity) {
-        this.activity = activity;
-        this.grantPermissions = new GrantPermissions();
-        this.takePhoto = new TakePhoto();
-        this.cropImage = new CropImage();
-        this.saveImage = new SaveImage();
-    }
-
-    //Testing purposes
-    public Camera(Activity activity, GrantPermissions grantPermissions, TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage) {
-        this.activity = activity;
-        this.grantPermissions = grantPermissions;
+    @Inject public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi) {
         this.takePhoto = takePhoto;
         this.cropImage = cropImage;
         this.saveImage = saveImage;
+        this.grantPermissions = grantPermissions;
+        this.targetUi = targetUi;
     }
 
-    public Camera with(Config config) {
-        this.config = config;
-        return this;
-    }
-
-    public Observable<String> takePhoto() {
-        return grantPermissions.with(activity, config.getFolder()).react()
-                .flatMap(granted -> takePhoto.with(activity).react())
-                .flatMap(uri -> cropImage.with(activity, config, uri).react())
-                .flatMap(uri -> saveImage.with(activity, uri).react());
+    public <T> Observable<Response<T, String>> takePhoto() {
+        return grantPermissions.react()
+                .flatMap(granted -> takePhoto.react())
+                .flatMap(uri -> cropImage.with(uri).react())
+                .flatMap(uri -> saveImage.with(uri).react())
+                .map(path -> new Response((T) targetUi.ui(), path));
     }
 }

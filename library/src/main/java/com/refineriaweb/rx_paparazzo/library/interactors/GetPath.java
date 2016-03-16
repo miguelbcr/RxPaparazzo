@@ -26,38 +26,46 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
+
+import javax.inject.Inject;
+
 import rx.Observable;
 
-public class GetPath extends UseCase<String> {
+final class GetPath extends UseCase<String> {
+    private final TargetUi targetUi;
     private Uri uri;
-    private Context context;
 
-    public GetPath with(Context context, Uri uri) {
-        this.context = context;
+    @Inject GetPath(TargetUi targetUi) {
+        this.targetUi = targetUi;
+    }
+
+    public GetPath with(Uri uri) {
         this.uri = uri;
         return this;
     }
 
     @Override public Observable<String> react() {
-        return Observable.just(getPath(context, uri));
+        return Observable.just(getPath());
     }
 
     @SuppressLint("NewApi")
-    private String getPath(final Context context, final Uri uri) {
-        final boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    private String getPath() {
+        boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+        Context context = targetUi.activity();
 
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
-                final Document document = getDocument(uri);
+                Document document = getDocument(uri);
                 if ("primary".equalsIgnoreCase(document.type)) return Environment.getExternalStorageDirectory() + "/" + document.id;
                 // TODO handle non-primary volumes
                 return null;
             } else if (isDownloadsDocument(uri)) {
-                final String id = DocumentsContract.getDocumentId(uri);
-                final Uri contentUri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+                String id = DocumentsContract.getDocumentId(uri);
+                Uri contentUri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
                 return getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(uri)) {
-                final Document document = getDocument(uri);
+                Document document = getDocument(uri);
                 Uri contentUri = null;
                 if ("image".equals(document.type)) contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
                 else if ("video".equals(document.type)) contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
@@ -80,8 +88,8 @@ public class GetPath extends UseCase<String> {
     @SuppressLint("NewApi")
     private Document getDocument(Uri uri) {
         Document document = new Document();
-        final String docId = DocumentsContract.getDocumentId(uri);
-        final String[] docArray = docId.split(":");
+        String docId = DocumentsContract.getDocumentId(uri);
+        String[] docArray = docId.split(":");
         document.type = docArray[0];
         document.id = docArray[1];
         return document;
@@ -89,8 +97,8 @@ public class GetPath extends UseCase<String> {
 
     private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
-        final String column = MediaStore.Images.ImageColumns.DATA;
-        final String[] projection = {column};
+        String column = MediaStore.Images.ImageColumns.DATA;
+        String[] projection = {column};
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);

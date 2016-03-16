@@ -16,53 +16,50 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
+
 import java.io.File;
 
-import rx.Observable;
-import rx_activity_result.RxActivityResult;
+import javax.inject.Inject;
 
-public class TakePhoto extends UseCase<Uri>{
-    private Activity activity;
+import rx.Observable;
+
+public final class TakePhoto extends UseCase<Uri>{
+    private final StartIntent startIntent;
+    private final TargetUi targetUi;
     private Uri uri;
 
-    public TakePhoto with(Activity activity) {
-        this.activity = activity;
+    @Inject  public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+        this.startIntent = startIntent;
+        this.targetUi = targetUi;
+    }
+
+    @Override public Observable<Uri> react() {
         this.uri = getUri();
-        return this;
+        return startIntent.with(getIntentCamera()).react()
+                .map(data -> uri);
     }
 
     private Uri getUri() {
 //        File file = activity.getCacheDir();
-        File file = activity.getExternalCacheDir();
+        File file = targetUi.activity().getExternalCacheDir();
         file.setWritable(true, false);
         file.setExecutable(true, false);
         file.setReadable(true, false);
+
         return Uri.fromFile(file)
-            .buildUpon()
-            .appendPath("shoot.jpg")
-            .build();
+                .buildUpon()
+                .appendPath("shoot.jpg")
+                .build();
     }
 
     private Intent getIntentCamera() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         return takePictureIntent;
-    }
-
-    @Override public Observable<Uri> react() {
-
-        return RxActivityResult.on(activity).startIntent(getIntentCamera())
-                .flatMap(result -> {
-                    if (result.resultCode() == Activity.RESULT_OK) {
-                        return Observable.just(uri);
-                    } else {
-                        return oBreakChain();
-                    }
-                });
     }
 }

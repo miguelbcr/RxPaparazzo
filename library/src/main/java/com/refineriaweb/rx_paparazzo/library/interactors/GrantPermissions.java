@@ -17,27 +17,29 @@
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
 import android.Manifest;
-import android.content.Context;
 
+import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.tbruyelle.rxpermissions.RxPermissions;
+
+import javax.inject.Inject;
 
 import rx.Observable;
 
 public class GrantPermissions extends UseCase<Void> {
-    private Context context;
-    private Folder folder;
+    private final TargetUi targetUi;
+    private final Config config;
 
-    public GrantPermissions with(Context context, Folder folder) {
-        this.context = context;
-        this.folder = folder;
-        return this;
+    @Inject public GrantPermissions(TargetUi targetUi, Config config) {
+        this.targetUi = targetUi;
+        this.config = config;
     }
 
     @Override public Observable<Void> react() {
-        RxPermissions permissions = RxPermissions.getInstance(context);
+        RxPermissions permissions = RxPermissions.getInstance(targetUi.activity());
 
-        return Observable.just(folder == Folder.Private)
+        return Observable.just(config.getFolder() == Folder.Private)
                 .flatMap(privateFolder -> {
                     if (privateFolder) return Observable.just(true);
                     if (permissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) return Observable.just(true);

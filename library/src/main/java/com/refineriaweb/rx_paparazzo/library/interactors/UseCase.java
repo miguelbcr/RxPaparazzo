@@ -19,7 +19,7 @@ package com.refineriaweb.rx_paparazzo.library.interactors;
 import rx.Observable;
 
 abstract class UseCase<D> {
-    public abstract Observable<D> react();
+    abstract Observable<D> react();
 
     protected Observable oBreakChain() {
         return Observable.<D>create(subscriber -> subscriber.onError(new RuntimeException()))

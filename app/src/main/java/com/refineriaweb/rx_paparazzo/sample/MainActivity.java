@@ -7,6 +7,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
+import com.refineriaweb.rx_paparazzo.library.entities.Folder;
+import com.refineriaweb.rx_paparazzo.library.entities.Size;
+import com.refineriaweb.rx_paparazzo.library.entities.Style;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
@@ -33,21 +36,27 @@ public class MainActivity extends AppCompatActivity {
         fabCamera = findViewById(R.id.fab_camera);
         imageView = (ImageView) findViewById(R.id.iv_image);
 
-        fabCamera.setOnClickListener(v -> {
-            RxPaparazzo.takeImage(MainActivity.this)
-//                    .crop(Style.Square)
-//                    .output(Folder.Private)
-//                    .size(Size.Small)
-                    .usingCamera()
-                    .subscribe(filePath -> {
-                        File imageFile = new File(filePath);
-                        imageFile.setWritable(true, false);
-                        imageFile.setExecutable(true, false);
-                        imageFile.setReadable(true, false);
-                        Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-                        Picasso.with(getApplicationContext()).invalidate(imageFile);
-                        Picasso.with(getApplicationContext()).load(imageFile).into(imageView);
-                    });
-        });
+        fabCamera.setOnClickListener(v -> takeImage());
     }
+
+    private void takeImage() {
+        RxPaparazzo.takeImage(MainActivity.this)
+                .crop(Style.Free)
+                .output(Folder.Private)
+                .size(Size.Normal)
+                .usingCamera()
+                .subscribe(response -> response.targetUI().loadImage(response.data()));
+    }
+
+    private void loadImage(String filePath) {
+        File imageFile = new File(filePath);
+        imageFile.setWritable(true, false);
+        imageFile.setExecutable(true, false);
+        imageFile.setReadable(true, false);
+
+        Picasso.with(getApplicationContext()).setLoggingEnabled(true);
+        Picasso.with(getApplicationContext()).invalidate(imageFile);
+        Picasso.with(getApplicationContext()).load(imageFile).into(imageView);
+    }
+
 }

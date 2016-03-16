@@ -1,4 +1,5 @@
 ## RxPaparazzo
+## How are we going to handle the exceptions?
 
 RxPaparazzo
      .delete(context)

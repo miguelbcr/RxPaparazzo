@@ -16,9 +16,8 @@
 
 package com.refineriaweb.rx_paparazzo.library.workers;
 
-import android.app.Activity;
-
-import com.refineriaweb.rx_paparazzo.library.entities.Config;
+import com.refineriaweb.rx_paparazzo.library.entities.Response;
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.CropImage;
 import com.refineriaweb.rx_paparazzo.library.interactors.GrantPermissions;
 import com.refineriaweb.rx_paparazzo.library.interactors.PickImage;
@@ -27,54 +26,43 @@ import com.refineriaweb.rx_paparazzo.library.interactors.SaveImage;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import rx.Observable;
 
 public final class Gallery {
-    private final Activity activity;
     private final GrantPermissions grantPermissions;
     private final PickImages pickImages;
     private final PickImage pickImage;
     private final CropImage cropImage;
     private final SaveImage saveImage;
-    private Config config;
+    private final TargetUi targetUi;
 
-    public Gallery(Activity activity) {
-        this.activity = activity;
-        this.grantPermissions = new GrantPermissions();
-        this.pickImage = new PickImage();
-        this.pickImages = new PickImages();
-        this.cropImage = new CropImage();
-        this.saveImage = new SaveImage();
-    }
-
-    //Testing purposes
-    public Gallery(Activity activity, GrantPermissions grantPermissions, PickImage pickImage, PickImages pickImages, CropImage cropImage, SaveImage saveImage) {
-        this.activity = activity;
+    @Inject public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi) {
         this.grantPermissions = grantPermissions;
-        this.pickImage = pickImage;
         this.pickImages = pickImages;
+        this.pickImage = pickImage;
         this.cropImage = cropImage;
         this.saveImage = saveImage;
+        this.targetUi = targetUi;
     }
 
-    public Gallery with(Config config) {
-        this.config = config;
-        return this;
+    public <T> Observable<Response<T, String>> pickImage() {
+        return grantPermissions.react()
+                .flatMap(granted -> pickImage.react())
+                .flatMap(uri -> cropImage.with(uri).react())
+                .flatMap(uri -> saveImage.with(uri).react())
+                .map(path -> new Response((T) targetUi.ui(), path));
+
     }
 
-    public Observable<String> pickImage() {
-        return grantPermissions.with(activity, config.getFolder()).react()
-                .flatMap(granted -> pickImage.with(activity).react())
-                .flatMap(uri -> cropImage.with(activity, config, uri).react())
-                .flatMap(uri -> saveImage.with(activity, uri).react());
-    }
-
-    public Observable<List<String>> pickImages() {
-        return grantPermissions.with(activity, config.getFolder()).react()
-                .flatMap(granted -> pickImages.with(activity).react())
+    public <T> Observable<Response<T, List<String>>> pickImages() {
+        return grantPermissions.react()
+                .flatMap(granted -> pickImages.react())
                 .flatMapIterable(uris -> uris)
-                .flatMap(uri -> cropImage.with(activity, config, uri).react())
-                .flatMap(uri -> saveImage.with(activity, uri).react())
-                .toList();
+                .flatMap(uri -> cropImage.with(uri).react())
+                .flatMap(uri -> saveImage.with(uri).react())
+                .toList()
+                .map(paths -> new Response((T) targetUi.ui(), paths));
     }
 }

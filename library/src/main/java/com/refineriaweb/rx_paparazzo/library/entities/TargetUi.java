@@ -14,29 +14,33 @@
  * limitations under the License.
  */
 
-package com.refineriaweb.rx_paparazzo.library.interactors;
+package com.refineriaweb.rx_paparazzo.library.entities;
 
-import android.net.Uri;
+import android.app.Activity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 
-import javax.inject.Inject;
+public class TargetUi {
+    private Object ui;
 
-import rx.Observable;
-
-public final class SaveImage extends UseCase<String> {
-    private final GetPath getPath;
-    private Uri uri;
-
-    @Inject public SaveImage(GetPath getPath) {
-        this.getPath = getPath;
+    public TargetUi(Object ui) {
+        this.ui = ui;
     }
 
-    public SaveImage with(Uri uri) {
-        this.uri = uri;
-        return this;
+    public Activity activity() {
+        return fragment() != null ? fragment().getActivity() : (Activity) ui;
     }
 
-    @Override public Observable<String> react() {
-        return getPath.with(uri).react();
+    @Nullable public Fragment fragment() {
+        if (ui instanceof Fragment) return (Fragment) ui;
+        return null;
     }
 
+    public Object ui() {
+        return ui;
+    }
+
+    public void setUi(Object ui) {
+        this.ui = ui;
+    }
 }

@@ -16,23 +16,24 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
-import android.app.Activity;
 import android.net.Uri;
+
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 
 import java.util.List;
 
+import javax.inject.Inject;
+
 import rx.Observable;
 
-public class PickImages extends UseCase<List<Uri>>{
-    private Activity activity;
+public final class PickImages extends UseCase<List<Uri>>{
+    private final TargetUi targetUi;
 
-    public PickImages with(Activity activity) {
-        this.activity = activity;
-        return this;
+    @Inject public PickImages(TargetUi targetUi) {
+        this.targetUi = targetUi;
     }
 
     @Override public Observable<List<Uri>> react() {
-        //if back return userBack()
         return Observable.just(null);
     }
 }
