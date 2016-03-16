@@ -19,8 +19,6 @@ package com.refineriaweb.rx_paparazzo.library.internal.di;
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 
-import javax.inject.Singleton;
-
 import dagger.Module;
 import dagger.Provides;
 
@@ -34,11 +32,11 @@ public final class ApplicationModule {
         this.ui = new TargetUi(ui);
     }
 
-    @Singleton @Provides Config provideConfig() {
+    @Provides Config provideConfig() {
         return config;
     }
 
-    @Singleton @Provides TargetUi provideTargetUi() {
+    @Provides TargetUi provideTargetUi() {
         return ui;
     }
 }
