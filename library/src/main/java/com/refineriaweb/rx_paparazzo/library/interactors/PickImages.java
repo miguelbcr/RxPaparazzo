@@ -16,10 +16,15 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
+import android.content.ClipData;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -27,13 +32,44 @@ import javax.inject.Inject;
 import rx.Observable;
 
 public final class PickImages extends UseCase<List<Uri>>{
+    private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-    @Inject public PickImages(TargetUi targetUi) {
+    @Inject public PickImages(StartIntent startIntent, TargetUi targetUi) {
+        this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
 
     @Override public Observable<List<Uri>> react() {
-        return Observable.just(null);
+        return startIntent.with(getFileChooserIntent()).react()
+                .map(intent -> {
+                    if (intent.getData() != null) return Arrays.asList(intent.getData());
+                    else return getUris(intent);
+                });
+    }
+
+    private List<Uri> getUris(Intent intent) {
+        List<Uri> uris = new ArrayList<>();
+        ClipData clipData = intent.getClipData();
+        if (clipData != null) {
+            for (int i = 0; i < clipData.getItemCount(); i++) {
+                ClipData.Item item = clipData.getItemAt(i);
+                Uri uri = item.getUri();
+                uris.add(uri);
+            }
+        }
+
+        return uris;
+    }
+
+    private Intent getFileChooserIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+            intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        return intent;
     }
 }

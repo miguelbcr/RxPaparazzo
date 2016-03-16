@@ -38,7 +38,7 @@ public final class CropImage extends UseCase<Uri> {
     }
 
     @Override public Observable<Uri> react() {
-        if (config.doCrop()) return Observable.just(null);
+        if (config.doCrop()) return Observable.just(uri);
         else return Observable.just(uri);
     }
 }

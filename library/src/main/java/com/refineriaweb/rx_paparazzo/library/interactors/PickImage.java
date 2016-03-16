@@ -16,6 +16,7 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
+import android.content.Intent;
 import android.net.Uri;
 
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
@@ -24,14 +25,24 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public final class PickImage extends UseCase<Uri>{
+public final class PickImage extends UseCase<Uri> {
+    private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-    @Inject public PickImage(TargetUi targetUi) {
+    @Inject public PickImage(StartIntent startIntent, TargetUi targetUi) {
+        this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
 
     @Override public Observable<Uri> react() {
-        return Observable.just(null);
+        return startIntent.with(getFileChooserIntent()).react()
+                .map(intent -> intent.getData());
+    }
+
+    private Intent getFileChooserIntent() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        return intent;
     }
 }

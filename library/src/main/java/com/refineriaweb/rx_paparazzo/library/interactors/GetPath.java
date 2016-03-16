@@ -98,13 +98,13 @@ final class GetPath extends UseCase<String> {
 
     private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
         Cursor cursor = null;
-        String column = MediaStore.Images.ImageColumns.DATA;
+        String column = MediaStore.Images.Media.DATA;
         String[] projection = {column};
 
         try {
             cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-            final int columnIndex = cursor.getColumnIndexOrThrow(column);
-            return cursor.getString(columnIndex);
+            cursor.moveToFirst();
+            return cursor.getString(cursor.getColumnIndexOrThrow(column));
         } catch (Exception e) {
             throw Exceptions.propagate(e);
         } finally {

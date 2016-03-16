@@ -38,6 +38,9 @@ public final class RxPaparazzo {
         return new BuilderImage<T>(activity);
     }
 
+    /**
+     * From API >= 18
+     */
     public static <T extends Activity> BuilderImages<T> takeImages(T activity) {
         return new BuilderImages<T>(activity);
     }
@@ -46,6 +49,9 @@ public final class RxPaparazzo {
         return new BuilderImage<T>(fragment);
     }
 
+    /**
+     * From API >= 18
+     */
     public static <T extends Fragment> BuilderImages<T> takeImages(T fragment) {
         return new BuilderImages<T>(fragment);
     }

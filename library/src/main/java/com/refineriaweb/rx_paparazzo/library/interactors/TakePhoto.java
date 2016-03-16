@@ -28,10 +28,9 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public final class TakePhoto extends UseCase<Uri>{
+public final class TakePhoto extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
-    private Uri uri;
 
     @Inject  public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
@@ -39,17 +38,17 @@ public final class TakePhoto extends UseCase<Uri>{
     }
 
     @Override public Observable<Uri> react() {
-        this.uri = getUri();
-        return startIntent.with(getIntentCamera()).react()
+        Uri uri = getUri();
+        return startIntent.with(getIntentCamera(uri)).react()
                 .map(data -> uri);
     }
 
     private Uri getUri() {
 //        File file = activity.getCacheDir();
         File file = targetUi.activity().getExternalCacheDir();
-        file.setWritable(true, false);
-        file.setExecutable(true, false);
-        file.setReadable(true, false);
+//        file.setWritable(true, false);
+//        file.setExecutable(true, false);
+//        file.setReadable(true, false);
 
         return Uri.fromFile(file)
                 .buildUpon()
@@ -57,7 +56,7 @@ public final class TakePhoto extends UseCase<Uri>{
                 .build();
     }
 
-    private Intent getIntentCamera() {
+    private Intent getIntentCamera(Uri uri) {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
         return takePictureIntent;

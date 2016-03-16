@@ -42,8 +42,9 @@ public class GrantPermissions extends UseCase<Void> {
         return Observable.just(config.getFolder() == Folder.Private)
                 .flatMap(privateFolder -> {
                     if (privateFolder) return Observable.just(true);
-                    if (permissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE)) return Observable.just(true);
-                    return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+                    if (permissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) && permissions.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE))
+                        return Observable.just(true);
+                    return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
                 })
                 .flatMap(granted -> granted ? Observable.<Void>just(null) : oBreakChain());
     }
