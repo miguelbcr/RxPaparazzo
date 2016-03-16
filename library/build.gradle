@@ -1,5 +1,8 @@
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 apply plugin: 'me.tatarka.retrolambda'
+
+group='com.github.RefineriaWeb'
 
 buildscript {
     repositories {
@@ -17,7 +20,6 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.refineriaweb.rx_paparazzo.sample"
         minSdkVersion 16
         targetSdkVersion 23
         versionCode 1
@@ -39,11 +41,13 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:23.2.0'
-    compile 'com.android.support:design:23.2.0'
-    compile 'com.squareup.picasso:picasso:2.5.2'
-    compile project(':library')
-}
+    compile fileTree(dir: 'libs', include: ['*.jar'])
 
+    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'com.github.VictorAlbertos:RxActivityResult:0.2'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.5.2@aar'
+
+    testCompile 'junit:junit:4.12'
+    testCompile "org.mockito:mockito-core:1.10.19"
+}
