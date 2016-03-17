@@ -16,8 +16,6 @@
 
 package com.refineriaweb.rx_paparazzo.library.workers;
 
-import android.net.Uri;
-
 import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.CropImage;
@@ -26,7 +24,6 @@ import com.refineriaweb.rx_paparazzo.library.interactors.PickImage;
 import com.refineriaweb.rx_paparazzo.library.interactors.PickImages;
 import com.refineriaweb.rx_paparazzo.library.interactors.SaveImage;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -61,19 +58,10 @@ public final class Gallery {
     public <T> Observable<Response<T, List<String>>> pickImages() {
         return grantPermissions.react()
                 .flatMap(granted -> pickImages.react())
-//                .flatMapIterable(uris -> uris)
-//                .flatMap(uri -> cropImage.with(uri).react())
-//                .flatMap(uri -> saveImage.with(uri).react())
-//                .toList()
-//                .map(paths -> new Response((T) targetUi.ui(), paths));
-                .map(paths -> {
-                    List<String> urls = new ArrayList<>();
-
-                    for (Uri uri : paths)
-                        saveImage.with(uri).react().subscribe(path -> urls.add(path));
-
-                    return new Response((T) targetUi.ui(), urls);
-
-                });
+                .flatMapIterable(uris -> uris)
+                .concatMap(uri -> cropImage.with(uri).react())
+                .concatMap(uri -> saveImage.with(uri).react())
+                .toList()
+                .map(paths -> new Response((T) targetUi.ui(), paths));
     }
 }

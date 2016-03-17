@@ -52,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
     private void captureImage() {
         RxPaparazzo.takeImage(MainActivity.this)
                 .crop(Style.Free)
-                .output(Folder.Private)
+                .output(Folder.Public)
                 .size(Size.Normal)
                 .usingCamera()
                 .subscribe(response -> response.targetUI().loadImage(response.data()));
@@ -61,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
     private void pickupImage() {
         RxPaparazzo.takeImage(MainActivity.this)
                 .crop(Style.Free)
-                .output(Folder.Private)
+                .output(Folder.Public)
                 .size(Size.Normal)
                 .usingGallery()
                 .subscribe(response -> response.targetUI().loadImage(response.data()));
@@ -70,11 +70,12 @@ public class MainActivity extends AppCompatActivity {
     private void pickupImages() {
         RxPaparazzo.takeImages(MainActivity.this)
                 .crop(Style.Free)
-                .output(Folder.Private)
+                .output(Folder.Public)
                 .size(Size.Normal)
                 .usingGallery()
                 .subscribe(response -> {
-                    if (response.data().size() == 1) response.targetUI().loadImage(response.data().get(0));
+                    if (response.data().size() == 1)
+                        response.targetUI().loadImage(response.data().get(0));
                     else response.targetUI().loadImages(response.data());
                 });
     }
