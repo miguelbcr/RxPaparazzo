@@ -18,6 +18,7 @@ package com.refineriaweb.rx_paparazzo.library.interactors;
 
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 
@@ -40,9 +41,16 @@ public final class PickImage extends UseCase<Uri> {
     }
 
     private Intent getFileChooserIntent() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent();
         intent.setType("image/*");
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
+
         return intent;
     }
 }

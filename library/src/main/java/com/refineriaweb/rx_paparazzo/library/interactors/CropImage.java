@@ -16,9 +16,16 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.Bundle;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
+import com.yalantis.ucrop.UCrop;
+import com.yalantis.ucrop.UCropActivity;
+
+import java.io.File;
 
 import javax.inject.Inject;
 
@@ -26,10 +33,16 @@ import rx.Observable;
 
 public final class CropImage extends UseCase<Uri> {
     private final Config config;
+    private final StartIntent startIntent;
+    private final GetPath getPath;
+    private Context context;
     private Uri uri;
 
-    @Inject public CropImage(Config config) {
+    @Inject public CropImage(Context context, Config config, StartIntent startIntent, GetPath getPath) {
+        this.context = context;
         this.config = config;
+        this.startIntent = startIntent;
+        this.getPath = getPath;
     }
 
     public CropImage with(Uri uri) {
@@ -38,7 +51,30 @@ public final class CropImage extends UseCase<Uri> {
     }
 
     @Override public Observable<Uri> react() {
-        if (config.doCrop()) return Observable.just(uri);
-        else return Observable.just(uri);
+        if (config.doCrop()) {
+            return getOutputUri().flatMap(outputUri ->
+                startIntent.with(getIntent(outputUri)).react()
+                        .map(UCrop::getOutput)
+            );
+        }
+
+        return Observable.just(uri);
+    }
+
+    public Intent getIntent(Uri outputUri) {
+        Intent intent = new Intent(context, UCropActivity.class);
+        Bundle cropOptionsBundle = new Bundle();
+        cropOptionsBundle.putParcelable(UCrop.EXTRA_INPUT_URI, uri);
+        cropOptionsBundle.putParcelable(UCrop.EXTRA_OUTPUT_URI, outputUri);
+        intent.putExtras(cropOptionsBundle);
+        return intent;
+    }
+
+    private Observable<Uri> getOutputUri() {
+        return getPath.with(uri).react()
+                .map(filePath -> {
+                    File file = new File(filePath);
+                    return Uri.fromFile(new File(context.getExternalCacheDir(), "cropped-" + file.getName()));
+                });
     }
 }

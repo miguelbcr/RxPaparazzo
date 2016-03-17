@@ -9,7 +9,7 @@
         android:layout_width="200dp"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
-        android:scaleType="centerCrop"
+        android:scaleType="centerInside"
         android:src="@mipmap/ic_launcher" />
 
 </LinearLayout>

@@ -43,7 +43,8 @@ public final class PickImages extends UseCase<List<Uri>>{
     @Override public Observable<List<Uri>> react() {
         return startIntent.with(getFileChooserIntent()).react()
                 .map(intent -> {
-                    if (intent.getData() != null) return Arrays.asList(intent.getData());
+                    if (intent.getData() != null)
+                        return Arrays.asList(intent.getData());
                     else return getUris(intent);
                 });
     }
@@ -51,6 +52,7 @@ public final class PickImages extends UseCase<List<Uri>>{
     private List<Uri> getUris(Intent intent) {
         List<Uri> uris = new ArrayList<>();
         ClipData clipData = intent.getClipData();
+
         if (clipData != null) {
             for (int i = 0; i < clipData.getItemCount(); i++) {
                 ClipData.Item item = clipData.getItemAt(i);
@@ -63,13 +65,19 @@ public final class PickImages extends UseCase<List<Uri>>{
     }
 
     private Intent getFileChooserIntent() {
-        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent intent = new Intent();
         intent.setType("image/*");
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            intent.setAction(Intent.ACTION_GET_CONTENT);
+        } else {
+            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+            intent.addCategory(Intent.CATEGORY_OPENABLE);
+        }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
 
-        intent.addCategory(Intent.CATEGORY_OPENABLE);
         return intent;
     }
 }

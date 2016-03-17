@@ -17,6 +17,7 @@
 package com.refineriaweb.rx_paparazzo.library.entities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
@@ -42,5 +43,9 @@ public class TargetUi {
 
     public void setUi(Object ui) {
         this.ui = ui;
+    }
+
+    public Context getContext() {
+        return fragment() == null ? activity() : fragment().getContext();
     }
 }

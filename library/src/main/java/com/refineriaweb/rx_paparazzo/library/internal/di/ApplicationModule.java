@@ -16,6 +16,8 @@
 
 package com.refineriaweb.rx_paparazzo.library.internal.di;
 
+import android.content.Context;
+
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 
@@ -30,6 +32,10 @@ public final class ApplicationModule {
     public ApplicationModule(Config config, Object ui) {
         this.config = config;
         this.ui = new TargetUi(ui);
+    }
+
+    @Provides Context provideContext() {
+        return ui.getContext();
     }
 
     @Provides Config provideConfig() {
