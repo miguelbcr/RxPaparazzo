@@ -23,10 +23,10 @@ import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
-import com.refineriaweb.rx_paparazzo.library.entities.Style;
 import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationComponent;
 import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationModule;
 import com.refineriaweb.rx_paparazzo.library.internal.di.DaggerApplicationComponent;
+import com.yalantis.ucrop.UCrop;
 
 import java.util.List;
 
@@ -84,8 +84,13 @@ public final class RxPaparazzo {
             return this;
         }
 
-        public BuilderImage<T> crop(Style style) {
-            this.config.setCrop(style);
+        public BuilderImage<T> crop() {
+            this.config.setCrop();
+            return this;
+        }
+
+        public BuilderImage<T> crop(UCrop.Options options) {
+            this.config.setCrop(options);
             return this;
         }
 
@@ -114,11 +119,15 @@ public final class RxPaparazzo {
             return this;
         }
 
-        public BuilderImages<T> crop(Style style) {
-            this.config.setCrop(style);
+        public BuilderImages<T> crop() {
+            this.config.setCrop();
             return this;
         }
 
+        public BuilderImages<T> crop(UCrop.Options options) {
+            this.config.setCrop(options);
+            return this;
+        }
 
         public Observable<Response<T, List<String>>> usingGallery() {
             return applicationComponent.gallery().pickImages();

@@ -11,20 +11,20 @@ import android.widget.ImageView;
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
-import com.refineriaweb.rx_paparazzo.library.entities.Style;
 import com.squareup.picasso.Picasso;
+import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class SampleActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private ImageView imageView;
     private RecyclerView recyclerView;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.sample_layout);
         configureToolbar();
         initViews();
     }
@@ -50,8 +50,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void captureImage() {
-        RxPaparazzo.takeImage(MainActivity.this)
-                .crop(Style.Free)
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(getColor(R.color.colorAccent));
+
+        RxPaparazzo.takeImage(SampleActivity.this)
+                .crop(options)
                 .output(Folder.Public)
                 .size(Size.Normal)
                 .usingCamera()
@@ -59,8 +62,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void pickupImage() {
-        RxPaparazzo.takeImage(MainActivity.this)
-                .crop(Style.Free)
+        RxPaparazzo.takeImage(SampleActivity.this)
+                .crop()
                 .output(Folder.Public)
                 .size(Size.Normal)
                 .usingGallery()
@@ -68,8 +71,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void pickupImages() {
-        RxPaparazzo.takeImages(MainActivity.this)
-                .crop(Style.Free)
+        RxPaparazzo.takeImages(SampleActivity.this)
+                .crop()
                 .output(Folder.Public)
                 .size(Size.Normal)
                 .usingGallery()

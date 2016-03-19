@@ -16,16 +16,17 @@
 
 package com.refineriaweb.rx_paparazzo.library.entities;
 
+import com.yalantis.ucrop.UCrop;
+
 public class Config {
     private Folder folder;
     private Size size;
-    private Style style;
     private boolean doCrop;
+    private UCrop.Options options;
 
     public Config() {
         this.folder = Folder.Public;
         this.size = Size.Normal;
-        this.style = Style.Square;
         this.doCrop = false;
     }
 
@@ -37,10 +38,6 @@ public class Config {
         return size;
     }
 
-    public Style getStyle() {
-        return style;
-    }
-
     public boolean doCrop() {
         return doCrop;
     }
@@ -49,9 +46,18 @@ public class Config {
         this.folder = folder;
     }
 
-    public void setCrop(Style style) {
-        this.style = style;
+    public void setCrop(UCrop.Options options) {
+        this.options = options;
         this.doCrop = true;
+    }
+
+    public void setCrop() {
+        this.options = new UCrop.Options();
+        this.doCrop = true;
+    }
+
+    public UCrop.Options getOptions() {
+        return options;
     }
 
     public void setSize(Size size) {

@@ -16,14 +16,12 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
-import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Bundle;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.yalantis.ucrop.UCrop;
-import com.yalantis.ucrop.UCropActivity;
 
 import java.io.File;
 
@@ -35,11 +33,11 @@ public final class CropImage extends UseCase<Uri> {
     private final Config config;
     private final StartIntent startIntent;
     private final GetPath getPath;
-    private Context context;
+    private final TargetUi targetUi;
     private Uri uri;
 
-    @Inject public CropImage(Context context, Config config, StartIntent startIntent, GetPath getPath) {
-        this.context = context;
+    @Inject public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath) {
+        this.targetUi = targetUi;
         this.config = config;
         this.startIntent = startIntent;
         this.getPath = getPath;
@@ -62,19 +60,16 @@ public final class CropImage extends UseCase<Uri> {
     }
 
     public Intent getIntent(Uri outputUri) {
-        Intent intent = new Intent(context, UCropActivity.class);
-        Bundle cropOptionsBundle = new Bundle();
-        cropOptionsBundle.putParcelable(UCrop.EXTRA_INPUT_URI, uri);
-        cropOptionsBundle.putParcelable(UCrop.EXTRA_OUTPUT_URI, outputUri);
-        intent.putExtras(cropOptionsBundle);
-        return intent;
+       return UCrop.of(uri, outputUri)
+                .withOptions(config.getOptions())
+                .getIntent(targetUi.getContext());
     }
 
     private Observable<Uri> getOutputUri() {
         return getPath.with(uri).react()
                 .map(filePath -> {
                     File file = new File(filePath);
-                    return Uri.fromFile(new File(context.getExternalCacheDir(), "cropped-" + file.getName()));
+                    return Uri.fromFile(new File(targetUi.getContext().getExternalCacheDir(), "cropped-" + file.getName()));
                 });
     }
 }
