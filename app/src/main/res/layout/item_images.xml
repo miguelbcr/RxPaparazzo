@@ -6,10 +6,11 @@
 
     <ImageView
         android:id="@+id/iv_image"
-        android:layout_width="200dp"
+        android:layout_width="wrap_content"
+        android:layout_marginRight="10dp"
+        android:layout_marginLeft="10dp"
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
-        android:scaleType="centerInside"
         android:src="@mipmap/ic_launcher" />
 
 </LinearLayout>

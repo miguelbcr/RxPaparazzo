@@ -34,13 +34,15 @@ public final class CropImage extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final GetPath getPath;
     private final TargetUi targetUi;
+    private final GetDimens getDimens;
     private Uri uri;
 
-    @Inject public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath) {
+    @Inject public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath, GetDimens getDimens) {
         this.targetUi = targetUi;
         this.config = config;
         this.startIntent = startIntent;
         this.getPath = getPath;
+        this.getDimens = getDimens;
     }
 
     public CropImage with(Uri uri) {
@@ -50,19 +52,22 @@ public final class CropImage extends UseCase<Uri> {
 
     @Override public Observable<Uri> react() {
         if (config.doCrop()) {
-            return getOutputUri().flatMap(outputUri ->
-                startIntent.with(getIntent(outputUri)).react()
-                        .map(UCrop::getOutput)
+            return getIntent().flatMap(intent ->
+                    startIntent.with(intent).react()
+                        .map(intent1 -> UCrop.getOutput(intent))
             );
         }
 
         return Observable.just(uri);
     }
 
-    public Intent getIntent(Uri outputUri) {
-       return UCrop.of(uri, outputUri)
-                .withOptions(config.getOptions())
-                .getIntent(targetUi.getContext());
+    public Observable<Intent> getIntent() {
+        return Observable.zip(getOutputUri(), getDimens.with(uri).react(), (outputUri, dimens) ->
+                UCrop.of(uri, outputUri)
+                    .withMaxResultSize(dimens[0], dimens[1])
+                    .withOptions(config.getOptions())
+                    .getIntent(targetUi.getContext())
+        );
     }
 
     private Observable<Uri> getOutputUri() {
