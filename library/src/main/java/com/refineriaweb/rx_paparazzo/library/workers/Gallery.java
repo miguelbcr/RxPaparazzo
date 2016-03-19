@@ -16,6 +16,8 @@
 
 package com.refineriaweb.rx_paparazzo.library.workers;
 
+import android.app.Activity;
+
 import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.CropImage;
@@ -30,7 +32,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public final class Gallery {
+public final class Gallery extends Worker{
     private final GrantPermissions grantPermissions;
     private final PickImages pickImages;
     private final PickImage pickImage;
@@ -39,6 +41,7 @@ public final class Gallery {
     private final TargetUi targetUi;
 
     @Inject public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi) {
+        super(targetUi);
         this.grantPermissions = grantPermissions;
         this.pickImages = pickImages;
         this.pickImage = pickImage;
@@ -52,7 +55,8 @@ public final class Gallery {
                 .flatMap(granted -> pickImage.react())
                 .flatMap(uri -> cropImage.with(uri).react())
                 .flatMap(uri -> saveImage.with(uri).react())
-                .map(path -> new Response((T) targetUi.ui(), path));
+                .map(path -> new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK))
+                .compose(applyOnError());
     }
 
     public <T> Observable<Response<T, List<String>>> pickImages() {
@@ -62,6 +66,7 @@ public final class Gallery {
                 .concatMap(uri -> cropImage.with(uri).react())
                 .concatMap(uri -> saveImage.with(uri).react())
                 .toList()
-                .map(paths -> new Response((T) targetUi.ui(), paths));
+                .map(paths -> new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK))
+                .compose(applyOnError());
     }
 }

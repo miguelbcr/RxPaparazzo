@@ -19,10 +19,12 @@ package com.refineriaweb.rx_paparazzo.library.entities;
 public class Response<T, D> {
     private final T targetUI;
     private final D data;
+    private final int resultCode;
 
-    public Response(T targetUI, D data) {
+    public Response(T targetUI, D data, int resultCode) {
         this.targetUI = targetUI;
         this.data = data;
+        this.resultCode = resultCode;
     }
 
     public T targetUI() {
@@ -31,5 +33,9 @@ public class Response<T, D> {
 
     public D data() {
         return data;
+    }
+
+    public int resultCode() {
+        return resultCode;
     }
 }

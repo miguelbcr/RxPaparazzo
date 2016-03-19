@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
@@ -58,7 +59,14 @@ public class SampleActivity extends AppCompatActivity {
                 .output(Folder.Public)
                 .size(Size.Normal)
                 .usingCamera()
-                .subscribe(response -> response.targetUI().loadImage(response.data()));
+                .subscribe(response -> {
+                    if (response.resultCode() != RESULT_OK) {
+                        showUserCanceled();
+                        return;
+                    }
+
+                    response.targetUI().loadImage(response.data());
+                });
     }
 
     private void pickupImage() {
@@ -67,7 +75,14 @@ public class SampleActivity extends AppCompatActivity {
                 .output(Folder.Public)
                 .size(Size.Normal)
                 .usingGallery()
-                .subscribe(response -> response.targetUI().loadImage(response.data()));
+                .subscribe(response -> {
+                    if (response.resultCode() != RESULT_OK) {
+                        showUserCanceled();
+                        return;
+                    }
+
+                    response.targetUI().loadImage(response.data());
+                });
     }
 
     private void pickupImages() {
@@ -77,8 +92,12 @@ public class SampleActivity extends AppCompatActivity {
                 .size(Size.Normal)
                 .usingGallery()
                 .subscribe(response -> {
-                    if (response.data().size() == 1)
-                        response.targetUI().loadImage(response.data().get(0));
+                    if (response.resultCode() != RESULT_OK) {
+                        showUserCanceled();
+                        return;
+                    }
+
+                    if (response.data().size() == 1) response.targetUI().loadImage(response.data().get(0));
                     else response.targetUI().loadImages(response.data());
                 });
     }
@@ -91,6 +110,10 @@ public class SampleActivity extends AppCompatActivity {
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
         Picasso.with(getApplicationContext()).invalidate(new File(filePath));
         Picasso.with(getApplicationContext()).load(imageFile).into(imageView);
+    }
+
+    private void showUserCanceled() {
+        Toast.makeText(this, getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
     }
 
     private void loadImages(List<String> filesPaths) {

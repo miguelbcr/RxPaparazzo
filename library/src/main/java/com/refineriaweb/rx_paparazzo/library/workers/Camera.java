@@ -16,6 +16,8 @@
 
 package com.refineriaweb.rx_paparazzo.library.workers;
 
+import android.app.Activity;
+
 import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.CropImage;
@@ -27,7 +29,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public final class Camera {
+public final class Camera extends Worker {
     private final TakePhoto takePhoto;
     private final CropImage cropImage;
     private final SaveImage saveImage;
@@ -35,6 +37,7 @@ public final class Camera {
     private final TargetUi targetUi;
 
     @Inject public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi) {
+        super(targetUi);
         this.takePhoto = takePhoto;
         this.cropImage = cropImage;
         this.saveImage = saveImage;
@@ -47,6 +50,7 @@ public final class Camera {
                 .flatMap(granted -> takePhoto.react())
                 .flatMap(uri -> cropImage.with(uri).react())
                 .flatMap(uri -> saveImage.with(uri).react())
-                .map(path -> new Response((T) targetUi.ui(), path));
+                .map(path -> new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK))
+                .compose(applyOnError());
     }
 }

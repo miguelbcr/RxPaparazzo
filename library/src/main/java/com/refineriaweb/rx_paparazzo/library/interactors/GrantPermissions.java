@@ -27,7 +27,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public class GrantPermissions extends UseCase<Void> {
+public final class GrantPermissions extends UseCase<Void> {
     private final TargetUi targetUi;
     private final Config config;
 
