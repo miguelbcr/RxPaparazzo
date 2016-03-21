@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Refinería Web
+ * Copyright 2016 Copyright 2016 Víctor Albertos
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,24 @@
  * limitations under the License.
  */
 
-package com.refineriaweb.rx_paparazzo.library.interactors;
+package rx_activity_result;
 
-import rx.Observable;
+import android.content.Intent;
 
-abstract class UseCase<D> {
-    abstract Observable<D> react();
+class Request {
+    private final Intent intent;
+    private final OnResult onResult;
+
+    public Request(Intent intent, OnResult onResult) {
+        this.intent = intent;
+        this.onResult = onResult;
+    }
+
+    public OnResult onResult() {
+        return onResult;
+    }
+
+    public Intent intent() {
+        return intent;
+    }
 }

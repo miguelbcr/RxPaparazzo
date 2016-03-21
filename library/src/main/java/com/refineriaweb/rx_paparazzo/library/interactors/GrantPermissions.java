@@ -21,6 +21,7 @@ import android.Manifest;
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
+import com.refineriaweb.rx_paparazzo.library.entities.UserCanceledException;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import javax.inject.Inject;
@@ -46,6 +47,9 @@ public final class GrantPermissions extends UseCase<Void> {
                         return Observable.just(true);
                     return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
                 })
-                .flatMap(granted -> granted ? Observable.<Void>just(null) : oBreakChain());
+                 .flatMap(granted -> {
+                     if (granted) return Observable.<Void>just(null);
+                     throw new UserCanceledException();
+                 });
     }
 }

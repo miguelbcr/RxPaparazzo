@@ -1,5 +1,6 @@
 package com.refineriaweb.rx_paparazzo.sample;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -8,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
 import com.refineriaweb.rx_paparazzo.library.entities.Folder;
@@ -50,8 +52,12 @@ public class SampleFragment extends Fragment {
                 .size(Size.Normal)
                 .usingGallery()
                 .subscribe(response -> {
-                    if (response.data().size() == 1)
-                        response.targetUI().loadImage(response.data().get(0));
+                    if (response.resultCode() != Activity.RESULT_OK) {
+                        showUserCanceled();
+                        return;
+                    }
+
+                    if (response.data().size() == 1) response.targetUI().loadImage(response.data().get(0));
                     else response.targetUI().loadImages(response.data());
                 });
     }
@@ -64,6 +70,10 @@ public class SampleFragment extends Fragment {
         Picasso.with(getActivity()).setLoggingEnabled(true);
         Picasso.with(getActivity()).invalidate(new File(filePath));
         Picasso.with(getActivity()).load(imageFile).into(imageView);
+    }
+
+    private void showUserCanceled() {
+        Toast.makeText(getActivity(), getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
     }
 
     private void loadImages(List<String> filesPaths) {
