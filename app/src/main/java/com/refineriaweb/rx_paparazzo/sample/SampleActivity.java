@@ -1,6 +1,8 @@
 package com.refineriaweb.rx_paparazzo.sample;
 
+import android.content.res.Configuration;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -15,7 +17,6 @@ import com.refineriaweb.rx_paparazzo.library.entities.Size;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
-import java.io.File;
 import java.util.List;
 
 public class SampleActivity extends AppCompatActivity {
@@ -28,6 +29,10 @@ public class SampleActivity extends AppCompatActivity {
         setContentView(R.layout.sample_layout);
         configureToolbar();
         initViews();
+    }
+
+    @Override public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
     }
 
     private void configureToolbar() {
@@ -52,12 +57,13 @@ public class SampleActivity extends AppCompatActivity {
 
     private void captureImage() {
         UCrop.Options options = new UCrop.Options();
-        options.setToolbarColor(getColor(R.color.colorAccent));
+        options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
+        options.setMaxBitmapSize(1000000000);
 
         RxPaparazzo.takeImage(SampleActivity.this)
                 .crop(options)
                 .output(Folder.Public)
-                .size(Size.Normal)
+                .size(Size.Original)
                 .usingCamera()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
@@ -70,10 +76,14 @@ public class SampleActivity extends AppCompatActivity {
     }
 
     private void pickupImage() {
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorPrimaryDark));
+        options.setMaxBitmapSize(1000000000);
+
         RxPaparazzo.takeImage(SampleActivity.this)
-                .crop()
+                .crop(options)
                 .output(Folder.Public)
-                .size(Size.Normal)
+                .size(Size.Small)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
@@ -105,11 +115,12 @@ public class SampleActivity extends AppCompatActivity {
     private void loadImage(String filePath) {
         imageView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
-        File imageFile = new File(filePath);
+        imageView.setImageDrawable(null);
+        recyclerView.setAdapter(null);
 
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-        Picasso.with(getApplicationContext()).invalidate(new File(filePath));
-        Picasso.with(getApplicationContext()).load(imageFile).into(imageView);
+        Picasso.with(getApplicationContext()).invalidate("file://" + filePath);
+        Picasso.with(getApplicationContext()).load("file://" + filePath).into(imageView);
     }
 
     private void showUserCanceled() {
@@ -119,6 +130,7 @@ public class SampleActivity extends AppCompatActivity {
     private void loadImages(List<String> filesPaths) {
         imageView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
+        imageView.setImageDrawable(null);
         recyclerView.setAdapter(new ImagesAdapter(filesPaths));
     }
 }
