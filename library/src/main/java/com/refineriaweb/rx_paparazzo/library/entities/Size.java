@@ -17,5 +17,5 @@
 package com.refineriaweb.rx_paparazzo.library.entities;
 
 public enum Size {
-    Small, Normal, Original
+    Small, Screen, Original
 }

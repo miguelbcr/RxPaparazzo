@@ -35,6 +35,13 @@
             android:src="@drawable/ic_camera_alt_black_24dp" />
 
         <android.support.design.widget.FloatingActionButton
+            android:id="@+id/fab_camera_crop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="50dp"
+            android:src="@drawable/ic_camera_alt_black_24dp" />
+
+        <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_pickup_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -50,6 +57,7 @@
 
     <ImageView
         android:id="@+id/iv_image"
+        android:background="@color/colorPrimary"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
         android:layout_gravity="center_horizontal|bottom"

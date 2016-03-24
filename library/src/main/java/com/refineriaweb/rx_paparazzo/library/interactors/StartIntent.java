@@ -54,8 +54,8 @@ final class StartIntent extends UseCase<Intent> {
     }
 
     private Intent getResponse(Result result) {
-        if (result.resultCode() != Activity.RESULT_OK) throw new UserCanceledException();
         targetUi.setUi(result.targetUI());
+        if (result.resultCode() != Activity.RESULT_OK) throw new UserCanceledException();
         return result.data();
     }
 }

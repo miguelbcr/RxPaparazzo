@@ -50,7 +50,7 @@ public class GetDimens extends UseCase<int[]> {
                 .map(filePath -> {
                     if (config.getSize() == Size.Original)
                         return getFileDimens(filePath);
-                    else if (config.getSize() == Size.Normal)
+                    else if (config.getSize() == Size.Screen)
                         return getScreenDimens();
                     else {
                         int[] dimens = getScreenDimens();

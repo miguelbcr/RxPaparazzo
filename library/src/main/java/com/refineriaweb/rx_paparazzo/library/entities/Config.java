@@ -19,19 +19,13 @@ package com.refineriaweb.rx_paparazzo.library.entities;
 import com.yalantis.ucrop.UCrop;
 
 public class Config {
-    private Folder folder;
     private Size size;
     private boolean doCrop;
     private UCrop.Options options;
 
     public Config() {
-        this.folder = Folder.Public;
-        this.size = Size.Normal;
+        this.size = Size.Screen;
         this.doCrop = false;
-    }
-
-    public Folder getFolder() {
-        return folder;
     }
 
     public Size getSize() {
@@ -40,10 +34,6 @@ public class Config {
 
     public boolean doCrop() {
         return doCrop;
-    }
-
-    public void setFolder(Folder folder) {
-        this.folder = folder;
     }
 
     public void setCrop(UCrop.Options options) {

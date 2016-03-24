@@ -20,7 +20,6 @@ import android.app.Activity;
 import android.support.v4.app.Fragment;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
-import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.Response;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
 import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationComponent;
@@ -74,11 +73,6 @@ public final class RxPaparazzo {
             super(ui);
         }
 
-        public BuilderImage<T> output(Folder folder) {
-            this.config.setFolder(folder);
-            return this;
-        }
-
         public BuilderImage<T> size(Size size) {
             this.config.setSize(size);
             return this;
@@ -107,11 +101,6 @@ public final class RxPaparazzo {
 
         public BuilderImages(T ui) {
             super(ui);
-        }
-
-        public BuilderImages<T> output(Folder folder) {
-            this.config.setFolder(folder);
-            return this;
         }
 
         public BuilderImages<T> size(Size size) {

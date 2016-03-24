@@ -2,4 +2,6 @@
     <string name="app_name">RxPaparazzo</string>
     <string name="action_settings">Settings</string>
     <string name="user_canceled">User canceled action</string>
+    <string name="activity">Activity</string>
+    <string name="fragment">Fragment</string>
 </resources>

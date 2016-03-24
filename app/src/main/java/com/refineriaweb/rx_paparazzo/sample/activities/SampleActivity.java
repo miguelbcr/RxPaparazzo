@@ -1,4 +1,4 @@
-package com.refineriaweb.rx_paparazzo.sample;
+package com.refineriaweb.rx_paparazzo.sample.activities;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
@@ -12,8 +12,9 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
-import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
+import com.refineriaweb.rx_paparazzo.sample.adapters.ImagesAdapter;
+import com.refineriaweb.rx_paparazzo.sample.R;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
@@ -51,23 +52,35 @@ public class SampleActivity extends AppCompatActivity {
         recyclerView.setLayoutManager(layoutManager);
 
         findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
+        findViewById(R.id.fab_camera_crop).setOnClickListener(v -> captureImageWithCrop());
         findViewById(R.id.fab_pickup_image).setOnClickListener(v -> pickupImage());
         findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
     }
 
     private void captureImage() {
+        RxPaparazzo.takeImage(SampleActivity.this)
+                .usingCamera()
+                .subscribe(response -> {
+                    if (response.resultCode() != RESULT_OK) {
+                        response.targetUI().showUserCanceled();
+                        return;
+                    }
+
+                    response.targetUI().loadImage(response.data());
+                });
+    }
+
+    private void captureImageWithCrop() {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
         options.setMaxBitmapSize(1000000000);
 
         RxPaparazzo.takeImage(SampleActivity.this)
                 .crop(options)
-                .output(Folder.Public)
-                .size(Size.Original)
                 .usingCamera()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
-                        showUserCanceled();
+                        response.targetUI().showUserCanceled();
                         return;
                     }
 
@@ -82,12 +95,11 @@ public class SampleActivity extends AppCompatActivity {
 
         RxPaparazzo.takeImage(SampleActivity.this)
                 .crop(options)
-                .output(Folder.Public)
                 .size(Size.Small)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
-                        showUserCanceled();
+                        response.targetUI().showUserCanceled();
                         return;
                     }
 
@@ -98,12 +110,11 @@ public class SampleActivity extends AppCompatActivity {
     private void pickupImages() {
         RxPaparazzo.takeImages(SampleActivity.this)
                 .crop()
-                .output(Folder.Public)
-                .size(Size.Normal)
+                .size(Size.Screen)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
-                        showUserCanceled();
+                        response.targetUI().showUserCanceled();
                         return;
                     }
 

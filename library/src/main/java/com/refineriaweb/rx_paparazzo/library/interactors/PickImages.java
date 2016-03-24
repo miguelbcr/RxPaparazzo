@@ -21,8 +21,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
-import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -33,18 +31,15 @@ import rx.Observable;
 
 public final class PickImages extends UseCase<List<Uri>>{
     private final StartIntent startIntent;
-    private final TargetUi targetUi;
 
-    @Inject public PickImages(StartIntent startIntent, TargetUi targetUi) {
+    @Inject public PickImages(StartIntent startIntent) {
         this.startIntent = startIntent;
-        this.targetUi = targetUi;
     }
 
     @Override public Observable<List<Uri>> react() {
         return startIntent.with(getFileChooserIntent()).react()
                 .map(intent -> {
-                    if (intent.getData() != null)
-                        return Arrays.asList(intent.getData());
+                    if (intent.getData() != null) return Arrays.asList(intent.getData());
                     else return getUris(intent);
                 });
     }

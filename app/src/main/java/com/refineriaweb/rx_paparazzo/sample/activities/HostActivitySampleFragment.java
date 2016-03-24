@@ -1,7 +1,9 @@
-package com.refineriaweb.rx_paparazzo.sample;
+package com.refineriaweb.rx_paparazzo.sample.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.refineriaweb.rx_paparazzo.sample.R;
 
 public class HostActivitySampleFragment extends AppCompatActivity {
 

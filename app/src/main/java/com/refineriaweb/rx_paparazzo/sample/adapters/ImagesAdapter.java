@@ -1,4 +1,4 @@
-package com.refineriaweb.rx_paparazzo.sample;
+package com.refineriaweb.rx_paparazzo.sample.adapters;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 
+import com.refineriaweb.rx_paparazzo.sample.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;

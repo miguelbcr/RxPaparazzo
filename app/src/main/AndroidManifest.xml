@@ -9,7 +9,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
-        <activity android:name=".SampleActivity"
+        <activity android:name=".activities.StartActivity"
             android:configChanges="orientation|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -17,9 +17,10 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".HostActivitySampleFragment">
+        <activity android:name=".activities.SampleActivity"/>
 
-        </activity>
+        <activity android:name=".activities.HostActivitySampleFragment"/>
+
     </application>
 
 </manifest>

@@ -18,8 +18,6 @@ package com.refineriaweb.rx_paparazzo.library.interactors;
 
 import android.Manifest;
 
-import com.refineriaweb.rx_paparazzo.library.entities.Config;
-import com.refineriaweb.rx_paparazzo.library.entities.Folder;
 import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.entities.UserCanceledException;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -30,23 +28,14 @@ import rx.Observable;
 
 public final class GrantPermissions extends UseCase<Void> {
     private final TargetUi targetUi;
-    private final Config config;
 
-    @Inject public GrantPermissions(TargetUi targetUi, Config config) {
+    @Inject public GrantPermissions(TargetUi targetUi) {
         this.targetUi = targetUi;
-        this.config = config;
     }
 
     @Override public Observable<Void> react() {
         RxPermissions permissions = RxPermissions.getInstance(targetUi.activity());
-
-        return Observable.just(config.getFolder() == Folder.Private)
-                .flatMap(privateFolder -> {
-                    if (privateFolder) return Observable.just(true);
-                    if (permissions.isGranted(Manifest.permission.WRITE_EXTERNAL_STORAGE) && permissions.isGranted(Manifest.permission.READ_EXTERNAL_STORAGE))
-                        return Observable.just(true);
-                    return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
-                })
+        return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
                  .flatMap(granted -> {
                      if (granted) return Observable.<Void>just(null);
                      throw new UserCanceledException();

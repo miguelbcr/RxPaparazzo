@@ -18,10 +18,11 @@ android {
 
     defaultConfig {
         applicationId "com.refineriaweb.rx_paparazzo.sample"
-        minSdkVersion 16
+        minSdkVersion 18
         targetSdkVersion 23
         versionCode 1
         versionName "1.0"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {
         release {
@@ -45,5 +46,28 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':library')
+
+    androidTestCompile ("com.android.support.test:runner:0.4.1") {
+        exclude module: 'support-annotations'
+    }
+    androidTestCompile ("com.android.support.test:rules:0.4.1") {
+        exclude module: 'support-annotations'
+    }
+
+    androidTestCompile ("com.android.support.test.espresso:espresso-intents:2.2.1") {
+        exclude module: 'support-annotations'
+        exclude module: 'support-v4'
+        exclude module: 'support-v13'
+        exclude module: 'recyclerview-v7'
+    }
+
+    androidTestCompile ("com.android.support.test.espresso:espresso-contrib:2.2.1") {
+        exclude module: 'support-annotations'
+        exclude module: 'support-v4'
+        exclude module: 'support-v13'
+        exclude module: 'recyclerview-v7'
+    }
+
+    androidTestCompile 'com.android.support.test.uiautomator:uiautomator-v18:2.1.1'
 }
 
