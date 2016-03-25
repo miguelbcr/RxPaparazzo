@@ -1,5 +1,14 @@
-## RxPaparazzo
-## Features: permissions, crop, capture image, gallery (multiple), don't break chain, 
+# RxPaparazzo
+
+
+
+## Features: 
+permissions, crop, capture image, gallery (multiple), don't break chain, 
+
+
+
+
+
 
 TODO: set name folder as name application
 
