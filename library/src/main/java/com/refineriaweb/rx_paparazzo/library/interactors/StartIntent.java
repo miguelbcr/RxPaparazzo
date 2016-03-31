@@ -28,7 +28,7 @@ import rx.Observable;
 import rx_activity_result.Result;
 import rx_activity_result.RxActivityResult;
 
-final class StartIntent extends UseCase<Intent> {
+public final class StartIntent extends UseCase<Intent> {
     private final TargetUi targetUi;
     private Intent intent;
 

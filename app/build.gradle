@@ -1,5 +1,6 @@
 apply plugin: 'com.android.application'
 apply plugin: 'me.tatarka.retrolambda'
+apply plugin: 'android-apt'
 
 buildscript {
     repositories {
@@ -9,6 +10,7 @@ buildscript {
 
     dependencies {
         classpath 'me.tatarka:gradle-retrolambda:3.2.4'
+        classpath "com.neenbedankt.gradle.plugins:android-apt:1.8"
     }
 }
 
@@ -46,6 +48,10 @@ dependencies {
     compile 'com.android.support:design:23.2.0'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':library')
+
+    apt "com.google.dagger:dagger-compiler:2.0.2"
+    testCompile "com.google.dagger:dagger:2.0.2"
+    testCompile "org.glassfish:javax.annotation:10.0-b28"
 
     androidTestCompile ("com.android.support.test:runner:0.4.1") {
         exclude module: 'support-annotations'

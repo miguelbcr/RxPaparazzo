@@ -14,29 +14,16 @@
  * limitations under the License.
  */
 
-package com.refineriaweb.rx_paparazzo.library.internal.di;
+package com.refineriaweb.rx_paparazzo.sample;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
-import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
+import com.refineriaweb.rx_paparazzo.library.internal.di.ApplicationModule;
 
 import dagger.Module;
-import dagger.Provides;
 
 @Module
-public class ApplicationModule {
-    private final Config config;
-    private final TargetUi ui;
-
-    public ApplicationModule(Config config, Object ui) {
-        this.config = config;
-        this.ui = new TargetUi(ui);
-    }
-
-    @Provides Config provideConfig() {
-        return config;
-    }
-
-    @Provides TargetUi provideTargetUi() {
-        return ui;
+public final class ApplicationTestModule extends ApplicationModule {
+    public ApplicationTestModule(Config config, Object ui) {
+        super(config, ui);
     }
 }

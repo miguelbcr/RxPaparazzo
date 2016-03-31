@@ -28,7 +28,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public class GetDimens extends UseCase<int[]> {
+public final class GetDimens extends UseCase<int[]> {
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;
@@ -45,7 +45,7 @@ public class GetDimens extends UseCase<int[]> {
         return this;
     }
 
-    @Override Observable<int[]> react() {
+    @Override public Observable<int[]> react() {
         return getPath.with(uri).react()
                 .map(filePath -> {
                     if (config.getSize() == Size.Original)

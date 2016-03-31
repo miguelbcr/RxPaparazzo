@@ -44,11 +44,7 @@ public final class TakePhoto extends UseCase<Uri> {
     }
 
     private Uri getUri() {
-//        File file = activity.getCacheDir();
         File file = targetUi.activity().getExternalCacheDir();
-//        file.setWritable(true, false);
-//        file.setExecutable(true, false);
-//        file.setReadable(true, false);
 
         return Uri.fromFile(file)
                 .buildUpon()

@@ -33,7 +33,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
-final class GetPath extends UseCase<String> {
+public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
     private Uri uri;
 
