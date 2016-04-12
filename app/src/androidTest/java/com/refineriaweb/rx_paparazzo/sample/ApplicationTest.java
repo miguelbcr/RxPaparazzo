@@ -1,11 +1,9 @@
 package com.refineriaweb.rx_paparazzo.sample;
 
-import android.app.Application;
 import android.content.Context;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.RemoteException;
-import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.rule.ActivityTestRule;
@@ -16,10 +14,11 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 
+import com.refineriaweb.rx_paparazzo.library.entities.Config;
+import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import com.refineriaweb.rx_paparazzo.library.interactors.GetDimens;
 import com.refineriaweb.rx_paparazzo.library.interactors.GetPath;
 import com.refineriaweb.rx_paparazzo.sample.activities.StartActivity;
-import com.refineriaweb.rx_paparazzo.sample.util.DaggerActivityTestRule;
 
 import org.hamcrest.Description;
 import org.junit.Before;
@@ -28,8 +27,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 
 import java.io.File;
-
-import javax.inject.Inject;
 
 import rx.Observable;
 
@@ -40,23 +37,16 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 
 @RunWith(AndroidJUnit4.class)
 public class ApplicationTest {
-//    @Rule public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
+    @Rule public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
     private UiDevice uiDevice;
     private Context context;
-    @Inject GetDimens getDimens;
-    @Inject GetPath getPath;
-    private ApplicationTestComponent applicationTestComponent;
-    @Rule public ActivityTestRule<StartActivity> activityRule =
-            new DaggerActivityTestRule<>(StartActivity.class, new DaggerActivityTestRule.OnBeforeActivityLaunchedListener<StartActivity>() {
-                @Override
-                public void beforeActivityLaunched(@NonNull Application application, @NonNull StartActivity activity) {
-                    applicationTestComponent = DaggerApplicationTestComponent.create();
-                    ((MyApplication) application).setTestComponent(applicationTestComponent);
-                    applicationTestComponent.inject(ApplicationTest.this);
-                }
-            });
+    private GetDimens getDimens;
+    private GetPath getPath;
 
     @Before public void init() {
+        TargetUi targetUi = new TargetUi(activityRule.getActivity());
+        getPath = new GetPath(targetUi);
+        getDimens = new GetDimens(targetUi, new Config(), getPath);
         uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
         context = InstrumentationRegistry.getContext();
     }

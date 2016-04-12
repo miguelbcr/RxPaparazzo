@@ -37,7 +37,7 @@ public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
     private Uri uri;
 
-    @Inject GetPath(TargetUi targetUi) {
+    @Inject public GetPath(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 

@@ -71,6 +71,7 @@ public final class GetDimens extends UseCase<int[]> {
         return new int[] {options.outWidth, options.outHeight};
     }
 
+    //TODO remove before release
     public void printDimens(String log, String filePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;

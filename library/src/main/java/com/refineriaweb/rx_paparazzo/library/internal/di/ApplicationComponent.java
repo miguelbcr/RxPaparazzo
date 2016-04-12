@@ -16,6 +16,7 @@
 
 package com.refineriaweb.rx_paparazzo.library.internal.di;
 
+import com.refineriaweb.rx_paparazzo.library.interactors.GetPath;
 import com.refineriaweb.rx_paparazzo.library.workers.Camera;
 import com.refineriaweb.rx_paparazzo.library.workers.Gallery;
 
@@ -28,4 +29,5 @@ import dagger.Component;
 public interface ApplicationComponent {
     Camera camera();
     Gallery gallery();
+    GetPath getPath();
 }

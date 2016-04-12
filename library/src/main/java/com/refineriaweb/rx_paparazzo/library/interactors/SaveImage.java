@@ -67,6 +67,7 @@ public class SaveImage extends UseCase<String> {
                 });
     }
 
+    //TODO return a file name based on date (month-day-hour-seconds) instead of 'shoot'
     private String scaleImage(String filePath, String filePathOutput, int[] dimens) {
         getDimens.printDimens("input size : ", filePath);
         if (config.getSize() == Size.Original) return filePath;
