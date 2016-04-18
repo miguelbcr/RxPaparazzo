@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Refinería Web
+ * Copyright 2016 FuckBoilerplate
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,8 +22,7 @@ import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import dagger.Module;
 import dagger.Provides;
 
-@Module
-public class ApplicationModule {
+@Module public class ApplicationModule {
     private final Config config;
     private final TargetUi ui;
 

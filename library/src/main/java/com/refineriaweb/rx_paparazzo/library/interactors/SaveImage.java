@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Refinería Web
+ * Copyright 2016 FuckBoilerplate
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -35,7 +35,7 @@ import javax.inject.Inject;
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
-public class SaveImage extends UseCase<String> {
+public final class SaveImage extends UseCase<String> {
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;

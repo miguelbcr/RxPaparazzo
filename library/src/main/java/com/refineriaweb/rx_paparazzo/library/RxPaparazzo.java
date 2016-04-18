@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Refinería Web
+ * Copyright 2016 FuckBoilerplate
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,7 +38,7 @@ public final class RxPaparazzo {
     }
 
     /**
-     * From API >= 18
+     * Prior to API 18, only one image will be retrieved.
      */
     public static <T extends Activity> BuilderImages<T> takeImages(T activity) {
         return new BuilderImages<T>(activity);
@@ -49,7 +49,7 @@ public final class RxPaparazzo {
     }
 
     /**
-     * From API >= 18
+     * Prior to API 18, only one image will be retrieved.
      */
     public static <T extends Fragment> BuilderImages<T> takeImages(T fragment) {
         return new BuilderImages<T>(fragment);
@@ -67,57 +67,94 @@ public final class RxPaparazzo {
         }
     }
 
+    /**
+     * Call it when just one image is required to retrieve.
+     */
     public static class BuilderImage<T> extends Builder<T> {
 
         public BuilderImage(T ui) {
             super(ui);
         }
 
+        /**
+         * Sets the size for the retrieved image.
+         * @param size
+         * @see Size
+         */
         public BuilderImage<T> size(Size size) {
             this.config.setSize(size);
             return this;
         }
 
+        /**
+         * Call it when crop option is required.
+         */
         public BuilderImage<T> crop() {
             this.config.setCrop();
             return this;
         }
 
+        /**
+         * Call it when crop option is required as such as configuring the options of the cropping action.
+         */
         public BuilderImage<T> crop(UCrop.Options options) {
             this.config.setCrop(options);
             return this;
         }
 
+        /**
+         * Use gallery to retrieve the image.
+         */
         public Observable<Response<T, String>> usingGallery() {
             return applicationComponent.gallery().pickImage();
         }
 
+        /**
+         * Use camera to retrieve the image.
+         */
         public Observable<Response<T, String>> usingCamera() {
             return applicationComponent.camera().takePhoto();
         }
     }
 
+    /**
+     * Call it when multiple images are required to retrieve from gallery.
+     */
     public static class BuilderImages<T> extends Builder<T> {
 
         public BuilderImages(T ui) {
             super(ui);
         }
 
+        /**
+         * Sets the size for the retrieved image.
+         * @param size
+         * @see Size
+         */
         public BuilderImages<T> size(Size size) {
             this.config.setSize(size);
             return this;
         }
 
+        /**
+         * Call it when crop option is required.
+         */
         public BuilderImages<T> crop() {
             this.config.setCrop();
             return this;
         }
 
+        /**
+         * Call it when crop option is required as such as configuring the options of the cropping action.
+         */
         public BuilderImages<T> crop(UCrop.Options options) {
             this.config.setCrop(options);
             return this;
         }
 
+        /**
+         * Call it when crop option is required.
+         */
         public Observable<Response<T, List<String>>> usingGallery() {
             return applicationComponent.gallery().pickImages();
         }

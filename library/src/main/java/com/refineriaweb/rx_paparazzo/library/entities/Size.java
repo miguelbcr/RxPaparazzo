@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 Refinería Web
+ * Copyright 2016 FuckBoilerplate
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,21 @@
 
 package com.refineriaweb.rx_paparazzo.library.entities;
 
+/**
+ * Sizes that can be used to set the size of the image to retrieve after calling the camera or gallery feature.
+ * Screen will be set as default value.
+ */
 public enum Size {
-    Small, Screen, Original
+    /**
+     * 1/8 of the the resolution of the screen
+     */
+    Small,
+    /**
+     * The size image matches the resolution of the screen.
+     */
+    Screen,
+    /**
+     * The original size of the size image.
+     */
+    Original
 }
