@@ -1,23 +1,24 @@
-Reactive Android library to access camera and gallery using RxJava. 
+RxJava extension for Android to access camera and gallery. 
 
-#RxPaparazzo
+# RxPaparazzo
 
 What is a Paparazzo?
 
 > A freelance photographer who aggressively pursues celebrities for the purpose of taking candid photographs.
 
-This library does that. Mostly. Not really. But it was a funny name, thought. Was it?
+This library does that. Not really. But it was a funny name, thought. Was it?
 
 
-##Features: 
-- Runtime permissions. Not worries about the new fickle Android runtime permissions system. RxPaparazzo relies on [RxPermissions](https://github.com/tbruyelle/RxPermissions) to deal with that.  
-- Crop images. RxPaparazzo depends on [UCrop](https://github.com/Yalantis/uCrop) to perform beautiful cuts to any face, body or place. 
+## Features:
+ 
+- Runtime permissions. Not worries about the tricky Android runtime permissions system. RxPaparazzo relies on [RxPermissions](https://github.com/tbruyelle/RxPermissions) to deal with that.  
 - Take a photo using the built-in camera.
 - Access to gallery. 
+- Crop images. RxPaparazzo depends on [UCrop](https://github.com/Yalantis/uCrop) to perform beautiful cuts to any face, body or place. 
 - Honors the observable chain (it means you can go crazy chaining operators). [RxOnActivityResult](https://github.com/VictorAlbertos/RxActivityResult) allows RxPaparazzo to transform every intent into an observable for a wonderful chaining process.
 
 
-##Setup
+## Setup
 
 Add the JitPack repository in your build.gradle (top level module):
 ```gradle
@@ -38,7 +39,6 @@ dependencies {
 ```
 
 
-
 ## Usage
 Because RxPaparazzo uses RxActivityResult to deal with intent calls, all its requirements and features are inherited too.
 
@@ -56,13 +56,11 @@ public class SampleApp extends Application {
 
 Every feature RxPaparazzo exposes can be accessed from both, an `activity` or a `fragment` instance. 
 
-The generic type of the observable returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response]() class. 
+The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response]() class. 
 
-This instance hols a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated (due to configuration changes or some other system events) it would be unsafe calling it. 
+This instance hols a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated it would be unsafe calling it. Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the `response` instance.
 
-Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the Result object.
-
-Also, this instance `response` holds a reference to the data as the appropriate response, as such as the result code of the specific operation.
+Also, this instance holds a reference to the data as the appropriate response, as such as the result code of the specific operation.
 
 ### Calling built-in camera to take a photo.
 ```java
@@ -78,7 +76,7 @@ RxPaparazzo.takeImage(activityOrFragment)
         });
 ```
 
-The instance response holds a reference to the path where the image was persisted. 
+The `response` instance holds a reference to the path where the image was persisted. 
 
 
 ### Calling the gallery to retrieve an image.
@@ -95,9 +93,9 @@ RxPaparazzo.takeImage(activityOrFragment)
         });
 ```
 
-The instance response holds a reference to the path where the image was persisted. 
+The `response` instance holds a reference to the path where the image was persisted. Same as the previous example. 
 
-### Calling the gallery to retrieve multiple image (if the current level Android api is prior to 18, only one image will be retrieved). 
+### Calling the gallery to retrieve multiple image 
 ```java
 RxPaparazzo.takeImages(activityOrFragment)
         .usingGallery()
@@ -112,22 +110,65 @@ RxPaparazzo.takeImages(activityOrFragment)
         });
 ```
 
-The instance response holds a reference to the paths where the images was persisted. 
+The `response` instance holds a reference to the paths where the images was persisted. But if the level Android api device is minor than 18, only one image will be retrieved. 
 
-### Size options for both camera and gallery features
-After calling `RxPaparazzo.takeImage(activityOrFragment)`, you can set the size output for the image.
+## Customizations
+When asking RxPaparazzo for an image -whether it was retrieved using the built-in camera or via gallery, it's possible to apply some configurations to the action. 
 
-### Cropping options for both camera and gallery features
+### Size options
+`Size` values `enum` can be used to set the size of the image to retrieve. There are 3 options:
+
+* Small: 1/8 of the screen resolution
+* Screen: The size image matches the screen resolution.
+* Original: The original size of the image.
+
+Screen value will be set as default.
+
+```java
+RxPaparazzo.takeImages(activityOrFragment)
+                .size(Size.Small)
+                .usingGallery()
+```                 
+                
+### Cropping support for image.
+This feature is available thanks to the amazing library [uCrop](https://github.com/Yalantis/uCrop) authored by [Yalantis](https://github.com/Yalantis) group. 
+
+```java
+RxPaparazzo.takeImages(activityOrFragment)
+                .crop()
+``` 
+
+By calling `crop()` method when building the observable instance, all they images retrieved will be able to be cropped, regardless if the images were retrieved using the built-in camera or gallery, even if multiple images were requested in a single call using `takeImages()` approach.
+Because uCrop Yalantis library exposes some configuration in order to customize the crop screen, RxPaparazzo exposes an overloaded method of `crop(UCrop.Options)` which allow to pass an instance of [UCrop.Options](https://github.com/Yalantis/uCrop/blob/master/ucrop/src/main/java/com/yalantis/ucrop/UCrop.java#L211).
+
+```java
+UCrop.Options options = new UCrop.Options();
+options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+ 
+RxPaparazzo.takeImage(activityOrFragment)
+         .crop(options)
+```
 
 
-TODO: set name folder as name application
+## Credits
+* Runtime permissions: [RxPermissions](https://github.com/tbruyelle/RxPermissions)
+* Crop: [uCrop](https://github.com/Yalantis/uCrop)
 
-TODO Tests: 
-gallery, 
-gallery + crop, 
-gallery multiple images, 
-gallery multiple images + crop, 
+## Authors
 
-option -> check some aspect has been modified, 
-sizes?
-permissions?
+**Víctor Albertos**
+
+* <https://twitter.com/_victorAlbertos>
+* <https://www.linkedin.com/in/victoralbertos>
+* <https://github.com/VictorAlbertos>
+
+**Miguel García**
+
+* <https://es.linkedin.com/in/miguelbcr>
+* <https://github.com/miguelbcr>
+
+
+## Another author's libraries using RxJava:
+* [RxCache](https://github.com/VictorAlbertos/RxCache): Reactive caching library for Android and Java. 
+* [RxGcm](https://github.com/VictorAlbertos/RxGcm): RxJava extension for Gcm which acts as an architectural approach to easily satisfy the requirements of an android app when dealing with push notifications.
+* [RxActivityResult](https://github.com/VictorAlbertos/RxActivityResult): A reactive-tiny-badass-vindictive library to break with the OnActivityResult implementation as it breaks the observables chain. 

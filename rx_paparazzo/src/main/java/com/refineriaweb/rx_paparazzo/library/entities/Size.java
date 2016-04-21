@@ -22,15 +22,15 @@ package com.refineriaweb.rx_paparazzo.library.entities;
  */
 public enum Size {
     /**
-     * 1/8 of the the resolution of the screen
+     * 1/8 of the screen resolution.
      */
     Small,
     /**
-     * The size image matches the resolution of the screen.
+     * The size image matches the screen resolution.
      */
     Screen,
     /**
-     * The original size of the size image.
+     * The original size of the image.
      */
     Original
 }
