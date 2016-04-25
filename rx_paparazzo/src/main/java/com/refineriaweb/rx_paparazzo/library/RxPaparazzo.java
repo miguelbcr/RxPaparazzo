@@ -17,6 +17,7 @@
 package com.refineriaweb.rx_paparazzo.library;
 
 import android.app.Activity;
+import android.app.Application;
 import android.support.v4.app.Fragment;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
@@ -30,8 +31,13 @@ import com.yalantis.ucrop.UCrop;
 import java.util.List;
 
 import rx.Observable;
+import rx_activity_result.RxActivityResult;
 
 public final class RxPaparazzo {
+
+    public static void register(Application application) {
+        RxActivityResult.register(application);
+    }
 
     public static <T extends Activity> BuilderImage<T> takeImage(T activity) {
         return new BuilderImage<T>(activity);
