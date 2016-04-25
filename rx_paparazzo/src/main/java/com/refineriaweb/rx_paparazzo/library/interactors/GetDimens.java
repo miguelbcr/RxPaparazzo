@@ -54,7 +54,7 @@ public final class GetDimens extends UseCase<int[]> {
                         return getScreenDimens();
                     else {
                         int[] dimens = getScreenDimens();
-                        return new int[]{dimens[0] / 4, dimens[1] / 4};
+                        return new int[]{dimens[0] / 8, dimens[1] / 8};
                     }
                 });
     }

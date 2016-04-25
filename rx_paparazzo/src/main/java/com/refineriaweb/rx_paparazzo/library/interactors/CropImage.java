@@ -54,7 +54,7 @@ public final class CropImage extends UseCase<Uri> {
         if (config.doCrop()) {
             return getIntent().flatMap(intent ->
                     startIntent.with(intent).react()
-                        .map(intent1 -> UCrop.getOutput(intent))
+                        .map(intentResult -> UCrop.getOutput(intentResult))
             );
         }
 

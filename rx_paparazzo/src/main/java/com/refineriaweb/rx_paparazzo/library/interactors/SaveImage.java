@@ -16,11 +16,16 @@
 
 package com.refineriaweb.rx_paparazzo.library.interactors;
 
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.os.Environment;
+import android.text.TextUtils;
+import android.util.Log;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
@@ -29,6 +34,9 @@ import com.refineriaweb.rx_paparazzo.library.entities.TargetUi;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 import javax.inject.Inject;
 
@@ -36,6 +44,7 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 
 public final class SaveImage extends UseCase<String> {
+    private static final String TAG = "RxPaparazzo";
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;
@@ -56,15 +65,68 @@ public final class SaveImage extends UseCase<String> {
 
     @Override public Observable<String> react() {
         return getOutputUri()
-                .flatMap(outputUri -> Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(), getDimens.with(uri).react(), this::scaleImage));
+                .flatMap(outputUri -> Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(), getDimens.with(uri).react(),
+                        (filePath, filePathOutput, dimens) -> {
+                            String filepath = scaleImage(filePath, filePathOutput, dimens);
+                            MediaScannerConnection.scanFile(targetUi.getContext(), new String[] {filepath}, new String[] { "image/jpeg" }, null);
+                            return filepath;
+                        }));
     }
 
     private Observable<Uri> getOutputUri() {
-        return getPath.with(uri).react()
-                .map(filePath -> {
-                    File file = new File(filePath);
-                    return Uri.fromFile(new File(targetUi.getContext().getExternalCacheDir(), "scaled-" + file.getName()));
-                });
+        return Observable.just(Uri.fromFile(getOutputFile()));
+    }
+
+    private File getOutputFile() {
+        String filename = new SimpleDateFormat("ddMMyyyy_HHmmss", new Locale("en")).format(new Date());
+        filename = "IMG-" + filename + ".jpg";
+        String dirname = getApplicationName(targetUi.getContext());
+        File dir = getPublicDir(null, dirname);
+        return new File(dir.getAbsolutePath(), filename);
+    }
+
+    private String getApplicationName(Context context) {
+        int stringId = context.getApplicationInfo().labelRes;
+        return context.getString(stringId);
+    }
+
+    private File getPublicDir(String dirRoot, String dirname) {
+        File storageDir = null;
+
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
+            storageDir = new File(dir, dirname);
+
+            // Create the storage directory if it does not exist
+            if (!storageDir.exists()) {
+                if (!storageDir.mkdirs()) {
+                    Log.e(TAG, "Failed to create directory " + dirname);
+                    storageDir = null;
+                }
+            }
+        }
+
+        if (storageDir == null) {
+            Log.e(TAG, "Failed to create directory " + dirRoot + "/" + dirname + ".External storage not mounted");
+            storageDir = getPrivateDir(dirname);
+        }
+
+        return storageDir;
+    }
+
+    private File getPrivateDir(String dirname) {
+        File dir = targetUi.getContext().getFilesDir();
+        File storageDir = TextUtils.isEmpty(dirname) ? dir : new File(dir, dirname);
+
+        // Create the storage directory if it does not exist
+        if (!storageDir.exists()) {
+            if (!storageDir.mkdirs()) {
+                Log.e(TAG, "Failed to create directory " + dirname);
+                storageDir = null;
+            }
+        }
+
+        return storageDir;
     }
 
     //TODO return a file name based on date (month-day-hour-seconds) instead of 'shoot'
@@ -79,6 +141,7 @@ public final class SaveImage extends UseCase<String> {
             File fileScaled = new File(filePathOutput);
             bitmap2file(bitmap, fileScaled, Bitmap.CompressFormat.JPEG);
             copyExifRotation(file, fileScaled);
+            file.delete();
             getDimens.printDimens("output size : ", fileScaled.getAbsolutePath());
             return fileScaled.getAbsolutePath();
         }
