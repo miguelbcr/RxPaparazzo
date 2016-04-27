@@ -25,7 +25,6 @@ import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.refineriaweb.rx_paparazzo.library.entities.Config;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
@@ -44,7 +43,6 @@ import rx.Observable;
 import rx.exceptions.Exceptions;
 
 public final class SaveImage extends UseCase<String> {
-    private static final String TAG = "RxPaparazzo";
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;
@@ -97,17 +95,14 @@ public final class SaveImage extends UseCase<String> {
             File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
             storageDir = new File(dir, dirname);
 
-            // Create the storage directory if it does not exist
             if (!storageDir.exists()) {
                 if (!storageDir.mkdirs()) {
-                    Log.e(TAG, "Failed to create directory " + dirname);
                     storageDir = null;
                 }
             }
         }
 
         if (storageDir == null) {
-            Log.e(TAG, "Failed to create directory " + dirRoot + "/" + dirname + ".External storage not mounted");
             storageDir = getPrivateDir(dirname);
         }
 
@@ -121,7 +116,6 @@ public final class SaveImage extends UseCase<String> {
         // Create the storage directory if it does not exist
         if (!storageDir.exists()) {
             if (!storageDir.mkdirs()) {
-                Log.e(TAG, "Failed to create directory " + dirname);
                 storageDir = null;
             }
         }
@@ -129,12 +123,12 @@ public final class SaveImage extends UseCase<String> {
         return storageDir;
     }
 
-    //TODO return a file name based on date (month-day-hour-seconds) instead of 'shoot'
     private String scaleImage(String filePath, String filePathOutput, int[] dimens) {
         getDimens.printDimens("input size : ", filePath);
-        if (config.getSize() == Size.Original) return filePath;
-        // TODO check behaviour with last param, rotateIfNeeded
-        Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], true);
+        if (config.getSize() == Size.Original)
+            return filePath;
+
+        Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], false);
 
         if (bitmap != null) {
             File file = new File(filePath);
