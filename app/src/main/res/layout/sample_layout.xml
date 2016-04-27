@@ -24,45 +24,70 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal|top"
-        android:layout_marginTop="100dp"
-        android:orientation="horizontal">
+        android:layout_marginTop="80dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
 
-        <android.support.design.widget.FloatingActionButton
+        <TextView
             android:id="@+id/fab_camera"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="50dp"
-            android:src="@drawable/ic_camera_alt_black_24dp" />
+            android:background="@color/colorAccent"
+            android:drawableLeft="@drawable/ic_camera_alt_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Take photo"
+            android:textColor="@android:color/white" />
 
-        <android.support.design.widget.FloatingActionButton
+        <TextView
             android:id="@+id/fab_camera_crop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="50dp"
-            android:src="@drawable/ic_camera_alt_black_24dp" />
+            android:background="@color/colorAccent"
+            android:layout_marginTop="10dp"
+            android:drawableLeft="@drawable/ic_camera_alt_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Take photo and crop"
+            android:textColor="@android:color/white" />
 
-        <android.support.design.widget.FloatingActionButton
+        <TextView
             android:id="@+id/fab_pickup_image"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginRight="50dp"
-            android:src="@drawable/ic_image_black_24dp" />
+            android:background="@color/colorAccent"
+            android:layout_marginTop="10dp"
+            android:drawableLeft="@drawable/ic_image_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Pick up image and crop"
+            android:textColor="@android:color/white" />
 
-        <android.support.design.widget.FloatingActionButton
+        <TextView
             android:id="@+id/fab_pickup_images"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_collections_black_24dp" />
+            android:background="@color/colorAccent"
+            android:layout_marginTop="10dp"
+            android:drawableLeft="@drawable/ic_collections_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Pick up images and crop"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 
     <ImageView
         android:id="@+id/iv_image"
-        android:background="@color/colorPrimary"
         android:layout_width="wrap_content"
         android:layout_height="200dp"
         android:layout_gravity="center_horizontal|bottom"
         android:layout_marginBottom="50dp"
         android:adjustViewBounds="true"
+        android:background="@color/colorPrimary"
         android:visibility="gone" />
 
     <android.support.v7.widget.RecyclerView
@@ -70,7 +95,7 @@
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="50dp"
+        android:layout_marginBottom="30dp"
         android:background="@color/colorAccent"
         android:visibility="gone"
         tools:listitem="@layout/item_images" />
