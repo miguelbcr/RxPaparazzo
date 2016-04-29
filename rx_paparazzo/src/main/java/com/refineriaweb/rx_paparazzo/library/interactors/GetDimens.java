@@ -70,12 +70,4 @@ public final class GetDimens extends UseCase<int[]> {
         BitmapFactory.decodeFile(filePath, options);
         return new int[] {options.outWidth, options.outHeight};
     }
-
-    //TODO remove before release
-    public void printDimens(String log, String filePath) {
-        BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
-        BitmapFactory.decodeFile(filePath, options);
-        System.out.println(log + options.outWidth + "x" + options.outHeight);
-    }
 }

@@ -124,9 +124,14 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private String scaleImage(String filePath, String filePathOutput, int[] dimens) {
-        getDimens.printDimens("input size : ", filePath);
-        if (config.getSize() == Size.Original)
-            return filePath;
+        if (config.getSize() == Size.Original) {
+            File file = new File(filePath);
+            File fileOutput = new File(filePathOutput);
+            file.renameTo(fileOutput);
+            file.delete();
+
+            return filePathOutput;
+        }
 
         Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], false);
 
@@ -136,7 +141,6 @@ public final class SaveImage extends UseCase<String> {
             bitmap2file(bitmap, fileScaled, Bitmap.CompressFormat.JPEG);
             copyExifRotation(file, fileScaled);
             file.delete();
-            getDimens.printDimens("output size : ", fileScaled.getAbsolutePath());
             return fileScaled.getAbsolutePath();
         }
 
@@ -184,17 +188,21 @@ public final class SaveImage extends UseCase<String> {
         return bitmap;
     }
 
-    private int calculateInSampleSize(BitmapFactory.Options options, int reqWidth, int reqHeight) {
-        int height = options.outHeight;
-        int width = options.outWidth;
+    private int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {
         int inSampleSize = 1;
+        int[] dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
+        int[] maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
+        int width = dimensPortrait[0];
+        int height = dimensPortrait[1];
+        maxWidth = maxDimensPortrait[0];
+        maxHeight = maxDimensPortrait[1];
 
-        if (height > reqHeight || width > reqWidth) {
-            int heightRatio = Math.round((float) height / (float) reqHeight);
-            int widthRatio = Math.round((float) width / (float) reqWidth);
+        if (height > maxHeight || width > maxWidth) {
+            int heightRatio = Math.round((float) height / (float) maxHeight);
+            int widthRatio = Math.round((float) width / (float) maxWidth);
             inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
             float totalPixels = width * height;
-            float totalReqPixels = reqWidth * reqHeight * 2;
+            float totalReqPixels = maxWidth * maxHeight * 2;
 
             while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixels) {
                 inSampleSize++;
@@ -202,6 +210,11 @@ public final class SaveImage extends UseCase<String> {
         }
 
         return inSampleSize;
+    }
+
+    private int[] getDimensionsPortrait(int width, int height) {
+        if (width < height) return new int [] {width, height};
+        else return new int [] {height, width};
     }
 
     private Bitmap rotateImageIfRequired(Bitmap img, String filePath) {

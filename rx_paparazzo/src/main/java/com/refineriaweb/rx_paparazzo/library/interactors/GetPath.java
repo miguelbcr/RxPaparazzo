@@ -55,11 +55,12 @@ public final class GetPath extends UseCase<String> {
         boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
         Context context = targetUi.activity();
 
+        if (uri == null) return null;
+
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 Document document = getDocument(uri);
                 if ("primary".equalsIgnoreCase(document.type)) return Environment.getExternalStorageDirectory() + "/" + document.id;
-                // TODO handle non-primary volumes
                 return null;
             } else if (isDownloadsDocument(uri)) {
                 String id = DocumentsContract.getDocumentId(uri);

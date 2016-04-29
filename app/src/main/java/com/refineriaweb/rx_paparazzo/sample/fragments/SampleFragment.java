@@ -15,16 +15,20 @@ import android.widget.Toast;
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
 import com.refineriaweb.rx_paparazzo.sample.R;
+import com.refineriaweb.rx_paparazzo.sample.activities.Testable;
 import com.refineriaweb.rx_paparazzo.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
-public class SampleFragment extends Fragment {
+public class SampleFragment extends Fragment implements Testable {
     private ImageView imageView;
     private RecyclerView recyclerView;
+    private List<String> filesPaths;
+    private Size size;
 
     @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.sample_layout, container, false);
@@ -34,6 +38,8 @@ public class SampleFragment extends Fragment {
     @Override public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initViews();
+        filesPaths = new ArrayList<>();
+        size = Size.Original;
     }
 
     private void initViews() {
@@ -52,8 +58,9 @@ public class SampleFragment extends Fragment {
     }
 
     private void captureImage() {
+        size = Size.Small;
         RxPaparazzo.takeImage(this)
-                .size(Size.Original)
+                .size(size)
                 .usingCamera()
                 .subscribe(response -> {
 
@@ -71,7 +78,9 @@ public class SampleFragment extends Fragment {
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         options.setMaxBitmapSize(1000000000);
 
+        size = Size.Original;
         RxPaparazzo.takeImage(this)
+                .size(size)
                 .crop(options)
                 .usingCamera()
                 .subscribe(response -> {
@@ -89,9 +98,10 @@ public class SampleFragment extends Fragment {
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
         options.setMaxBitmapSize(1000000000);
 
+        size = Size.Small;
         RxPaparazzo.takeImage(this)
                 .crop(options)
-                .size(Size.Small)
+                .size(size)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != Activity.RESULT_OK) {
@@ -104,9 +114,10 @@ public class SampleFragment extends Fragment {
     }
 
     private void pickupImages() {
+        size = Size.Small;
         RxPaparazzo.takeImages(this)
                 .crop()
-                .size(Size.Screen)
+                .size(size)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != Activity.RESULT_OK) {
@@ -120,6 +131,8 @@ public class SampleFragment extends Fragment {
     }
 
     private void loadImage(String filePath) {
+        filesPaths.clear();
+        filesPaths.add(filePath);
         imageView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
         File imageFile = new File(filePath);
@@ -129,13 +142,22 @@ public class SampleFragment extends Fragment {
         Picasso.with(getActivity()).load(imageFile).into(imageView);
     }
 
+    private void loadImages(List<String> filesPaths) {
+        this.filesPaths = filesPaths;
+        imageView.setVisibility(View.GONE);
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView.setAdapter(new ImagesAdapter(filesPaths));
+    }
+
     private void showUserCanceled() {
         Toast.makeText(getActivity(), getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
     }
 
-    private void loadImages(List<String> filesPaths) {
-        imageView.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
-        recyclerView.setAdapter(new ImagesAdapter(filesPaths));
+    @Override public List<String> getFilePaths() {
+        return filesPaths;
+    }
+
+    @Override public Size getSize() {
+        return size;
     }
 }

@@ -13,23 +13,28 @@ import android.widget.Toast;
 
 import com.refineriaweb.rx_paparazzo.library.RxPaparazzo;
 import com.refineriaweb.rx_paparazzo.library.entities.Size;
-import com.refineriaweb.rx_paparazzo.sample.adapters.ImagesAdapter;
 import com.refineriaweb.rx_paparazzo.sample.R;
+import com.refineriaweb.rx_paparazzo.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class SampleActivity extends AppCompatActivity {
+public class SampleActivity extends AppCompatActivity implements Testable {
     private Toolbar toolbar;
     private ImageView imageView;
     private RecyclerView recyclerView;
+    private List<String> filesPaths;
+    private Size size;
 
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sample_layout);
         configureToolbar();
         initViews();
+        filesPaths = new ArrayList<>();
+        size = Size.Original;
     }
 
     @Override public void onConfigurationChanged(Configuration newConfig) {
@@ -58,7 +63,9 @@ public class SampleActivity extends AppCompatActivity {
     }
 
     private void captureImage() {
+        size = Size.Small;
         RxPaparazzo.takeImage(SampleActivity.this)
+                .size(size)
                 .usingCamera()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
@@ -75,7 +82,9 @@ public class SampleActivity extends AppCompatActivity {
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
         options.setMaxBitmapSize(1000000000);
 
+        size = Size.Original;
         RxPaparazzo.takeImage(SampleActivity.this)
+                .size(size)
                 .crop(options)
                 .usingCamera()
                 .subscribe(response -> {
@@ -93,9 +102,10 @@ public class SampleActivity extends AppCompatActivity {
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorPrimaryDark));
         options.setMaxBitmapSize(1000000000);
 
+        size = Size.Small;
         RxPaparazzo.takeImage(SampleActivity.this)
                 .crop(options)
-                .size(Size.Small)
+                .size(size)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
@@ -108,9 +118,10 @@ public class SampleActivity extends AppCompatActivity {
     }
 
     private void pickupImages() {
+        size = Size.Small;
         RxPaparazzo.takeImages(SampleActivity.this)
                 .crop()
-                .size(Size.Screen)
+                .size(size)
                 .usingGallery()
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
@@ -124,6 +135,8 @@ public class SampleActivity extends AppCompatActivity {
     }
 
     private void loadImage(String filePath) {
+        filesPaths.clear();
+        filesPaths.add(filePath);
         imageView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
@@ -134,14 +147,23 @@ public class SampleActivity extends AppCompatActivity {
         Picasso.with(getApplicationContext()).load("file://" + filePath).into(imageView);
     }
 
-    private void showUserCanceled() {
-        Toast.makeText(this, getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
-    }
-
     private void loadImages(List<String> filesPaths) {
+        this.filesPaths = filesPaths;
         imageView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);
         imageView.setImageDrawable(null);
         recyclerView.setAdapter(new ImagesAdapter(filesPaths));
+    }
+
+    private void showUserCanceled() {
+        Toast.makeText(this, getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
+    }
+
+    @Override public List<String> getFilePaths() {
+        return filesPaths;
+    }
+
+    @Override public Size getSize() {
+        return size;
     }
 }
