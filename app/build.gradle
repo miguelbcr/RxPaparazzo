@@ -17,7 +17,7 @@ android {
     buildToolsVersion "23.0.2"
 
     defaultConfig {
-        applicationId "com.refineriaweb.rx_paparazzo.sample"
+        applicationId "com.fuck_boilerplate.rx_paparazzo.sample"
         minSdkVersion 18
         targetSdkVersion 23
         versionCode 1

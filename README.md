@@ -1,4 +1,4 @@
-RxJava extension for Android to access camera and gallery. 
+RxJava extension for Android to access camera and gallery to take images. 
 
 # RxPaparazzo
 
@@ -14,7 +14,7 @@ This library does that. Not really. But it was a funny name, thought. Was it?
 - Runtime permissions. Not worries about the tricky Android runtime permissions system. RxPaparazzo relies on [RxPermissions](https://github.com/tbruyelle/RxPermissions) to deal with that.  
 - Take a photo using the built-in camera.
 - Access to gallery. 
-- Crop images. RxPaparazzo depends on [UCrop](https://github.com/Yalantis/uCrop) to perform beautiful cuts to any face, body or place. 
+- Crop images. RxPaparazzo relies on [UCrop](https://github.com/Yalantis/uCrop) to perform beautiful cuts to any face, body or place. 
 - Honors the observable chain (it means you can go crazy chaining operators). [RxOnActivityResult](https://github.com/VictorAlbertos/RxActivityResult) allows RxPaparazzo to transform every intent into an observable for a wonderful chaining process.
 
 
@@ -33,7 +33,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.RefineriaWeb:RxPaparazzo:0.1.0"
+    compile "com.github.FuckBoilerplate:RxPaparazzo:0.0.1"
     compile "io.reactivex:rxjava:1.1.0"
 }
 ```
@@ -42,7 +42,7 @@ dependencies {
 ## Usage
 Because RxPaparazzo uses RxActivityResult to deal with intent calls, all its requirements and features are inherited too.
 
-Before attempting to use RxPaparazzo, you need to call `RxActivityResult.register` in your Android `Application` class, supplying as parameter the current instance.
+Before attempting to use RxPaparazzo, you need to call `RxPaparazzo.register` in your Android `Application` class, supplying as parameter the current instance.
         
 ```java
 public class SampleApp extends Application {
@@ -110,7 +110,8 @@ RxPaparazzo.takeImages(activityOrFragment)
         });
 ```
 
-The `response` instance holds a reference to the paths where the images was persisted. But if the level Android api device is minor than 18, only one image will be retrieved. 
+The `response` instance holds a reference to the paths where the images was persisted. 
+**Note**: if the level Android api device is minor than 18, only one image will be retrieved. 
 
 ## Customizations
 When asking RxPaparazzo for an image -whether it was retrieved using the built-in camera or via gallery, it's possible to apply some configurations to the action. 
@@ -118,11 +119,11 @@ When asking RxPaparazzo for an image -whether it was retrieved using the built-i
 ### Size options
 `Size` values `enum` can be used to set the size of the image to retrieve. There are 3 options:
 
-* Small: 1/8 of the screen resolution
-* Screen: The size image matches the screen resolution.
+* Small: 1/8 aprox. of the screen resolution
+* Screen: The size image matches aprox. the screen resolution.
 * Original: The original size of the image.
 
-Screen value will be set as default.
+`Screen` value will be set as default.
 
 ```java
 RxPaparazzo.takeImages(activityOrFragment)
