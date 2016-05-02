@@ -58,7 +58,7 @@ Every feature RxPaparazzo exposes can be accessed from both, an `activity` or a 
 
 The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/Response.java) class. 
 
-This instance hols a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated it would be unsafe calling it. Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the `response` instance.
+This instance holds a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated it would be unsafe calling it. Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the `response` instance.
 
 Also, this instance holds a reference to the data as the appropriate response, as such as the result code of the specific operation.
 
@@ -76,7 +76,9 @@ RxPaparazzo.takeImage(activityOrFragment)
         });
 ```
 
-The `response` instance holds a reference to the path where the image was persisted. 
+The `response` instance holds a reference to the path where the image was persisted.
+
+The path is under app name folder on the root of the external storage.
 
 
 ### Calling the gallery to retrieve an image.
@@ -110,7 +112,8 @@ RxPaparazzo.takeImages(activityOrFragment)
         });
 ```
 
-The `response` instance holds a reference to the paths where the images was persisted. 
+The `response` instance holds a reference to the paths where the images was persisted.
+
 **Note**: if the level Android api device is minor than 18, only one image will be retrieved. 
 
 ## Customizations
