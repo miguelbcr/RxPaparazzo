@@ -62,9 +62,8 @@ public final class CropImage extends UseCase<Uri> {
     }
 
     public Observable<Intent> getIntent() {
-        return Observable.zip(getOutputUri(), getDimens.with(uri).react(), (outputUri, dimens) ->
+        return getOutputUri().map(outputUri ->
                 UCrop.of(uri, outputUri)
-                    .withMaxResultSize(dimens[0], dimens[1])
                     .withOptions(config.getOptions())
                     .getIntent(targetUi.getContext())
         );
@@ -73,8 +72,12 @@ public final class CropImage extends UseCase<Uri> {
     private Observable<Uri> getOutputUri() {
         return getPath.with(uri).react()
                 .map(filePath -> {
-                    File file = new File(filePath);
-                    return Uri.fromFile(new File(targetUi.getContext().getExternalCacheDir(), "cropped-" + file.getName()));
+                    File file = targetUi.activity().getExternalCacheDir();
+
+                    return Uri.fromFile(file)
+                            .buildUpon()
+                            .appendPath("cropped.jpg")
+                            .build();
                 });
     }
 }

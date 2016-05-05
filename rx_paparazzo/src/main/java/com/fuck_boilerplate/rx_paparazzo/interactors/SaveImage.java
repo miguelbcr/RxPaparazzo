@@ -31,8 +31,11 @@ import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -125,26 +128,50 @@ public final class SaveImage extends UseCase<String> {
 
     private String scaleImage(String filePath, String filePathOutput, int[] dimens) {
         if (config.getSize() == Size.Original) {
-            File file = new File(filePath);
-            File fileOutput = new File(filePathOutput);
-            file.renameTo(fileOutput);
-            file.delete();
-
-            return filePathOutput;
+            return copyFile(filePath, filePathOutput);
         }
 
-        Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], false);
+        boolean rotateIfNeeded = false;
+        Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], rotateIfNeeded);
 
-        if (bitmap != null) {
-            File file = new File(filePath);
-            File fileScaled = new File(filePathOutput);
-            bitmap2file(bitmap, fileScaled, Bitmap.CompressFormat.JPEG);
-            copyExifRotation(file, fileScaled);
-            file.delete();
-            return fileScaled.getAbsolutePath();
+        if (bitmap == null) {
+            return copyFile(filePath, filePathOutput);
         }
 
-        return filePath;
+        File file = new File(filePath);
+        File fileScaled = new File(filePathOutput);
+        bitmap2file(bitmap, fileScaled, Bitmap.CompressFormat.JPEG);
+        copyExifRotation(file, fileScaled, rotateIfNeeded);
+
+        return filePathOutput;
+    }
+
+    private String copyFile(String filePath, String newfilePath) {
+        File file = new File(filePath);
+        File fileOutput = new File(newfilePath);
+
+        copy(file, fileOutput);
+
+        return newfilePath;
+    }
+
+    private void copy(File src, File dst) {
+        try {
+            InputStream in = new FileInputStream(src);
+            OutputStream out = new FileOutputStream(dst);
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = in.read(buffer)) > 0) {
+                out.write(buffer, 0, length);
+            }
+
+            in.close();
+            out.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw Exceptions.propagate(e);
+        }
     }
 
     private boolean bitmap2file(Bitmap bitmap, File file, Bitmap.CompressFormat compressFormat) {
@@ -160,12 +187,13 @@ public final class SaveImage extends UseCase<String> {
         }
     }
 
-    private boolean copyExifRotation(File sourceFile, File destFile) {
+    private boolean copyExifRotation(File sourceFile, File destFile, boolean rotateIfNeeded) {
         if (sourceFile == null || destFile == null) return false;
         try {
             ExifInterface exifSource = new ExifInterface(sourceFile.getAbsolutePath());
             ExifInterface exifDest = new ExifInterface(destFile.getAbsolutePath());
-            exifDest.setAttribute(ExifInterface.TAG_ORIENTATION, exifSource.getAttribute(ExifInterface.TAG_ORIENTATION));
+            String value = rotateIfNeeded ? String.valueOf(ExifInterface.ORIENTATION_NORMAL) : exifSource.getAttribute(ExifInterface.TAG_ORIENTATION);
+            exifDest.setAttribute(ExifInterface.TAG_ORIENTATION, value);
             exifDest.saveAttributes();
             return true;
         } catch (IOException e) {
@@ -179,6 +207,10 @@ public final class SaveImage extends UseCase<String> {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         options.inSampleSize = (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
+
+        if (options.inSampleSize == 1)
+            return null;
+
         options.inJustDecodeBounds = false;
         Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
 
@@ -220,15 +252,18 @@ public final class SaveImage extends UseCase<String> {
     private Bitmap rotateImageIfRequired(Bitmap img, String filePath) {
         try {
             ExifInterface ei = new ExifInterface(filePath);
-            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
 
             switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
                     img = rotateImage(img, 90);
+                    break;
                 case ExifInterface.ORIENTATION_ROTATE_180:
                     img = rotateImage(img, 180);
+                    break;
                 case ExifInterface.ORIENTATION_ROTATE_270:
                     img = rotateImage(img, 270);
+                    break;
             }
 
             return img;
