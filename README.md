@@ -21,7 +21,6 @@ This library does that. Not really. But it was a funny name, thought. Was it?
 
 
 ## Setup
-
 Add the JitPack repository in your build.gradle (top level module):
 ```gradle
 allprojects {
@@ -35,7 +34,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.FuckBoilerplate:RxPaparazzo:0.0.5"
+    compile "com.github.FuckBoilerplate:RxPaparazzo:0.0.6"
     compile "io.reactivex:rxjava:1.1.4"
 }
 ```
