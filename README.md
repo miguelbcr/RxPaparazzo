@@ -115,7 +115,7 @@ RxPaparazzo.takeImages(activityOrFragment)
         });
 ```
 
-The `response` instance holds a reference to the paths where the images was persisted.
+The `response` instance holds a reference to the paths where the images were persisted.
 
 **Note**: if the level Android api device is minor than 18, only one image will be retrieved. 
 
