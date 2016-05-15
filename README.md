@@ -57,6 +57,8 @@ public class SampleApp extends Application {
 
 Every feature RxPaparazzo exposes can be accessed from both, an `activity` or a `fragment` instance. 
 
+**Limitation:**: Your fragments need to extend from `android.support.v4.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified. 
+
 The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/Response.java) class. 
 
 This instance holds a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated it would be unsafe calling it. Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the `response` instance.
