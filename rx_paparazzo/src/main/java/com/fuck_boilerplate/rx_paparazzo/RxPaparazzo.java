@@ -34,6 +34,7 @@ import rx.Observable;
 import rx_activity_result.RxActivityResult;
 
 public final class RxPaparazzo {
+    public static final int RESULT_DENIED_PERMISSION = 2;
 
     public static void register(Application application) {
         RxActivityResult.register(application);

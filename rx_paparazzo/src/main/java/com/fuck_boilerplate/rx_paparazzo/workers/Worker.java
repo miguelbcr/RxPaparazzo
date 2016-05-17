@@ -18,6 +18,8 @@ package com.fuck_boilerplate.rx_paparazzo.workers;
 
 import android.app.Activity;
 
+import com.fuck_boilerplate.rx_paparazzo.RxPaparazzo;
+import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
@@ -32,14 +34,15 @@ abstract class Worker {
         this.targetUi = targetUi;
     }
 
+    @SuppressWarnings("unchecked")
     protected <T> Observable.Transformer<T, T> applyOnError() {
-        return (observable) -> {
-            return observable.onErrorResumeNext(throwable -> {
-                if (throwable instanceof UserCanceledException) {
-                    return Observable.just((T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
-                }
-                throw Exceptions.propagate(throwable);
-            });
-        };
+        return observable -> observable.onErrorResumeNext(throwable -> {
+            if (throwable instanceof UserCanceledException) {
+                return Observable.just((T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
+            } else if (throwable instanceof PermissionDeniedException) {
+                return Observable.just((T) new Response(targetUi.ui(), null, RxPaparazzo.RESULT_DENIED_PERMISSION));
+            }
+            throw Exceptions.propagate(throwable);
+        });
     }
 }

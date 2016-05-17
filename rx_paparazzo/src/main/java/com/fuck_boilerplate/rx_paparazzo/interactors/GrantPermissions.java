@@ -18,6 +18,7 @@ package com.fuck_boilerplate.rx_paparazzo.interactors;
 
 import android.Manifest;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
 import com.tbruyelle.rxpermissions.RxPermissions;
@@ -38,7 +39,7 @@ public final class GrantPermissions extends UseCase<Void> {
         return permissions.request(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
                  .flatMap(granted -> {
                      if (granted) return Observable.<Void>just(null);
-                     throw new UserCanceledException();
+                     throw new PermissionDeniedException();
                  });
     }
 }
