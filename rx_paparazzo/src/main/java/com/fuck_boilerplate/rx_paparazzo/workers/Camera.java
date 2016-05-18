@@ -46,7 +46,7 @@ public final class Camera extends Worker {
     }
 
     public <T> Observable<Response<T, String>> takePhoto() {
-        return grantPermissions.react()
+        return grantPermissions.reactAlsoWithCameraPermission()
                 .flatMap(granted -> takePhoto.react())
                 .flatMap(uri -> cropImage.with(uri).react())
                 .flatMap(uri -> saveImage.with(uri).react())
