@@ -68,6 +68,11 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .size(size)
                 .usingCamera()
                 .subscribe(response -> {
+                    if (response.resultCode() == RxPaparazzo.RESULT_DENIED_PERMISSION) {
+                        response.targetUI().showUserDidNotGrantPermissions();
+                        return;
+                    }
+
                     if (response.resultCode() != RESULT_OK) {
                         response.targetUI().showUserCanceled();
                         return;
@@ -157,6 +162,10 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
     private void showUserCanceled() {
         Toast.makeText(this, getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
+    }
+
+    private void showUserDidNotGrantPermissions() {
+        Toast.makeText(this, getString(R.string.user_did_not_grant_permissions), Toast.LENGTH_SHORT).show();
     }
 
     @Override public List<String> getFilePaths() {
