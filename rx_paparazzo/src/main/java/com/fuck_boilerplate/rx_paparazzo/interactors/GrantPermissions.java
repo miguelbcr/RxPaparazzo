@@ -16,11 +16,8 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
-import android.Manifest;
-
 import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
 import javax.inject.Inject;
@@ -29,26 +26,23 @@ import rx.Observable;
 
 public final class GrantPermissions extends UseCase<Void> {
     private final TargetUi targetUi;
+    private String[] permissions;
 
     @Inject public GrantPermissions(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
+    public GrantPermissions with(String... permissions) {
+        this.permissions = permissions;
+        return this;
+    }
+
     @Override public Observable<Void> react() {
-        return requestPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE);
-    }
-
-    private Observable<Void> requestPermissions(String... permissionsString) {
-        RxPermissions permissions = RxPermissions.getInstance(targetUi.activity());
-        return permissions.request(permissionsString)
-                 .flatMap(granted -> {
-                     if (granted) return Observable.<Void>just(null);
-                     throw new PermissionDeniedException();
-                 });
-    }
-
-    public Observable<Void> reactAlsoWithCameraPermission() {
-        return requestPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-            Manifest.permission.CAMERA);
+        return RxPermissions.getInstance(targetUi.activity())
+                .request(permissions)
+                .flatMap(granted -> {
+                    if (granted) return Observable.<Void>just(null);
+                    throw new PermissionDeniedException();
+                });
     }
 }

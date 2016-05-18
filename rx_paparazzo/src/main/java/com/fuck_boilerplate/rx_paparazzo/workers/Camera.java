@@ -16,6 +16,7 @@
 
 package com.fuck_boilerplate.rx_paparazzo.workers;
 
+import android.Manifest;
 import android.app.Activity;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
@@ -46,7 +47,11 @@ public final class Camera extends Worker {
     }
 
     public <T> Observable<Response<T, String>> takePhoto() {
-        return grantPermissions.reactAlsoWithCameraPermission()
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.CAMERA};
+
+        return grantPermissions.with(permissions).react()
                 .flatMap(granted -> takePhoto.react())
                 .flatMap(uri -> cropImage.with(uri).react())
                 .flatMap(uri -> saveImage.with(uri).react())

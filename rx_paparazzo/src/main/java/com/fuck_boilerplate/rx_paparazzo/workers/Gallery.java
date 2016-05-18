@@ -16,6 +16,7 @@
 
 package com.fuck_boilerplate.rx_paparazzo.workers;
 
+import android.Manifest;
 import android.app.Activity;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
@@ -32,7 +33,7 @@ import javax.inject.Inject;
 
 import rx.Observable;
 
-public final class Gallery extends Worker{
+public final class Gallery extends Worker {
     private final GrantPermissions grantPermissions;
     private final PickImages pickImages;
     private final PickImage pickImage;
@@ -51,7 +52,7 @@ public final class Gallery extends Worker{
     }
 
     public <T> Observable<Response<T, String>> pickImage() {
-        return grantPermissions.react()
+        return grantPermissions.with(permissions()).react()
                 .flatMap(granted -> pickImage.react())
                 .flatMap(uri -> cropImage.with(uri).react())
                 .flatMap(uri -> saveImage.with(uri).react())
@@ -60,7 +61,7 @@ public final class Gallery extends Worker{
     }
 
     public <T> Observable<Response<T, List<String>>> pickImages() {
-        return grantPermissions.react()
+        return grantPermissions.with(permissions()).react()
                 .flatMap(granted -> pickImages.react())
                 .flatMapIterable(uris -> uris)
                 .concatMap(uri -> cropImage.with(uri).react())
@@ -69,4 +70,10 @@ public final class Gallery extends Worker{
                 .map(paths -> new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK))
                 .compose(applyOnError());
     }
+
+    private String[] permissions() {
+        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        return permissions;
+    }
+
 }
