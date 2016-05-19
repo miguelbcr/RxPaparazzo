@@ -74,8 +74,9 @@ public final class PickImages extends UseCase<List<Uri>>{
             intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
 
         return intent;
     }

@@ -27,6 +27,8 @@ import com.fuck_boilerplate.rx_paparazzo.interactors.PickImages;
 import com.fuck_boilerplate.rx_paparazzo.interactors.SaveImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.StartIntent;
 import com.fuck_boilerplate.rx_paparazzo.interactors.TakePhoto;
+import com.fuck_boilerplate.rx_paparazzo.workers.Camera;
+import com.fuck_boilerplate.rx_paparazzo.workers.Gallery;
 
 public class ApplicationModule {
     final Config config;
@@ -40,6 +42,8 @@ public class ApplicationModule {
     final GrantPermissions grantPermissions;
     final PickImages pickImages;
     final PickImage pickImage;
+    final Camera camera;
+    final Gallery gallery;
 
     public ApplicationModule(Config config, Object originUi) {
         this.config = config;
@@ -53,5 +57,7 @@ public class ApplicationModule {
         grantPermissions = new GrantPermissions(ui);
         pickImages = new PickImages(startIntent);
         pickImage = new PickImage(startIntent, ui);
+        camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui);
+        gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui);
     }
 }

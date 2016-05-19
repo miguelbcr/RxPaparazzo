@@ -49,10 +49,12 @@ public final class GetDimens extends UseCase<int[]> {
                 .map(new Func1<String, int[]>() {
                     @Override
                     public int[] call(String filePath) {
-                        if (config.getSize() == Size.Original)
+                        if (config.getSize() == Size.Original) {
                             return GetDimens.this.getFileDimens(filePath);
-                        else if (config.getSize() == Size.Screen)
+                        }
+                        else if (config.getSize() == Size.Screen) {
                             return GetDimens.this.getScreenDimens();
+                        }
                         else {
                             int[] dimens = GetDimens.this.getScreenDimens();
                             return new int[]{dimens[0] / 8, dimens[1] / 8};

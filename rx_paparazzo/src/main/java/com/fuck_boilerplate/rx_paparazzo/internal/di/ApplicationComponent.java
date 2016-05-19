@@ -31,21 +31,17 @@ public abstract class ApplicationComponent {
         return new ApplicationComponent() {
             @Override
             public Camera camera() {
-                return new Camera(applicationModule.takePhoto, applicationModule.cropImage,
-                        applicationModule.saveImage, applicationModule.grantPermissions,
-                        applicationModule.ui);
+                return applicationModule.camera;
             }
 
             @Override
             public Gallery gallery() {
-                return new Gallery(applicationModule.grantPermissions, applicationModule.pickImages,
-                        applicationModule.pickImage, applicationModule.cropImage,
-                        applicationModule.saveImage, applicationModule.ui);
+                return applicationModule.gallery;
             }
 
             @Override
             public GetPath getPath() {
-                return new GetPath(applicationModule.ui);
+                return applicationModule.getPath;
             }
         };
     }
