@@ -28,21 +28,6 @@ public abstract class ApplicationComponent {
     public abstract GetPath getPath();
 
     public static ApplicationComponent create(final ApplicationModule applicationModule) {
-        return new ApplicationComponent() {
-            @Override
-            public Camera camera() {
-                return applicationModule.camera;
-            }
-
-            @Override
-            public Gallery gallery() {
-                return applicationModule.gallery;
-            }
-
-            @Override
-            public GetPath getPath() {
-                return applicationModule.getPath;
-            }
-        };
+        return new ApplicationComponentImpl(applicationModule.getUi(), applicationModule.getConfig());
     }
 }
