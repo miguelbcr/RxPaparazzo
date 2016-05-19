@@ -25,22 +25,26 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class PickImages extends UseCase<List<Uri>>{
     private final StartIntent startIntent;
 
-    @Inject public PickImages(StartIntent startIntent) {
+     public PickImages(StartIntent startIntent) {
         this.startIntent = startIntent;
     }
 
     @Override public Observable<List<Uri>> react() {
         return startIntent.with(getFileChooserIntent()).react()
-                .map(intent -> {
-                    if (intent.getData() != null) return Arrays.asList(intent.getData());
-                    else return getUris(intent);
+                .map(new Func1<Intent, List<Uri>>() {
+                    @Override
+                    public List<Uri> call(Intent intent) {
+                        if (intent.getData() != null) {
+                            return Arrays.asList(intent.getData());
+                        }
+                        else return PickImages.this.getUris(intent);
+                    }
                 });
     }
 
@@ -70,8 +74,9 @@ public final class PickImages extends UseCase<List<Uri>>{
             intent.addCategory(Intent.CATEGORY_OPENABLE);
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);
+        }
 
         return intent;
     }

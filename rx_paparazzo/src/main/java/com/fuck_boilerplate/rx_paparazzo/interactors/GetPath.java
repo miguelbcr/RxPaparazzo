@@ -28,8 +28,6 @@ import android.provider.MediaStore;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
-import javax.inject.Inject;
-
 import rx.Observable;
 import rx.exceptions.Exceptions;
 
@@ -37,7 +35,7 @@ public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
     private Uri uri;
 
-    @Inject public GetPath(TargetUi targetUi) {
+     public GetPath(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
@@ -55,12 +53,16 @@ public final class GetPath extends UseCase<String> {
         boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
         Context context = targetUi.activity();
 
-        if (uri == null) return null;
+        if (uri == null) {
+            return null;
+        }
 
         if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 Document document = getDocument(uri);
-                if ("primary".equalsIgnoreCase(document.type)) return Environment.getExternalStorageDirectory() + "/" + document.id;
+                if ("primary".equalsIgnoreCase(document.type)) {
+                    return Environment.getExternalStorageDirectory() + "/" + document.id;
+                }
                 return null;
             } else if (isDownloadsDocument(uri)) {
                 String id = DocumentsContract.getDocumentId(uri);
@@ -69,15 +71,25 @@ public final class GetPath extends UseCase<String> {
             } else if (isMediaDocument(uri)) {
                 Document document = getDocument(uri);
                 Uri contentUri = null;
-                if ("image".equals(document.type)) contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                else if ("video".equals(document.type)) contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                else if ("audio".equals(document.type)) contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                if ("image".equals(document.type)) {
+                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+                }
+                else if ("video".equals(document.type)) {
+                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+                }
+                else if ("audio".equals(document.type)) {
+                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
+                }
 
                 return getDataColumn(context, contentUri, "_id=?", new String[] {document.id});
             }
         }
-        else if ("content".equalsIgnoreCase(uri.getScheme())) return getDataColumn(context, uri, null, null);
-        else if ("file".equalsIgnoreCase(uri.getScheme())) return uri.getPath();
+        else if ("content".equalsIgnoreCase(uri.getScheme())) {
+            return getDataColumn(context, uri, null, null);
+        }
+        else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
 
         return null;
     }
@@ -109,7 +121,9 @@ public final class GetPath extends UseCase<String> {
         } catch (Exception e) {
             throw Exceptions.propagate(e);
         } finally {
-            if (cursor != null) cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
     }
 

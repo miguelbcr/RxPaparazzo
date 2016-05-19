@@ -20,15 +20,14 @@ import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.tbruyelle.rxpermissions.RxPermissions;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class GrantPermissions extends UseCase<Void> {
     private final TargetUi targetUi;
     private String[] permissions;
 
-    @Inject public GrantPermissions(TargetUi targetUi) {
+     public GrantPermissions(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
@@ -40,9 +39,15 @@ public final class GrantPermissions extends UseCase<Void> {
     @Override public Observable<Void> react() {
         return RxPermissions.getInstance(targetUi.activity())
                 .request(permissions)
-                .flatMap(granted -> {
-                    if (granted) return Observable.<Void>just(null);
-                    throw new PermissionDeniedException();
+                .flatMap(new Func1<Boolean, Observable<Void>>() {
+                    @Override
+                    public Observable<Void> call(Boolean granted) {
+                        if (granted) {
+                            return Observable.just(null);
+                        }
+                        // FIXME Observable.error() to respect the Observable contract
+                        throw new PermissionDeniedException();
+                    }
                 });
     }
 }

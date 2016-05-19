@@ -25,9 +25,8 @@ import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class CropImage extends UseCase<Uri> {
     private final Config config;
@@ -37,7 +36,7 @@ public final class CropImage extends UseCase<Uri> {
     private final GetDimens getDimens;
     private Uri uri;
 
-    @Inject public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath, GetDimens getDimens) {
+    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath, GetDimens getDimens) {
         this.targetUi = targetUi;
         this.config = config;
         this.startIntent = startIntent;
@@ -52,32 +51,39 @@ public final class CropImage extends UseCase<Uri> {
 
     @Override public Observable<Uri> react() {
         if (config.doCrop()) {
-            return getIntent().flatMap(intent ->
-                    startIntent.with(intent).react()
-                        .map(intentResult -> UCrop.getOutput(intentResult))
-            );
+            return getIntent().flatMap(new Func1<Intent, Observable<Uri>>() {
+                @Override
+                public Observable<Uri> call(Intent intent) {
+                    return startIntent.with(intent).react().map(new Func1<Intent, Uri>() {
+                        @Override
+                        public Uri call(Intent intentResult) {
+                            return UCrop.getOutput(intentResult);
+                        }
+                    });
+                }
+            });
         }
 
         return Observable.just(uri);
     }
 
     public Observable<Intent> getIntent() {
-        return getOutputUri().map(outputUri ->
-                UCrop.of(uri, outputUri)
-                    .withOptions(config.getOptions())
-                    .getIntent(targetUi.getContext())
-        );
+        return getOutputUri().map(new Func1<Uri, Intent>() {
+            @Override
+            public Intent call(Uri outputUri) {
+                return UCrop.of(uri, outputUri).withOptions(config.getOptions())
+                        .getIntent(targetUi.getContext());
+            }
+        });
     }
 
     private Observable<Uri> getOutputUri() {
-        return getPath.with(uri).react()
-                .map(filePath -> {
-                    File file = targetUi.activity().getExternalCacheDir();
-
-                    return Uri.fromFile(file)
-                            .buildUpon()
-                            .appendPath("cropped.jpg")
-                            .build();
+        return getPath.with(uri).react().map(new Func1<String, Uri>() {
+            @Override
+            public Uri call(String filePath) {
+                File file = targetUi.activity().getExternalCacheDir();
+                return Uri.fromFile(file).buildUpon().appendPath("cropped.jpg").build();
+            }
                 });
     }
 }

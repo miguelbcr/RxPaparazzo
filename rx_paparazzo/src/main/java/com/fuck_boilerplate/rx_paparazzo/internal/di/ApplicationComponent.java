@@ -20,14 +20,14 @@ import com.fuck_boilerplate.rx_paparazzo.interactors.GetPath;
 import com.fuck_boilerplate.rx_paparazzo.workers.Camera;
 import com.fuck_boilerplate.rx_paparazzo.workers.Gallery;
 
-import javax.inject.Singleton;
+public abstract class ApplicationComponent {
+    public abstract Camera camera();
 
-import dagger.Component;
+    public abstract Gallery gallery();
 
-@Component(modules = ApplicationModule.class)
-@Singleton
-public interface ApplicationComponent {
-    Camera camera();
-    Gallery gallery();
-    GetPath getPath();
+    public abstract GetPath getPath();
+
+    public static ApplicationComponent create(final ApplicationModule applicationModule) {
+        return new ApplicationComponentImpl(applicationModule.getUi(), applicationModule.getConfig());
+    }
 }

@@ -22,22 +22,26 @@ import android.os.Build;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class PickImage extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-    @Inject public PickImage(StartIntent startIntent, TargetUi targetUi) {
+     public PickImage(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
 
     @Override public Observable<Uri> react() {
         return startIntent.with(getFileChooserIntent()).react()
-                .map(intent -> intent.getData());
+                .map(new Func1<Intent, Uri>() {
+                    @Override
+                    public Uri call(Intent intent) {
+                        return intent.getData();
+                    }
+                });
     }
 
     private Intent getFileChooserIntent() {

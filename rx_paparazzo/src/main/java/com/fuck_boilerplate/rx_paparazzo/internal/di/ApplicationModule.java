@@ -19,23 +19,20 @@ package com.fuck_boilerplate.rx_paparazzo.internal.di;
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
-import dagger.Module;
-import dagger.Provides;
-
-@Module public class ApplicationModule {
+public class ApplicationModule {
     private final Config config;
     private final TargetUi ui;
 
-    public ApplicationModule(Config config, Object ui) {
+    public ApplicationModule(Config config, Object originUi) {
         this.config = config;
-        this.ui = new TargetUi(ui);
+        ui = new TargetUi(originUi);
     }
 
-    @Provides Config provideConfig() {
+    public Config getConfig() {
         return config;
     }
 
-    @Provides TargetUi provideTargetUi() {
+    public TargetUi getUi() {
         return ui;
     }
 }
