@@ -18,13 +18,13 @@ package com.fuck_boilerplate.rx_paparazzo.interactors;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.support.v4.app.Fragment;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 import rx_activity_result.Result;
 import rx_activity_result.RxActivityResult;
 
@@ -32,7 +32,7 @@ public final class StartIntent extends UseCase<Intent> {
     private final TargetUi targetUi;
     private Intent intent;
 
-    @Inject public StartIntent(TargetUi targetUi) {
+     public StartIntent(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
@@ -42,20 +42,33 @@ public final class StartIntent extends UseCase<Intent> {
     }
 
     @Override public Observable<Intent> react() {
-        if (targetUi.fragment() != null) {
-            return RxActivityResult.on(targetUi.fragment())
+        final Fragment fragment = targetUi.fragment();
+        if (fragment != null) {
+            return RxActivityResult.on(fragment)
                     .startIntent(intent)
-                    .map(this::getResponse);
+                    .map(new Func1<Result<Fragment>, Intent>() {
+                        @Override
+                        public Intent call(Result<Fragment> result) {
+                            return StartIntent.this.getResponse(result);
+                        }
+                    });
         } else {
             return RxActivityResult.on(targetUi.activity())
                     .startIntent(intent)
-                    .map(this::getResponse);
+                    .map(new Func1<Result<Activity>, Intent>() {
+                        @Override
+                        public Intent call(Result<Activity> result) {
+                            return StartIntent.this.getResponse(result);
+                        }
+                    });
         }
     }
 
     private Intent getResponse(Result result) {
         targetUi.setUi(result.targetUI());
-        if (result.resultCode() != Activity.RESULT_OK) throw new UserCanceledException();
+        if (result.resultCode() != Activity.RESULT_OK) {
+            throw new UserCanceledException();
+        }
         return result.data();
     }
 }

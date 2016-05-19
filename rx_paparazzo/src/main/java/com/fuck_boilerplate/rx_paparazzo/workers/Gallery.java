@@ -18,6 +18,7 @@ package com.fuck_boilerplate.rx_paparazzo.workers;
 
 import android.Manifest;
 import android.app.Activity;
+import android.net.Uri;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
@@ -29,9 +30,8 @@ import com.fuck_boilerplate.rx_paparazzo.interactors.SaveImage;
 
 import java.util.List;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class Gallery extends Worker {
     private final GrantPermissions grantPermissions;
@@ -41,7 +41,7 @@ public final class Gallery extends Worker {
     private final SaveImage saveImage;
     private final TargetUi targetUi;
 
-    @Inject public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi) {
+    public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi) {
         super(targetUi);
         this.grantPermissions = grantPermissions;
         this.pickImages = pickImages;
@@ -53,22 +53,67 @@ public final class Gallery extends Worker {
 
     public <T> Observable<Response<T, String>> pickImage() {
         return grantPermissions.with(permissions()).react()
-                .flatMap(granted -> pickImage.react())
-                .flatMap(uri -> cropImage.with(uri).react())
-                .flatMap(uri -> saveImage.with(uri).react())
-                .map(path -> new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK))
-                .compose(applyOnError());
+                .flatMap(new Func1<Void, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(Void granted) {
+                        return pickImage.react();
+                    }
+                })
+                .flatMap(new Func1<Uri, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(Uri uri) {
+                        return cropImage.with(uri).react();
+                    }
+                })
+                .flatMap(new Func1<Uri, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(Uri uri) {
+                        return saveImage.with(uri).react();
+                    }
+                })
+                .map(new Func1<String, Response<T, String>>() {
+                    @Override
+                    public Response<T, String> call(String path) {
+                        return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
+                    }
+                })
+                .compose(this.<Response<T, String>>applyOnError());
     }
 
     public <T> Observable<Response<T, List<String>>> pickImages() {
         return grantPermissions.with(permissions()).react()
-                .flatMap(granted -> pickImages.react())
-                .flatMapIterable(uris -> uris)
-                .concatMap(uri -> cropImage.with(uri).react())
-                .concatMap(uri -> saveImage.with(uri).react())
+                .flatMap(new Func1<Void, Observable<List<Uri>>>() {
+                    @Override
+                    public Observable<List<Uri>> call(Void granted) {
+                        return pickImages.react();
+                    }
+                })
+                .flatMapIterable(new Func1<List<Uri>, Iterable<Uri>>() {
+                    @Override
+                    public Iterable<Uri> call(List<Uri> uris) {
+                        return uris;
+                    }
+                })
+                .concatMap(new Func1<Uri, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(Uri uri) {
+                        return cropImage.with(uri).react();
+                    }
+                })
+                .concatMap(new Func1<Uri, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(Uri uri) {
+                        return saveImage.with(uri).react();
+                    }
+                })
                 .toList()
-                .map(paths -> new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK))
-                .compose(applyOnError());
+                .map(new Func1<List<String>, Response<T, List<String>>>() {
+                    @Override
+                    public Response<T, List<String>> call(List<String> paths) {
+                        return new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK);
+                    }
+                })
+                .compose(this.<Response<T, List<String>>>applyOnError());
     }
 
     private String[] permissions() {

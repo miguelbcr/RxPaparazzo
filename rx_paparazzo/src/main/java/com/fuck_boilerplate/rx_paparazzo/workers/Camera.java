@@ -18,6 +18,7 @@ package com.fuck_boilerplate.rx_paparazzo.workers;
 
 import android.Manifest;
 import android.app.Activity;
+import android.net.Uri;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
@@ -26,9 +27,8 @@ import com.fuck_boilerplate.rx_paparazzo.interactors.GrantPermissions;
 import com.fuck_boilerplate.rx_paparazzo.interactors.SaveImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.TakePhoto;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class Camera extends Worker {
     private final TakePhoto takePhoto;
@@ -37,7 +37,7 @@ public final class Camera extends Worker {
     private final GrantPermissions grantPermissions;
     private final TargetUi targetUi;
 
-    @Inject public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi) {
+    public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi) {
         super(targetUi);
         this.takePhoto = takePhoto;
         this.cropImage = cropImage;
@@ -52,10 +52,30 @@ public final class Camera extends Worker {
                 Manifest.permission.CAMERA};
 
         return grantPermissions.with(permissions).react()
-                .flatMap(granted -> takePhoto.react())
-                .flatMap(uri -> cropImage.with(uri).react())
-                .flatMap(uri -> saveImage.with(uri).react())
-                .map(path -> new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK))
-                .compose(applyOnError());
+                .flatMap(new Func1<Void, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(Void granted) {
+                        return takePhoto.react();
+                    }
+                })
+                .flatMap(new Func1<Uri, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(Uri uri) {
+                        return cropImage.with(uri).react();
+                    }
+                })
+                .flatMap(new Func1<Uri, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(Uri uri) {
+                        return saveImage.with(uri).react();
+                    }
+                })
+                .map(new Func1<String, Response<T, String>>() {
+                    @Override
+                    public Response<T, String> call(String path) {
+                        return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
+                    }
+                })
+                .compose(this.<Response<T, String>>applyOnError());
     }
 }

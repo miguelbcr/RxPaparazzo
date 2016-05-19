@@ -33,7 +33,9 @@ public class TargetUi {
     }
 
     @Nullable public Fragment fragment() {
-        if (ui instanceof Fragment) return (Fragment) ui;
+        if (ui instanceof Fragment) {
+            return (Fragment) ui;
+        }
         return null;
     }
 

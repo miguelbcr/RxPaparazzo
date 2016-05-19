@@ -25,7 +25,6 @@ import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationComponent;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationModule;
-import com.fuck_boilerplate.rx_paparazzo.internal.di.DaggerApplicationComponent;
 import com.yalantis.ucrop.UCrop;
 
 import java.util.List;
@@ -68,9 +67,7 @@ public final class RxPaparazzo {
 
         public Builder(T ui) {
             this.config = new Config();
-            this.applicationComponent = DaggerApplicationComponent.builder()
-                    .applicationModule(new ApplicationModule(config, ui))
-                    .build();
+            this.applicationComponent = ApplicationComponent.create(new ApplicationModule(config, ui));
         }
     }
 

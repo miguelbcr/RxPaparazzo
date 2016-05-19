@@ -40,19 +40,21 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-import javax.inject.Inject;
-
 import rx.Observable;
 import rx.exceptions.Exceptions;
+import rx.functions.Func1;
+import rx.functions.Func3;
 
 public final class SaveImage extends UseCase<String> {
+    public static final String DATE_FORMAT = "ddMMyyyy_HHmmss";
+    public static final String LOCALE_EN = "en";
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;
     private final GetDimens getDimens;
     private Uri uri;
 
-    @Inject public SaveImage(TargetUi targetUi, Config config, GetPath getPath, GetDimens getDimens) {
+     public SaveImage(TargetUi targetUi, Config config, GetPath getPath, GetDimens getDimens) {
         this.targetUi = targetUi;
         this.config = config;
         this.getPath = getPath;
@@ -66,12 +68,20 @@ public final class SaveImage extends UseCase<String> {
 
     @Override public Observable<String> react() {
         return getOutputUri()
-                .flatMap(outputUri -> Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(), getDimens.with(uri).react(),
-                        (filePath, filePathOutput, dimens) -> {
-                            String filepath = scaleImage(filePath, filePathOutput, dimens);
-                            MediaScannerConnection.scanFile(targetUi.getContext(), new String[] {filepath}, new String[] { "image/jpeg" }, null);
-                            return filepath;
-                        }));
+                .flatMap(new Func1<Uri, Observable<String>>() {
+                    @Override
+                    public Observable<String> call(Uri outputUri) {
+                        return Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(), getDimens.with(uri).react(),
+                                new Func3<String, String, int[], String>() {
+                                    @Override
+                                    public String call(String filePath, String filePathOutput, int[] dimens) {
+                                        String filepath = SaveImage.this.scaleImage(filePath, filePathOutput, dimens);
+                                        MediaScannerConnection.scanFile(targetUi.getContext(), new String[]{filepath}, new String[]{"image/jpeg"}, null);
+                                        return filepath;
+                                    }
+                                });
+                    }
+                });
     }
 
     private Observable<Uri> getOutputUri() {
@@ -79,7 +89,7 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private File getOutputFile() {
-        String filename = new SimpleDateFormat("ddMMyyyy_HHmmss", new Locale("en")).format(new Date());
+        String filename = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date());
         filename = "IMG-" + filename + ".jpg";
         String dirname = getApplicationName(targetUi.getContext());
         File dir = getPublicDir(null, dirname);
@@ -98,10 +108,8 @@ public final class SaveImage extends UseCase<String> {
             File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
             storageDir = new File(dir, dirname);
 
-            if (!storageDir.exists()) {
-                if (!storageDir.mkdirs()) {
+            if (!storageDir.exists() && !storageDir.mkdirs()) {
                     storageDir = null;
-                }
             }
         }
 
@@ -117,12 +125,9 @@ public final class SaveImage extends UseCase<String> {
         File storageDir = TextUtils.isEmpty(dirname) ? dir : new File(dir, dirname);
 
         // Create the storage directory if it does not exist
-        if (!storageDir.exists()) {
-            if (!storageDir.mkdirs()) {
-                storageDir = null;
-            }
+        if (!storageDir.exists() && !storageDir.mkdirs()) {
+            storageDir = null;
         }
-
         return storageDir;
     }
 
@@ -188,7 +193,9 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private boolean copyExifRotation(File sourceFile, File destFile, boolean rotateIfNeeded) {
-        if (sourceFile == null || destFile == null) return false;
+        if (sourceFile == null || destFile == null) {
+            return false;
+        }
         try {
             ExifInterface exifSource = new ExifInterface(sourceFile.getAbsolutePath());
             ExifInterface exifDest = new ExifInterface(destFile.getAbsolutePath());
@@ -224,17 +231,17 @@ public final class SaveImage extends UseCase<String> {
         int inSampleSize = 1;
         int[] dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
         int[] maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
-        int width = dimensPortrait[0];
-        int height = dimensPortrait[1];
-        maxWidth = maxDimensPortrait[0];
-        maxHeight = maxDimensPortrait[1];
+        float width = dimensPortrait[0];
+        float height = dimensPortrait[1];
+        float newMaxWidth = maxDimensPortrait[0];
+        float newMaxHeight = maxDimensPortrait[1];
 
-        if (height > maxHeight || width > maxWidth) {
-            int heightRatio = Math.round((float) height / (float) maxHeight);
-            int widthRatio = Math.round((float) width / (float) maxWidth);
+        if (height > newMaxHeight || width > newMaxWidth) {
+            int heightRatio = Math.round(height / newMaxHeight);
+            int widthRatio = Math.round(width / newMaxWidth);
             inSampleSize = heightRatio < widthRatio ? heightRatio : widthRatio;
             float totalPixels = width * height;
-            float totalReqPixels = maxWidth * maxHeight * 2;
+            float totalReqPixels = newMaxWidth * newMaxHeight * 2;
 
             while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixels) {
                 inSampleSize++;
@@ -245,30 +252,34 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private int[] getDimensionsPortrait(int width, int height) {
-        if (width < height) return new int [] {width, height};
-        else return new int [] {height, width};
+        if (width < height) {
+            return new int[]{width, height};
+        }
+        else {
+            return new int[]{height, width};
+        }
     }
 
     private Bitmap rotateImageIfRequired(Bitmap img, String filePath) {
         try {
             ExifInterface ei = new ExifInterface(filePath);
             int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-
+            Bitmap processedImage = img;
             switch (orientation) {
                 case ExifInterface.ORIENTATION_ROTATE_90:
-                    img = rotateImage(img, 90);
+                    processedImage = rotateImage(img, 90);
                     break;
                 case ExifInterface.ORIENTATION_ROTATE_180:
-                    img = rotateImage(img, 180);
+                    processedImage = rotateImage(img, 180);
                     break;
                 case ExifInterface.ORIENTATION_ROTATE_270:
-                    img = rotateImage(img, 270);
+                    processedImage = rotateImage(img, 270);
+                    break;
+                default:
                     break;
             }
-
-            return img;
+            return processedImage;
         } catch (IOException e) {
-            e.printStackTrace();
             throw Exceptions.propagate(e);
         }
     }

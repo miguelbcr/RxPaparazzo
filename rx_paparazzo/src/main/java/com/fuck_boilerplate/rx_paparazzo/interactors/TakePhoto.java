@@ -24,23 +24,27 @@ import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
 import java.io.File;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class TakePhoto extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-    @Inject  public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+      public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
 
     @Override public Observable<Uri> react() {
-        Uri uri = getUri();
+        final Uri uri = getUri();
         return startIntent.with(getIntentCamera(uri)).react()
-                .map(data -> uri);
+                .map(new Func1<Intent, Uri>() {
+                    @Override
+                    public Uri call(Intent data) {
+                        return uri;
+                    }
+                });
     }
 
     private Uri getUri() {

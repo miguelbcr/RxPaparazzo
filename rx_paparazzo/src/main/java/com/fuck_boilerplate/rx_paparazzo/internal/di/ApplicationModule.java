@@ -18,24 +18,40 @@ package com.fuck_boilerplate.rx_paparazzo.internal.di;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import com.fuck_boilerplate.rx_paparazzo.interactors.CropImage;
+import com.fuck_boilerplate.rx_paparazzo.interactors.GetDimens;
+import com.fuck_boilerplate.rx_paparazzo.interactors.GetPath;
+import com.fuck_boilerplate.rx_paparazzo.interactors.GrantPermissions;
+import com.fuck_boilerplate.rx_paparazzo.interactors.PickImage;
+import com.fuck_boilerplate.rx_paparazzo.interactors.PickImages;
+import com.fuck_boilerplate.rx_paparazzo.interactors.SaveImage;
+import com.fuck_boilerplate.rx_paparazzo.interactors.StartIntent;
+import com.fuck_boilerplate.rx_paparazzo.interactors.TakePhoto;
 
-import dagger.Module;
-import dagger.Provides;
+public class ApplicationModule {
+    final Config config;
+    final TargetUi ui;
+    final StartIntent startIntent;
+    final GetPath getPath;
+    final GetDimens getDimens;
+    final TakePhoto takePhoto;
+    final CropImage cropImage;
+    final SaveImage saveImage;
+    final GrantPermissions grantPermissions;
+    final PickImages pickImages;
+    final PickImage pickImage;
 
-@Module public class ApplicationModule {
-    private final Config config;
-    private final TargetUi ui;
-
-    public ApplicationModule(Config config, Object ui) {
+    public ApplicationModule(Config config, Object originUi) {
         this.config = config;
-        this.ui = new TargetUi(ui);
-    }
-
-    @Provides Config provideConfig() {
-        return config;
-    }
-
-    @Provides TargetUi provideTargetUi() {
-        return ui;
+        ui = new TargetUi(originUi);
+        startIntent = new StartIntent(this.ui);
+        getPath = new GetPath(ui);
+        takePhoto = new TakePhoto(startIntent, this.ui);
+        getDimens = new GetDimens(ui, config, getPath);
+        cropImage = new CropImage(ui, config, startIntent, getPath, getDimens);
+        saveImage = new SaveImage(ui, config, getPath, getDimens);
+        grantPermissions = new GrantPermissions(ui);
+        pickImages = new PickImages(startIntent);
+        pickImage = new PickImage(startIntent, ui);
     }
 }

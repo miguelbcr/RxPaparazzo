@@ -24,9 +24,8 @@ import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
-import javax.inject.Inject;
-
 import rx.Observable;
+import rx.functions.Func1;
 
 public final class GetDimens extends UseCase<int[]> {
     private final TargetUi targetUi;
@@ -34,7 +33,7 @@ public final class GetDimens extends UseCase<int[]> {
     private final GetPath getPath;
     private Uri uri;
 
-    @Inject public GetDimens(TargetUi targetUi, Config config, GetPath getPath) {
+     public GetDimens(TargetUi targetUi, Config config, GetPath getPath) {
         this.targetUi = targetUi;
         this.config = config;
         this.getPath = getPath;
@@ -47,14 +46,17 @@ public final class GetDimens extends UseCase<int[]> {
 
     @Override public Observable<int[]> react() {
         return getPath.with(uri).react()
-                .map(filePath -> {
-                    if (config.getSize() == Size.Original)
-                        return getFileDimens(filePath);
-                    else if (config.getSize() == Size.Screen)
-                        return getScreenDimens();
-                    else {
-                        int[] dimens = getScreenDimens();
-                        return new int[]{dimens[0] / 8, dimens[1] / 8};
+                .map(new Func1<String, int[]>() {
+                    @Override
+                    public int[] call(String filePath) {
+                        if (config.getSize() == Size.Original)
+                            return GetDimens.this.getFileDimens(filePath);
+                        else if (config.getSize() == Size.Screen)
+                            return GetDimens.this.getScreenDimens();
+                        else {
+                            int[] dimens = GetDimens.this.getScreenDimens();
+                            return new int[]{dimens[0] / 8, dimens[1] / 8};
+                        }
                     }
                 });
     }
