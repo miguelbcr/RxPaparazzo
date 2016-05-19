@@ -45,8 +45,7 @@ public final class GrantPermissions extends UseCase<Void> {
                         if (granted) {
                             return Observable.just(null);
                         }
-                        // FIXME Observable.error() to respect the Observable contract
-                        throw new PermissionDeniedException();
+                        return Observable.error(new PermissionDeniedException());
                     }
                 });
     }
