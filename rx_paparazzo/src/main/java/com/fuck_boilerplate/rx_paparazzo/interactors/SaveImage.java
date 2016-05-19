@@ -46,8 +46,8 @@ import rx.functions.Func1;
 import rx.functions.Func3;
 
 public final class SaveImage extends UseCase<String> {
-    public static final String DATE_FORMAT = "ddMMyyyy_HHmmss";
-    public static final String LOCALE_EN = "en";
+    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss";
+    private static final String LOCALE_EN = "en";
     private final TargetUi targetUi;
     private final Config config;
     private final GetPath getPath;
@@ -71,17 +71,25 @@ public final class SaveImage extends UseCase<String> {
                 .flatMap(new Func1<Uri, Observable<String>>() {
                     @Override
                     public Observable<String> call(Uri outputUri) {
-                        return Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(), getDimens.with(uri).react(),
+                        return Observable.zip(getPath.with(uri).react(),
+                                getPath.with(outputUri).react(), getDimens.with(uri).react(),
                                 new Func3<String, String, int[], String>() {
                                     @Override
-                                    public String call(String filePath, String filePathOutput, int[] dimens) {
-                                        String filepath = SaveImage.this.scaleImage(filePath, filePathOutput, dimens);
-                                        MediaScannerConnection.scanFile(targetUi.getContext(), new String[]{filepath}, new String[]{"image/jpeg"}, null);
+                                    public String call(String filePath, String filePathOutput,
+                                            int[] dimens) {
+                                        String filepath = SaveImage.this.scaleImage(filePath,
+                                                filePathOutput, dimens);
+                                        MediaScannerConnection.scanFile(targetUi.getContext(),
+                                                new String[] {
+                                                        filepath
+                                        }, new String[] {
+                                                "image/jpeg"
+                                        }, null);
                                         return filepath;
                                     }
                                 });
                     }
-                });
+        });
     }
 
     private Observable<Uri> getOutputUri() {

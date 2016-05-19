@@ -28,6 +28,7 @@ import rx.Observable;
 import rx.functions.Func1;
 
 public final class TakePhoto extends UseCase<Uri> {
+    private static final String SHOOT_APPEND = "shoot.jpg";
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
@@ -52,7 +53,7 @@ public final class TakePhoto extends UseCase<Uri> {
 
         return Uri.fromFile(file)
                 .buildUpon()
-                .appendPath("shoot.jpg")
+                .appendPath(SHOOT_APPEND)
                 .build();
     }
 
