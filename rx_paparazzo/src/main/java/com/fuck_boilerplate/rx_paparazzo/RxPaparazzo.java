@@ -23,6 +23,7 @@ import android.support.v4.app.Fragment;
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.Size;
+import com.fuck_boilerplate.rx_paparazzo.entities.UCropFeature;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationComponent;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationModule;
 import com.yalantis.ucrop.UCrop;
@@ -107,6 +108,14 @@ public final class RxPaparazzo {
         }
 
         /**
+         * Call it when crop features is required.
+         */
+        public BuilderImage<T> cropFeatures(UCropFeature feature) {
+            this.config.setUCropFeature(feature);
+            return this;
+        }
+
+        /**
          * Use gallery to retrieve the image.
          */
         public Observable<Response<T, String>> usingGallery() {
@@ -153,6 +162,14 @@ public final class RxPaparazzo {
          */
         public BuilderImages<T> crop(UCrop.Options options) {
             this.config.setCrop(options);
+            return this;
+        }
+
+        /**
+         * Call it when crop features is required.
+         */
+        public BuilderImages<T> cropFeatures(UCropFeature feature) {
+            this.config.setUCropFeature(feature);
             return this;
         }
 

@@ -71,8 +71,18 @@ public final class CropImage extends UseCase<Uri> {
         return getOutputUri().map(new Func1<Uri, Intent>() {
             @Override
             public Intent call(Uri outputUri) {
-                return UCrop.of(uri, outputUri).withOptions(config.getOptions())
-                        .getIntent(targetUi.getContext());
+                UCrop uCrop = UCrop.of(uri, outputUri);
+                uCrop.withOptions(config.getOptions());
+
+                if (config.getUCropFeature().hasAspectRatio()) {
+                    uCrop.withAspectRatio(config.getUCropFeature().getAspectRatioX(), config.getUCropFeature().getAspectRatioY());
+                }
+
+                if (config.getUCropFeature().hasMaxResultSize()) {
+                    uCrop.withMaxResultSize(config.getUCropFeature().getMaxWidth(), config.getUCropFeature().getMaxHeight());
+                }
+
+                return uCrop.getIntent(targetUi.getContext());
             }
         });
     }

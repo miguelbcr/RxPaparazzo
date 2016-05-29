@@ -22,6 +22,7 @@ public class Config {
     private Size size;
     private boolean doCrop;
     private UCrop.Options options;
+    private UCropFeature uCropFeature = new UCropFeature();
 
     public Config() {
         this.size = Size.Screen;
@@ -52,5 +53,13 @@ public class Config {
 
     public void setSize(Size size) {
         this.size = size;
+    }
+
+    public UCropFeature getUCropFeature() {
+        return uCropFeature;
+    }
+
+    public void setUCropFeature(UCropFeature uCropFeature) {
+        this.uCropFeature = uCropFeature;
     }
 }
