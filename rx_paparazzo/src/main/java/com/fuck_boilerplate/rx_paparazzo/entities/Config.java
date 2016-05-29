@@ -20,12 +20,10 @@ import com.yalantis.ucrop.UCrop;
 
 public class Config {
     private Size size;
-    private boolean doCrop;
     private UCrop.Options options;
 
     public Config() {
         this.size = Size.Screen;
-        this.doCrop = false;
     }
 
     public Size getSize() {
@@ -33,17 +31,15 @@ public class Config {
     }
 
     public boolean doCrop() {
-        return doCrop;
+        return this.options != null;
     }
 
     public void setCrop(UCrop.Options options) {
         this.options = options;
-        this.doCrop = true;
     }
 
     public void setCrop() {
         this.options = new UCrop.Options();
-        this.doCrop = true;
     }
 
     public UCrop.Options getOptions() {
