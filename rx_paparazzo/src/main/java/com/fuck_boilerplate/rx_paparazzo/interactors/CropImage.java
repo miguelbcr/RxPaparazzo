@@ -20,6 +20,7 @@ import android.content.Intent;
 import android.net.Uri;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
+import com.fuck_boilerplate.rx_paparazzo.entities.Options;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.yalantis.ucrop.UCrop;
 
@@ -71,12 +72,28 @@ public final class CropImage extends UseCase<Uri> {
         return getOutputUri().map(new Func1<Uri, Intent>() {
             @Override
             public Intent call(Uri outputUri) {
-                return UCrop.of(uri, outputUri).withOptions(config.getOptions())
-                        .getIntent(targetUi.getContext());
+                UCrop.Options options = config.getOptions();
+                if (options == null) return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
+
+                if (options instanceof Options) {
+                    return getIntentWithOptions((Options) options, outputUri);
+                } else {
+                    return UCrop.of(uri, outputUri).withOptions(config.getOptions())
+                            .getIntent(targetUi.getContext());
+                }
             }
         });
     }
 
+    private Intent getIntentWithOptions(Options options, Uri outputUri) {
+        UCrop uCrop = UCrop.of(uri, outputUri);
+
+        uCrop = uCrop.withOptions(options);
+        if (options.getX() != 0) uCrop = uCrop.withAspectRatio(options.getX(), options.getY());
+        if (options.getWidth() != 0) uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
+
+        return uCrop.getIntent(targetUi.getContext());
+    }
     private Observable<Uri> getOutputUri() {
         return getPath.with(uri).react().map(new Func1<String, Uri>() {
             @Override

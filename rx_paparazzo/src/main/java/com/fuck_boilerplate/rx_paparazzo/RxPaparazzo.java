@@ -101,7 +101,7 @@ public final class RxPaparazzo {
         /**
          * Call it when crop option is required as such as configuring the options of the cropping action.
          */
-        public BuilderImage<T> crop(UCrop.Options options) {
+        public <O extends UCrop.Options> BuilderImage<T> crop(O options) {
             this.config.setCrop(options);
             return this;
         }
@@ -151,7 +151,7 @@ public final class RxPaparazzo {
         /**
          * Call it when crop option is required as such as configuring the options of the cropping action.
          */
-        public BuilderImages<T> crop(UCrop.Options options) {
+        public <O extends UCrop.Options> BuilderImages<T> crop(O options) {
             this.config.setCrop(options);
             return this;
         }

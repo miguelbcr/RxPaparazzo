@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.fuck_boilerplate.rx_paparazzo.RxPaparazzo;
+import com.fuck_boilerplate.rx_paparazzo.entities.Options;
 import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.sample.R;
 import com.fuck_boilerplate.rx_paparazzo.sample.activities.Testable;
@@ -74,9 +75,9 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     private void captureImageWithCrop() {
-        UCrop.Options options = new UCrop.Options();
+        Options options = new Options();
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-        options.setMaxBitmapSize(1000000000);
+        options.setAspectRatio(25, 75);
 
         size = Size.Original;
         RxPaparazzo.takeImage(this)

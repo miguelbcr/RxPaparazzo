@@ -34,7 +34,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.1"
+    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.2"
     compile "io.reactivex:rxjava:1.1.5"
 }
 ```
@@ -147,15 +147,23 @@ RxPaparazzo.takeImages(activityOrFragment)
 
 By calling `crop()` method when building the observable instance, all they images retrieved will be able to be cropped, regardless if the images were retrieved using the built-in camera or gallery, even if multiple images were requested in a single call using `takeImages()` approach.
 Because uCrop Yalantis library exposes some configuration in order to customize the crop screen, RxPaparazzo exposes an overloaded method of `crop(UCrop.Options)` which allow to pass an instance of [UCrop.Options](https://github.com/Yalantis/uCrop/blob/master/ucrop/src/main/java/com/yalantis/ucrop/UCrop.java#L211).
+If you need to configure the aspect ratio, the max result size or using the source image aspect ratio, you must pass an instance of [Options](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/Options.java) class, which extends from `UCrop.Options` and adds the three missing properties.  
 
 ```java
 UCrop.Options options = new UCrop.Options();
 options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
- 
+
+RxPaparazzo.takeImage(activityOrFragment).crop(options)
+```
+
+```java
+Options options = new Options();
+options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+Options.setAspectRatio(25, 50); 
+
 RxPaparazzo.takeImage(activityOrFragment)
          .crop(options)
 ```
-
 
 ## Credits
 * Runtime permissions: [RxPermissions](https://github.com/tbruyelle/RxPermissions)
