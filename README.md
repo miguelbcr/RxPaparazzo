@@ -159,7 +159,7 @@ RxPaparazzo.takeImage(activityOrFragment).crop(options)
 ```java
 Options options = new Options();
 options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-Options.setAspectRatio(25, 50); 
+options.setAspectRatio(25, 50); 
 
 RxPaparazzo.takeImage(activityOrFragment)
          .crop(options)
