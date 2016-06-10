@@ -46,7 +46,7 @@ import rx.functions.Func1;
 import rx.functions.Func3;
 
 public final class SaveImage extends UseCase<String> {
-    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss";
+    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss.SSS";
     private static final String LOCALE_EN = "en";
     private final TargetUi targetUi;
     private final Config config;
