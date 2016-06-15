@@ -34,7 +34,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.2"
+    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.3"
     compile "io.reactivex:rxjava:1.1.5"
 }
 ```
@@ -159,7 +159,7 @@ RxPaparazzo.takeImage(activityOrFragment).crop(options)
 ```java
 Options options = new Options();
 options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-Options.setAspectRatio(25, 50); 
+options.setAspectRatio(25, 50); 
 
 RxPaparazzo.takeImage(activityOrFragment)
          .crop(options)
