@@ -39,8 +39,8 @@ dependencies {
     compile 'io.reactivex:rxjava:1.1.5'
     compile 'io.reactivex:rxandroid:1.2.0'
 
-    compile 'com.github.VictorAlbertos:RxActivityResult:0.3.3'
-    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.5.2@aar'
+    compile 'com.github.VictorAlbertos:RxActivityResult:0.3.4'
+    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
     compile 'com.yalantis:ucrop:1.5.0'
 
     testCompile 'junit:junit:4.12'
