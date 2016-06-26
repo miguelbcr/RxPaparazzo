@@ -34,7 +34,7 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.4"
+    compile "com.github.FuckBoilerplate:RxPaparazzo:0.1.5"
     compile "io.reactivex:rxjava:1.1.5"
 }
 ```
@@ -81,7 +81,7 @@ RxPaparazzo.takeImage(activityOrFragment)
 
 The `response` instance holds a reference to the path where the image was persisted.
 
-The path is under app name folder on the root of the external storage.
+By default, the path is under app name folder on the root of the external storage, but you can save the images in internal storage by using `.useInternalStorage()`
 
 
 ### Calling the gallery to retrieve an image.
