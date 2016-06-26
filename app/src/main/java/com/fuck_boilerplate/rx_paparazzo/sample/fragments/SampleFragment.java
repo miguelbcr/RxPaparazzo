@@ -101,6 +101,7 @@ public class SampleFragment extends Fragment implements Testable {
 
         size = Size.Small;
         RxPaparazzo.takeImage(this)
+                .useInternalStorage()
                 .crop(options)
                 .size(size)
                 .usingGallery()
@@ -117,6 +118,7 @@ public class SampleFragment extends Fragment implements Testable {
     private void pickupImages() {
         size = Size.Small;
         RxPaparazzo.takeImages(this)
+                .useInternalStorage()
                 .crop()
                 .size(size)
                 .usingGallery()

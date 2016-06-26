@@ -109,6 +109,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
         size = Size.Small;
         RxPaparazzo.takeImage(SampleActivity.this)
+                .useInternalStorage()
                 .crop(options)
                 .size(size)
                 .usingGallery()
@@ -125,6 +126,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private void pickupImages() {
         size = Size.Small;
         RxPaparazzo.takeImages(SampleActivity.this)
+                .useInternalStorage()
                 .crop()
                 .size(size)
                 .usingGallery()

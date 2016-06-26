@@ -46,7 +46,7 @@ import rx.functions.Func1;
 import rx.functions.Func3;
 
 public final class SaveImage extends UseCase<String> {
-    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss.SSS";
+    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";
     private static final String LOCALE_EN = "en";
     private final TargetUi targetUi;
     private final Config config;
@@ -112,12 +112,14 @@ public final class SaveImage extends UseCase<String> {
     private File getPublicDir(String dirRoot, String dirname) {
         File storageDir = null;
 
-        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-            File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
-            storageDir = new File(dir, dirname);
+        if (!config.useInternalStorage()) {
+            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+                File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
+                storageDir = new File(dir, dirname);
 
-            if (!storageDir.exists() && !storageDir.mkdirs()) {
+                if (!storageDir.exists() && !storageDir.mkdirs()) {
                     storageDir = null;
+                }
             }
         }
 

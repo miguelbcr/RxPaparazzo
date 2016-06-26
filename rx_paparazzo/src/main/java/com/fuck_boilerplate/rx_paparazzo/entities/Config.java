@@ -22,10 +22,12 @@ public class Config {
     private Size size;
     private boolean doCrop;
     private UCrop.Options options;
+    private boolean useInternalStorage;
 
     public Config() {
         this.size = Size.Screen;
         this.doCrop = false;
+        this.useInternalStorage = false;
     }
 
     public Size getSize() {
@@ -52,5 +54,13 @@ public class Config {
 
     public void setSize(Size size) {
         this.size = size;
+    }
+
+    public boolean useInternalStorage() {
+        return useInternalStorage;
+    }
+
+    public void setUseInternalStorage() {
+        this.useInternalStorage = true;
     }
 }

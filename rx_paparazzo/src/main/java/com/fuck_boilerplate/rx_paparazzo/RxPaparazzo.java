@@ -81,6 +81,14 @@ public final class RxPaparazzo {
         }
 
         /**
+         * Calling it the images will be saved in internal storage, otherwise in public storage
+         */
+        public BuilderImage<T> useInternalStorage() {
+            this.config.setUseInternalStorage();
+            return this;
+        }
+
+        /**
          * Sets the size for the retrieved image.
          * @param size
          * @see Size
@@ -128,6 +136,14 @@ public final class RxPaparazzo {
 
         public BuilderImages(T ui) {
             super(ui);
+        }
+
+        /**
+         * Calling it the images will be saved in internal storage, otherwise in public storage
+         */
+        public BuilderImages<T> useInternalStorage() {
+            this.config.setUseInternalStorage();
+            return this;
         }
 
         /**
