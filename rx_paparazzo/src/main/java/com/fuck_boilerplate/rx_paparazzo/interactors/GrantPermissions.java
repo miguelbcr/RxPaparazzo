@@ -37,6 +37,10 @@ public final class GrantPermissions extends UseCase<Void> {
     }
 
     @Override public Observable<Void> react() {
+        if (permissions.length == 0) {
+            return Observable.just(null);
+        }
+
         return RxPermissions.getInstance(targetUi.activity())
                 .request(permissions)
                 .flatMap(new Func1<Boolean, Observable<Void>>() {

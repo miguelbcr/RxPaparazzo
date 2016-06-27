@@ -38,8 +38,8 @@ class ApplicationComponentImpl extends ApplicationComponent {
         grantPermissions = new GrantPermissions(ui);
         pickImages = new PickImages(startIntent);
         pickImage = new PickImage(startIntent, ui);
-        camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui);
-        gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui);
+        camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui, config);
+        gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui, config);
     }
 
     @Override

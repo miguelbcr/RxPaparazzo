@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.net.Uri;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.interactors.CropImage;
@@ -40,8 +41,9 @@ public final class Gallery extends Worker {
     private final CropImage cropImage;
     private final SaveImage saveImage;
     private final TargetUi targetUi;
+    private final Config config;
 
-    public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi) {
+    public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage, CropImage cropImage, SaveImage saveImage, TargetUi targetUi, Config config) {
         super(targetUi);
         this.grantPermissions = grantPermissions;
         this.pickImages = pickImages;
@@ -49,6 +51,7 @@ public final class Gallery extends Worker {
         this.cropImage = cropImage;
         this.saveImage = saveImage;
         this.targetUi = targetUi;
+        this.config = config;
     }
 
     public <T> Observable<Response<T, String>> pickImage() {
@@ -117,8 +120,11 @@ public final class Gallery extends Worker {
     }
 
     private String[] permissions() {
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
-        return permissions;
+        if (config.useInternalStorage()) {
+            return new String[] {};
+        } else {
+            return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
+        }
     }
 
 }
