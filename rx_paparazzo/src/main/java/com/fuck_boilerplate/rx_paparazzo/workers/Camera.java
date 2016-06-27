@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Activity;
 import android.net.Uri;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.interactors.CropImage;
@@ -36,22 +37,20 @@ public final class Camera extends Worker {
     private final SaveImage saveImage;
     private final GrantPermissions grantPermissions;
     private final TargetUi targetUi;
+    private final Config config;
 
-    public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi) {
+    public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
         super(targetUi);
         this.takePhoto = takePhoto;
         this.cropImage = cropImage;
         this.saveImage = saveImage;
         this.grantPermissions = grantPermissions;
         this.targetUi = targetUi;
+        this.config = config;
     }
 
     public <T> Observable<Response<T, String>> takePhoto() {
-        String[] permissions = {Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA};
-
-        return grantPermissions.with(permissions).react()
+        return grantPermissions.with(permissions()).react()
                 .flatMap(new Func1<Void, Observable<Uri>>() {
                     @Override
                     public Observable<Uri> call(Void granted) {
@@ -77,5 +76,15 @@ public final class Camera extends Worker {
                     }
                 })
                 .compose(this.<Response<T, String>>applyOnError());
+    }
+
+    private String[] permissions() {
+        if (config.useInternalStorage()) {
+            return new String[] {Manifest.permission.CAMERA};
+        } else {
+            return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA};
+        }
     }
 }
