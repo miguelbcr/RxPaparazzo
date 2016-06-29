@@ -121,7 +121,7 @@ public final class Gallery extends Worker {
 
     private String[] permissions() {
         if (config.useInternalStorage()) {
-            return new String[] {};
+            return new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
         } else {
             return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
         }
