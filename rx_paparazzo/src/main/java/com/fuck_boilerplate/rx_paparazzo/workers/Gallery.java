@@ -55,6 +55,7 @@ public final class Gallery extends Worker {
     }
 
     public <T> Observable<Response<T, String>> pickImage() {
+        config.setMultiplePick(false);
         return grantPermissions.with(permissions()).react()
                 .flatMap(new Func1<Void, Observable<Uri>>() {
                     @Override
@@ -84,6 +85,7 @@ public final class Gallery extends Worker {
     }
 
     public <T> Observable<Response<T, List<String>>> pickImages() {
+        config.setMultiplePick(true);
         return grantPermissions.with(permissions()).react()
                 .flatMap(new Func1<Void, Observable<List<Uri>>>() {
                     @Override
@@ -121,7 +123,7 @@ public final class Gallery extends Worker {
 
     private String[] permissions() {
         if (config.useInternalStorage()) {
-            return new String[] {Manifest.permission.READ_EXTERNAL_STORAGE};
+            return new String[]{Manifest.permission.READ_EXTERNAL_STORAGE};
         } else {
             return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE};
         }

@@ -20,7 +20,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+
+import java.io.File;
 
 import rx.Observable;
 import rx.functions.Func1;
@@ -28,17 +31,26 @@ import rx.functions.Func1;
 public final class PickImage extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
+    private Config config;
 
-     public PickImage(StartIntent startIntent, TargetUi targetUi) {
+    public PickImage(StartIntent startIntent, Config config, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
+        this.config = config;
     }
 
-    @Override public Observable<Uri> react() {
+    @Override
+    public Observable<Uri> react() {
         return startIntent.with(getFileChooserIntent()).react()
                 .map(new Func1<Intent, Uri>() {
                     @Override
                     public Uri call(Intent intent) {
+                        if (intent.getData() != null && config.getDirPath() != null) {
+                            File file = new File(config.getDirPath());
+                            if (file != null && !file.exists()) {
+                                file.mkdirs();
+                            }
+                        }
                         return intent.getData();
                     }
                 });

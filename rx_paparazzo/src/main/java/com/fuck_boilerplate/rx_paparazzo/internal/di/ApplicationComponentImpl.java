@@ -31,13 +31,13 @@ class ApplicationComponentImpl extends ApplicationComponent {
     public ApplicationComponentImpl(TargetUi ui, Config config) {
         startIntent = new StartIntent(ui);
         getPath = new GetPath(ui);
-        takePhoto = new TakePhoto(startIntent, ui);
+        takePhoto = new TakePhoto(startIntent, config, ui);
         getDimens = new GetDimens(ui, config, getPath);
         cropImage = new CropImage(ui, config, startIntent, getPath, getDimens);
         saveImage = new SaveImage(ui, config, getPath, getDimens);
         grantPermissions = new GrantPermissions(ui);
-        pickImages = new PickImages(startIntent);
-        pickImage = new PickImage(startIntent, ui);
+        pickImages = new PickImages(startIntent,config);
+        pickImage = new PickImage(startIntent,config, ui);
         camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui, config);
         gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui, config);
     }

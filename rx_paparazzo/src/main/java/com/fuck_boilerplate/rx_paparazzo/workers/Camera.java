@@ -80,7 +80,7 @@ public final class Camera extends Worker {
 
     private String[] permissions() {
         if (config.useInternalStorage()) {
-            return new String[] {Manifest.permission.CAMERA};
+            return new String[]{Manifest.permission.CAMERA};
         } else {
             return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.READ_EXTERNAL_STORAGE,
