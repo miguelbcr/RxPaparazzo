@@ -110,7 +110,7 @@ public final class RxPaparazzo {
         /**
          * Set path for output dir (create output path if not exist).
          */
-        public BuilderImage<T> dirPath(String outputDirPath) {
+        public BuilderImage<T> path(String outputDirPath) {
             this.config.setDirPath(outputDirPath);
             return this;
         }
@@ -118,7 +118,7 @@ public final class RxPaparazzo {
         /**
          * Set name for photo.
          */
-        public BuilderImage<T> fileName(String outputFileName) {
+        public BuilderImage<T> name(String outputFileName) {
             this.config.setFileName(outputFileName);
             return this;
         }

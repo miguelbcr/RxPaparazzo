@@ -2,6 +2,7 @@ package com.fuck_boilerplate.rx_paparazzo.sample.fragments;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
@@ -62,6 +63,8 @@ public class SampleFragment extends Fragment implements Testable {
         size = Size.Small;
         RxPaparazzo.takeImage(this)
                 .size(size)
+                .path(Environment.getExternalStorageDirectory()+"/Test/")
+                .name("example_"+System.currentTimeMillis())
                 .usingCamera()
                 .subscribe(response -> {
 

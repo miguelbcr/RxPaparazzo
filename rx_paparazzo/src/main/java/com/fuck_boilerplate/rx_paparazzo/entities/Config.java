@@ -86,7 +86,7 @@ public class Config {
     }
 
     public void setFileName(String fileNamePrefix, SufixNameGenerator nameGenerator) {
-        this.fileName = fileNamePrefix + "_";
+        this.fileName = fileNamePrefix;
         this.nameGenerator = nameGenerator;
     }
 
