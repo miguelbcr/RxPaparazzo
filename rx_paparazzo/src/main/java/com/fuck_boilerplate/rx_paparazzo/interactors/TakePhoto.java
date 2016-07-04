@@ -19,6 +19,7 @@ package com.fuck_boilerplate.rx_paparazzo.interactors;
 import android.content.Intent;
 import android.net.Uri;
 import android.provider.MediaStore;
+import android.util.Log;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
@@ -32,12 +33,13 @@ public final class TakePhoto extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-      public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+    public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
 
-    @Override public Observable<Uri> react() {
+    @Override
+    public Observable<Uri> react() {
         final Uri uri = getUri();
         return startIntent.with(getIntentCamera(uri)).react()
                 .map(new Func1<Intent, Uri>() {
@@ -50,7 +52,9 @@ public final class TakePhoto extends UseCase<Uri> {
 
     private Uri getUri() {
         File file = targetUi.activity().getExternalCacheDir();
-
+        if (!file.exists()) {
+            file.mkdirs();
+        }
         return Uri.fromFile(file)
                 .buildUpon()
                 .appendPath(SHOOT_APPEND)
@@ -60,6 +64,8 @@ public final class TakePhoto extends UseCase<Uri> {
     private Intent getIntentCamera(Uri uri) {
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+        Log.d("getIntentCamera", "uri::" + uri.toString());
         return intent;
     }
 }

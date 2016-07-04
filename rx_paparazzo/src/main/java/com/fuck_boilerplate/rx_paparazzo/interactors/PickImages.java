@@ -21,6 +21,9 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.Config;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -28,22 +31,30 @@ import java.util.List;
 import rx.Observable;
 import rx.functions.Func1;
 
-public final class PickImages extends UseCase<List<Uri>>{
+public final class PickImages extends UseCase<List<Uri>> {
     private final StartIntent startIntent;
+    private Config config;
 
-     public PickImages(StartIntent startIntent) {
+    public PickImages(StartIntent startIntent, Config config) {
         this.startIntent = startIntent;
+        this.config = config;
     }
 
-    @Override public Observable<List<Uri>> react() {
+    @Override
+    public Observable<List<Uri>> react() {
         return startIntent.with(getFileChooserIntent()).react()
                 .map(new Func1<Intent, List<Uri>>() {
                     @Override
                     public List<Uri> call(Intent intent) {
+                        if (config.getDirPath() != null) {
+                            File file = new File(config.getDirPath());
+                            if (file != null && !file.exists()) {
+                                file.mkdirs();
+                            }
+                        }
                         if (intent.getData() != null) {
                             return Arrays.asList(intent.getData());
-                        }
-                        else return PickImages.this.getUris(intent);
+                        } else return PickImages.this.getUris(intent);
                     }
                 });
     }

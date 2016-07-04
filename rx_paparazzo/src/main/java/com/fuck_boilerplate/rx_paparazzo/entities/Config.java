@@ -23,11 +23,16 @@ public class Config {
     private boolean doCrop;
     private UCrop.Options options;
     private boolean useInternalStorage;
+    private String dirPath;
+    private String fileName;
+    private boolean isMultiplePick;
+    private SufixNameGenerator nameGenerator;
 
     public Config() {
         this.size = Size.Screen;
         this.doCrop = false;
         this.useInternalStorage = false;
+        this.isMultiplePick = false;
     }
 
     public Size getSize() {
@@ -62,5 +67,42 @@ public class Config {
 
     public void setUseInternalStorage() {
         this.useInternalStorage = true;
+    }
+
+    public String getDirPath() {
+        return dirPath;
+    }
+
+    public void setDirPath(String dirPath) {
+        this.dirPath = dirPath;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName + ".jpg";
+    }
+
+    public void setFileName(String fileNamePrefix, SufixNameGenerator nameGenerator) {
+        this.fileName = fileNamePrefix;
+        this.nameGenerator = nameGenerator;
+    }
+
+    public boolean isMultiplePick() {
+        return isMultiplePick;
+    }
+
+    public void setMultiplePick(boolean multiplePick) {
+        isMultiplePick = multiplePick;
+    }
+
+    public String getFileNameSufix() {
+        return nameGenerator.getSufix() + ".jpg";
+    }
+
+    public interface SufixNameGenerator {
+        String getSufix();
     }
 }

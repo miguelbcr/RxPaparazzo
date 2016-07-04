@@ -54,7 +54,7 @@ public final class SaveImage extends UseCase<String> {
     private final GetDimens getDimens;
     private Uri uri;
 
-     public SaveImage(TargetUi targetUi, Config config, GetPath getPath, GetDimens getDimens) {
+    public SaveImage(TargetUi targetUi, Config config, GetPath getPath, GetDimens getDimens) {
         this.targetUi = targetUi;
         this.config = config;
         this.getPath = getPath;
@@ -66,7 +66,8 @@ public final class SaveImage extends UseCase<String> {
         return this;
     }
 
-    @Override public Observable<String> react() {
+    @Override
+    public Observable<String> react() {
         return getOutputUri()
                 .flatMap(new Func1<Uri, Observable<String>>() {
                     @Override
@@ -76,20 +77,20 @@ public final class SaveImage extends UseCase<String> {
                                 new Func3<String, String, int[], String>() {
                                     @Override
                                     public String call(String filePath, String filePathOutput,
-                                            int[] dimens) {
+                                                       int[] dimens) {
                                         String filepath = SaveImage.this.scaleImage(filePath,
                                                 filePathOutput, dimens);
                                         MediaScannerConnection.scanFile(targetUi.getContext(),
-                                                new String[] {
+                                                new String[]{
                                                         filepath
-                                        }, new String[] {
-                                                "image/jpeg"
-                                        }, null);
+                                                }, new String[]{
+                                                        "image/jpeg"
+                                                }, null);
                                         return filepath;
                                     }
                                 });
                     }
-        });
+                });
     }
 
     private Observable<Uri> getOutputUri() {
@@ -97,10 +98,17 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private File getOutputFile() {
-        String filename = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date());
-        filename = "IMG-" + filename + ".jpg";
+        String filename = config.getFileName() != null ? (config.isMultiplePick() ? config.getFileName() + config.getFileNameSufix() : config.getFileName()) : new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date()) + ".jpg";
         String dirname = getApplicationName(targetUi.getContext());
-        File dir = getPublicDir(null, dirname);
+        File dir;
+        if (config.getDirPath() != null) {
+            dir = new File(config.getDirPath());
+            if (dir != null && !dir.exists()) {
+                dir.mkdirs();
+            }
+        } else {
+            dir = getPublicDir(null, dirname);
+        }
         return new File(dir.getAbsolutePath(), filename);
     }
 
@@ -264,8 +272,7 @@ public final class SaveImage extends UseCase<String> {
     private int[] getDimensionsPortrait(int width, int height) {
         if (width < height) {
             return new int[]{width, height};
-        }
-        else {
+        } else {
             return new int[]{height, width};
         }
     }
