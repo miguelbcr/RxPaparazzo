@@ -21,7 +21,6 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.util.Log;
 
-import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
 import java.io.File;
@@ -33,12 +32,10 @@ public final class TakePhoto extends UseCase<Uri> {
     private static final String SHOOT_APPEND = "shoot.jpg";
     private final StartIntent startIntent;
     private final TargetUi targetUi;
-    private Config config;
 
-    public TakePhoto(StartIntent startIntent, Config config, TargetUi targetUi) {
+    public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
-        this.config = config;
     }
 
     @Override
@@ -54,13 +51,13 @@ public final class TakePhoto extends UseCase<Uri> {
     }
 
     private Uri getUri() {
-        File file = config.getDirPath() != null ? new File(config.getDirPath()) : targetUi.activity().getExternalCacheDir();
+        File file = targetUi.activity().getExternalCacheDir();
         if (!file.exists()) {
             file.mkdirs();
         }
         return Uri.fromFile(file)
                 .buildUpon()
-                .appendPath(config.getFileName() != null ? config.getFileName() : SHOOT_APPEND)
+                .appendPath(SHOOT_APPEND)
                 .build();
     }
 

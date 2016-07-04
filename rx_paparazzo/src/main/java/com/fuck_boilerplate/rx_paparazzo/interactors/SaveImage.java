@@ -100,7 +100,15 @@ public final class SaveImage extends UseCase<String> {
     private File getOutputFile() {
         String filename = config.getFileName() != null ? (config.isMultiplePick() ? config.getFileName() + config.getFileNameSufix() : config.getFileName()) : new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date()) + ".jpg";
         String dirname = getApplicationName(targetUi.getContext());
-        File dir = config.getDirPath() != null ? new File(config.getDirPath()) : getPublicDir(null, dirname);
+        File dir;
+        if (config.getDirPath() != null) {
+            dir = new File(config.getDirPath());
+            if (dir != null && !dir.exists()) {
+                dir.mkdirs();
+            }
+        } else {
+            dir = getPublicDir(null, dirname);
+        }
         return new File(dir.getAbsolutePath(), filename);
     }
 
