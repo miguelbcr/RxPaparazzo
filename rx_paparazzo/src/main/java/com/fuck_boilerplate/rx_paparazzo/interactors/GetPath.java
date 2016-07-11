@@ -28,15 +28,24 @@ import android.provider.MediaStore;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
+import java.io.File;
+import java.io.InputStream;
+
 import rx.Observable;
+import rx.android.schedulers.AndroidSchedulers;
 import rx.exceptions.Exceptions;
+import rx.schedulers.Schedulers;
 
 public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
+    private final ImageUtils imageUtils;
+    private final DownloadImage downloadImage;
     private Uri uri;
 
-     public GetPath(TargetUi targetUi) {
+    public GetPath(TargetUi targetUi, ImageUtils imageUtils, DownloadImage downloadImage) {
         this.targetUi = targetUi;
+        this.imageUtils = imageUtils;
+        this.downloadImage = downloadImage;
     }
 
     public GetPath with(Uri uri) {
@@ -45,13 +54,14 @@ public final class GetPath extends UseCase<String> {
     }
 
     @Override public Observable<String> react() {
-        return Observable.just(getPath());
+        return getPath();
     }
 
     @SuppressLint("NewApi")
-    private String getPath() {
+    private Observable<String> getPath() {
         boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
         Context context = targetUi.activity();
+        String filePath = null;
 
         if (uri == null) {
             return null;
@@ -61,13 +71,12 @@ public final class GetPath extends UseCase<String> {
             if (isExternalStorageDocument(uri)) {
                 Document document = getDocument(uri);
                 if ("primary".equalsIgnoreCase(document.type)) {
-                    return Environment.getExternalStorageDirectory() + "/" + document.id;
+                    filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
                 }
-                return null;
             } else if (isDownloadsDocument(uri)) {
                 String id = DocumentsContract.getDocumentId(uri);
                 Uri contentUri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                return getDataColumn(context, contentUri, null, null);
+                filePath = getDataColumn(context, contentUri, null, null);
             } else if (isMediaDocument(uri)) {
                 Document document = getDocument(uri);
                 Uri contentUri = null;
@@ -81,17 +90,21 @@ public final class GetPath extends UseCase<String> {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 }
 
-                return getDataColumn(context, contentUri, "_id=?", new String[] {document.id});
+                filePath = getDataColumn(context, contentUri, "_id=?", new String[] {document.id});
             }
         }
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
-            return getDataColumn(context, uri, null, null);
+            filePath = getDataColumn(context, uri, null, null);
         }
         else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
+            filePath = uri.getPath();
         }
 
-        return null;
+        if (filePath == null) {
+            return downloadImage.with(uri).react();
+        }
+
+        return Observable.just(filePath);
     }
 
     private class Document {

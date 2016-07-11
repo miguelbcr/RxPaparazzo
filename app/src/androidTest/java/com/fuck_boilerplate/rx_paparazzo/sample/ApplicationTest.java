@@ -21,8 +21,10 @@ import android.widget.ImageView;
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import com.fuck_boilerplate.rx_paparazzo.interactors.DownloadImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.GetDimens;
 import com.fuck_boilerplate.rx_paparazzo.interactors.GetPath;
+import com.fuck_boilerplate.rx_paparazzo.interactors.ImageUtils;
 import com.fuck_boilerplate.rx_paparazzo.sample.activities.StartActivity;
 import com.fuck_boilerplate.rx_paparazzo.sample.activities.Testable;
 
@@ -215,10 +217,12 @@ public class ApplicationTest {
     }
 
     private GetDimens getDimens(Size size) {
-        TargetUi targetUi = new TargetUi(activityRule.getActivity());
-        GetPath getPath = new GetPath(targetUi);
         Config config = new Config();
         config.setSize(size);
+        TargetUi targetUi = new TargetUi(activityRule.getActivity());
+        ImageUtils imageUtils = new ImageUtils(targetUi, config);
+        DownloadImage downloadImage = new DownloadImage(targetUi, imageUtils);
+        GetPath getPath = new GetPath(targetUi, imageUtils, downloadImage);
         return new GetDimens(targetUi, config, getPath);
     }
 

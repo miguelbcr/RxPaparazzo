@@ -79,6 +79,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                     }
 
                     response.targetUI().loadImage(response.data());
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -99,6 +102,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                     }
 
                     response.targetUI().loadImage(response.data());
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -120,6 +126,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                     }
 
                     response.targetUI().loadImage(response.data());
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -138,6 +147,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
                     if (response.data().size() == 1) response.targetUI().loadImage(response.data().get(0));
                     else response.targetUI().loadImages(response.data());
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
