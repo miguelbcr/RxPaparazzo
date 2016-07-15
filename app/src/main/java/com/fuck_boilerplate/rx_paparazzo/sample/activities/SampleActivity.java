@@ -88,7 +88,6 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private void captureImageWithCrop() {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
-        options.setMaxBitmapSize(1000000000);
 
         size = Size.Original;
         RxPaparazzo.takeImage(SampleActivity.this)
@@ -111,7 +110,6 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private void pickupImage() {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorPrimaryDark));
-        options.setMaxBitmapSize(1000000000);
 
         size = Size.Small;
         RxPaparazzo.takeImage(SampleActivity.this)

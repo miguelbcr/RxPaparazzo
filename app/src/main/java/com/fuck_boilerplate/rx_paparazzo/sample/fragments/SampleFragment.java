@@ -97,7 +97,6 @@ public class SampleFragment extends Fragment implements Testable {
     private void pickupImage() {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
-        options.setMaxBitmapSize(1000000000);
 
         size = Size.Small;
         RxPaparazzo.takeImage(this)

@@ -222,7 +222,7 @@ public class ApplicationTest {
         TargetUi targetUi = new TargetUi(activityRule.getActivity());
         ImageUtils imageUtils = new ImageUtils(targetUi, config);
         DownloadImage downloadImage = new DownloadImage(targetUi, imageUtils);
-        GetPath getPath = new GetPath(targetUi, imageUtils, downloadImage);
+        GetPath getPath = new GetPath(targetUi, downloadImage);
         return new GetDimens(targetUi, config, getPath);
     }
 

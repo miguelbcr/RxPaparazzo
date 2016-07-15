@@ -38,13 +38,11 @@ import rx.schedulers.Schedulers;
 
 public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
-    private final ImageUtils imageUtils;
     private final DownloadImage downloadImage;
     private Uri uri;
 
-    public GetPath(TargetUi targetUi, ImageUtils imageUtils, DownloadImage downloadImage) {
+    public GetPath(TargetUi targetUi, DownloadImage downloadImage) {
         this.targetUi = targetUi;
-        this.imageUtils = imageUtils;
         this.downloadImage = downloadImage;
     }
 
