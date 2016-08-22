@@ -19,8 +19,8 @@ import android.view.WindowManager;
 import android.widget.ImageView;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.Size;
 import com.fuck_boilerplate.rx_paparazzo.interactors.DownloadImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.GetDimens;
 import com.fuck_boilerplate.rx_paparazzo.interactors.GetPath;
@@ -65,56 +65,67 @@ public class ApplicationTest {
     private UiDevice uiDevice;
     private int[] imageDimens = {0, 0};
 
-    @Before public void init() {
+    @Before
+    public void init() {
         uiDevice = UiDevice.getInstance(InstrumentationRegistry.getInstrumentation());
     }
 
-    @Test public void _01_CancelUserActionActivity() {
+    @Test
+    public void _01_CancelUserActionActivity() {
         onView(withId(R.id.bt_activity)).perform(click());
         cancelUserAction();
     }
 
-    @Test public void _02_CancelUserActionFragment() {
+    @Test
+    public void _02_CancelUserActionFragment() {
         onView(withId(R.id.bt_fragment)).perform(click());
         cancelUserAction();
     }
 
-    @Test public void _03_TakePhotoActivity() {
+    @Test
+    public void _03_TakePhotoActivity() {
         onView(withId(R.id.bt_activity)).perform(click());
         takePhoto(false);
     }
 
-    @Test public void _04_TakePhotoFragment() {
+    @Test
+    public void _04_TakePhotoFragment() {
         onView(withId(R.id.bt_fragment)).perform(click());
         takePhoto(false);
     }
 
-    @Test public void _05_TakePhotoActivityCrop() {
+    @Test
+    public void _05_TakePhotoActivityCrop() {
         onView(withId(R.id.bt_activity)).perform(click());
         takePhoto(true);
     }
 
-    @Test public void _06_TakePhotoFragmentCrop() {
+    @Test
+    public void _06_TakePhotoFragmentCrop() {
         onView(withId(R.id.bt_fragment)).perform(click());
         takePhoto(true);
     }
 
-    @Test public void _07_PickUpPhotoActivityCrop() {
+    @Test
+    public void _07_PickUpPhotoActivityCrop() {
         onView(withId(R.id.bt_activity)).perform(click());
         pickUpPhoto(true);
     }
 
-    @Test public void _08_PickUpPhotoFragmentCrop() {
+    @Test
+    public void _08_PickUpPhotoFragmentCrop() {
         onView(withId(R.id.bt_fragment)).perform(click());
         pickUpPhoto(true);
     }
 
-    @Test public void _09_PickUpPhotosActivityCrop() {
+    @Test
+    public void _09_PickUpPhotosActivityCrop() {
         onView(withId(R.id.bt_activity)).perform(click());
         pickUpPhoto(false);
     }
 
-    @Test public void _10_PickUpPhotosFragmentCrop() {
+    @Test
+    public void _10_PickUpPhotosFragmentCrop() {
         onView(withId(R.id.bt_fragment)).perform(click());
         pickUpPhoto(false);
     }
@@ -212,8 +223,8 @@ public class ApplicationTest {
     }
 
     private int[] getDimensionsPortrait(int width, int height) {
-        if (width < height) return new int [] {width, height};
-        else return new int [] {height, width};
+        if (width < height) return new int[]{width, height};
+        else return new int[]{height, width};
     }
 
     private GetDimens getDimens(Size size) {
@@ -235,12 +246,14 @@ public class ApplicationTest {
         uiDevice.pressBack();
 
         onView(withId(R.id.iv_image)).check(matches(new BoundedMatcher<View, ImageView>(ImageView.class) {
-            @Override public void describeTo(Description description) {
-                imageDimens = new int[] {0, 0};
+            @Override
+            public void describeTo(Description description) {
+                imageDimens = new int[]{0, 0};
                 description.appendText("has not drawable");
             }
 
-            @Override public boolean matchesSafely(ImageView imageView) {
+            @Override
+            public boolean matchesSafely(ImageView imageView) {
                 return imageView.getDrawable() == null;
             }
         }));
@@ -279,7 +292,7 @@ public class ApplicationTest {
         int height = screenDimens[1];
         int y = 0;
 
-        for (int i = 0; i < imagesToPick ; i++) {
+        for (int i = 0; i < imagesToPick; i++) {
             int widthQuarter = width / 4;
             int x = (i % 2 == 0) ? widthQuarter : widthQuarter * 3;
             y += (i % 2 == 0) ? height / 4 : 0;
@@ -295,11 +308,14 @@ public class ApplicationTest {
         Display display = wm.getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
-        return new int[] {size.x, size.y};
+        return new int[]{size.x, size.y};
     }
 
     private void waitTime() {
-        try {Thread.sleep(3000);}
-        catch (InterruptedException e) { e.printStackTrace();}
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }

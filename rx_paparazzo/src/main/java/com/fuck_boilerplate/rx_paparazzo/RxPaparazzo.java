@@ -22,7 +22,7 @@ import android.support.v4.app.Fragment;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.Size;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationComponent;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationModule;
 import com.yalantis.ucrop.UCrop;
@@ -90,6 +90,7 @@ public final class RxPaparazzo {
 
         /**
          * Sets the size for the retrieved image.
+         *
          * @param size
          * @see Size
          */
@@ -148,6 +149,7 @@ public final class RxPaparazzo {
 
         /**
          * Sets the size for the retrieved image.
+         *
          * @param size
          * @see Size
          */

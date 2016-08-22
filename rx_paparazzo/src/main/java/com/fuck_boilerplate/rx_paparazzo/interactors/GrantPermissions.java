@@ -27,7 +27,7 @@ public final class GrantPermissions extends UseCase<Void> {
     private final TargetUi targetUi;
     private String[] permissions;
 
-     public GrantPermissions(TargetUi targetUi) {
+    public GrantPermissions(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
@@ -36,7 +36,8 @@ public final class GrantPermissions extends UseCase<Void> {
         return this;
     }
 
-    @Override public Observable<Void> react() {
+    @Override
+    public Observable<Void> react() {
         if (permissions.length == 0) {
             return Observable.just(null);
         }

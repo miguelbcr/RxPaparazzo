@@ -50,7 +50,8 @@ public final class CropImage extends UseCase<Uri> {
         return this;
     }
 
-    @Override public Observable<Uri> react() {
+    @Override
+    public Observable<Uri> react() {
         if (config.doCrop()) {
             return getIntent().flatMap(new Func1<Intent, Observable<Uri>>() {
                 @Override
@@ -73,7 +74,8 @@ public final class CropImage extends UseCase<Uri> {
             @Override
             public Intent call(Uri outputUri) {
                 UCrop.Options options = config.getOptions();
-                if (options == null) return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
+                if (options == null)
+                    return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
 
                 if (options instanceof Options) {
                     return getIntentWithOptions((Options) options, outputUri);
@@ -90,10 +92,12 @@ public final class CropImage extends UseCase<Uri> {
 
         uCrop = uCrop.withOptions(options);
         if (options.getX() != 0) uCrop = uCrop.withAspectRatio(options.getX(), options.getY());
-        if (options.getWidth() != 0) uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
+        if (options.getWidth() != 0)
+            uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
 
         return uCrop.getIntent(targetUi.getContext());
     }
+
     private Observable<Uri> getOutputUri() {
         return getPath.with(uri).react().map(new Func1<String, Uri>() {
             @Override
@@ -101,6 +105,6 @@ public final class CropImage extends UseCase<Uri> {
                 File file = targetUi.activity().getExternalCacheDir();
                 return Uri.fromFile(file).buildUpon().appendPath("cropped.jpg").build();
             }
-                });
+        });
     }
 }
