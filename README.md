@@ -123,17 +123,18 @@ The `response` instance holds a reference to the paths where the images were per
 When asking RxPaparazzo for an image -whether it was retrieved using the built-in camera or via gallery, it's possible to apply some configurations to the action. 
 
 ### Size options
-`Size` values `enum` can be used to set the size of the image to retrieve. There are 3 options:
+[Size](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/Size.java) values can be used to set the size of the image to retrieve. There are 4 options:
 
-* Small: 1/8 aprox. of the screen resolution
-* Screen: The size image matches aprox. the screen resolution.
-* Original: The original size of the image.
+* [SmallSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/SmallSize.java): 1/8 aprox. of the screen resolution
+* [ScreenSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/ScreenSize.java): The size image matches aprox. the screen resolution.
+* [OriginalSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/OriginalSize.java): The original size of the image.
+* [CustomMaxSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/CustomMaxSize.java): Yot can specify max size you want and image will be scaled proportionally.
 
-`Screen` value will be set as default.
+[ScreenSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/ScreenSize.java) value will be set as default.
 
 ```java
 RxPaparazzo.takeImages(activityOrFragment)
-                .size(Size.Small)
+                .size(new ScreenSize())
                 .usingGallery()
 ```                 
                 

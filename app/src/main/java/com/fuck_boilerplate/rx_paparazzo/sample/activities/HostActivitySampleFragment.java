@@ -3,7 +3,7 @@ package com.fuck_boilerplate.rx_paparazzo.sample.activities;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.Size;
 import com.fuck_boilerplate.rx_paparazzo.sample.R;
 import com.fuck_boilerplate.rx_paparazzo.sample.fragments.SampleFragment;
 

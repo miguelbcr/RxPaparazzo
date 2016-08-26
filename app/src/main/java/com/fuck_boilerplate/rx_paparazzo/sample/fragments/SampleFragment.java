@@ -14,7 +14,9 @@ import android.widget.Toast;
 
 import com.fuck_boilerplate.rx_paparazzo.RxPaparazzo;
 import com.fuck_boilerplate.rx_paparazzo.entities.Options;
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.OriginalSize;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.Size;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.SmallSize;
 import com.fuck_boilerplate.rx_paparazzo.sample.R;
 import com.fuck_boilerplate.rx_paparazzo.sample.activities.Testable;
 import com.fuck_boilerplate.rx_paparazzo.sample.adapters.ImagesAdapter;
@@ -31,16 +33,18 @@ public class SampleFragment extends Fragment implements Testable {
     private List<String> filesPaths;
     private Size size;
 
-    @Override public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.sample_layout, container, false);
         return view;
     }
 
-    @Override public void onActivityCreated(Bundle savedInstanceState) {
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initViews();
         filesPaths = new ArrayList<>();
-        size = Size.Original;
+        size = new OriginalSize();
     }
 
     private void initViews() {
@@ -59,7 +63,7 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     private void captureImage() {
-        size = Size.Small;
+        size = new SmallSize();
         RxPaparazzo.takeImage(this)
                 .size(size)
                 .usingCamera()
@@ -79,7 +83,7 @@ public class SampleFragment extends Fragment implements Testable {
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
         options.setAspectRatio(25, 75);
 
-        size = Size.Original;
+        size = new OriginalSize();
         RxPaparazzo.takeImage(this)
                 .size(size)
                 .crop(options)
@@ -98,7 +102,7 @@ public class SampleFragment extends Fragment implements Testable {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
 
-        size = Size.Small;
+        size = new SmallSize();
         RxPaparazzo.takeImage(this)
                 .useInternalStorage()
                 .crop(options)
@@ -115,7 +119,7 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     private void pickupImages() {
-        size = Size.Small;
+        size = new SmallSize();
         RxPaparazzo.takeImages(this)
                 .useInternalStorage()
                 .crop()
@@ -127,7 +131,8 @@ public class SampleFragment extends Fragment implements Testable {
                         return;
                     }
 
-                    if (response.data().size() == 1) response.targetUI().loadImage(response.data().get(0));
+                    if (response.data().size() == 1)
+                        response.targetUI().loadImage(response.data().get(0));
                     else response.targetUI().loadImages(response.data());
                 });
     }
@@ -155,11 +160,13 @@ public class SampleFragment extends Fragment implements Testable {
         Toast.makeText(getActivity(), getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
     }
 
-    @Override public List<String> getFilePaths() {
+    @Override
+    public List<String> getFilePaths() {
         return filesPaths;
     }
 
-    @Override public Size getSize() {
+    @Override
+    public Size getSize() {
         return size;
     }
 }

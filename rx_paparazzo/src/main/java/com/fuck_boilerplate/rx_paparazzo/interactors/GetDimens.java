@@ -21,8 +21,10 @@ import android.net.Uri;
 import android.util.DisplayMetrics;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.CustomMaxSize;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.OriginalSize;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.ScreenSize;
 
 import rx.Observable;
 import rx.functions.Func1;
@@ -33,7 +35,7 @@ public final class GetDimens extends UseCase<int[]> {
     private final GetPath getPath;
     private Uri uri;
 
-     public GetDimens(TargetUi targetUi, Config config, GetPath getPath) {
+    public GetDimens(TargetUi targetUi, Config config, GetPath getPath) {
         this.targetUi = targetUi;
         this.config = config;
         this.getPath = getPath;
@@ -44,18 +46,20 @@ public final class GetDimens extends UseCase<int[]> {
         return this;
     }
 
-    @Override public Observable<int[]> react() {
+    @Override
+    public Observable<int[]> react() {
         return getPath.with(uri).react()
                 .map(new Func1<String, int[]>() {
                     @Override
                     public int[] call(String filePath) {
-                        if (config.getSize() == Size.Original) {
+                        if (config.getSize() instanceof OriginalSize) {
                             return GetDimens.this.getFileDimens(filePath);
-                        }
-                        else if (config.getSize() == Size.Screen) {
+                        } else if (config.getSize() instanceof CustomMaxSize) {
+                            CustomMaxSize customMaxSize = (CustomMaxSize) config.getSize();
+                            return getCustomDimens(customMaxSize, filePath);
+                        } else if (config.getSize() instanceof ScreenSize) {
                             return GetDimens.this.getScreenDimens();
-                        }
-                        else {
+                        } else {
                             int[] dimens = GetDimens.this.getScreenDimens();
                             return new int[]{dimens[0] / 8, dimens[1] / 8};
                         }
@@ -65,13 +69,26 @@ public final class GetDimens extends UseCase<int[]> {
 
     private int[] getScreenDimens() {
         DisplayMetrics metrics = targetUi.getContext().getResources().getDisplayMetrics();
-        return new int[] {metrics.widthPixels, metrics.heightPixels};
+        return new int[]{metrics.widthPixels, metrics.heightPixels};
     }
 
     private int[] getFileDimens(String filePath) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
-        return new int[] {options.outWidth, options.outHeight};
+        return new int[]{options.outWidth, options.outHeight};
+    }
+
+    private int[] getCustomDimens(CustomMaxSize customMaxSize, String filePath) {
+        int maxSize = customMaxSize.getMaxImageSize();
+        int[] dimens = GetDimens.this.getFileDimens(filePath);
+        int maxFileSize = Math.max(dimens[0], dimens[1]);
+        if (maxFileSize < maxSize) {
+            return dimens;
+        }
+        float scaleFactor = (float) maxSize / maxFileSize;
+        dimens[0] *= scaleFactor;
+        dimens[1] *= scaleFactor;
+        return dimens;
     }
 }
