@@ -56,16 +56,7 @@ public final class GetDimens extends UseCase<int[]> {
                             return GetDimens.this.getFileDimens(filePath);
                         } else if (config.getSize() instanceof CustomMaxSize) {
                             CustomMaxSize customMaxSize = (CustomMaxSize) config.getSize();
-                            int maxSize = customMaxSize.getMaxImageSize();
-                            int[] dimens = GetDimens.this.getFileDimens(filePath);
-                            int maxFileSize = Math.max(dimens[0], dimens[1]);
-                            if (maxFileSize < maxSize) {
-                                return dimens;
-                            }
-                            float scaleFactor = (float) maxSize / maxFileSize;
-                            dimens[0] *= scaleFactor;
-                            dimens[1] *= scaleFactor;
-                            return dimens;
+                            return getCustomDimens(customMaxSize, filePath);
                         } else if (config.getSize() instanceof ScreenSize) {
                             return GetDimens.this.getScreenDimens();
                         } else {
@@ -86,5 +77,18 @@ public final class GetDimens extends UseCase<int[]> {
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         return new int[]{options.outWidth, options.outHeight};
+    }
+
+    private int[] getCustomDimens(CustomMaxSize customMaxSize, String filePath) {
+        int maxSize = customMaxSize.getMaxImageSize();
+        int[] dimens = GetDimens.this.getFileDimens(filePath);
+        int maxFileSize = Math.max(dimens[0], dimens[1]);
+        if (maxFileSize < maxSize) {
+            return dimens;
+        }
+        float scaleFactor = (float) maxSize / maxFileSize;
+        dimens[0] *= scaleFactor;
+        dimens[1] *= scaleFactor;
+        return dimens;
     }
 }

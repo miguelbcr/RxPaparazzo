@@ -8,6 +8,9 @@ public class CustomMaxSize implements Size {
 
     private int maxImageSize = 1024;
 
+    public CustomMaxSize() {
+    }
+
     public CustomMaxSize(int maxSize) {
         this.maxImageSize = maxSize;
     }
