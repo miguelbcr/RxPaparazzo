@@ -16,6 +16,8 @@
 
 package com.fuck_boilerplate.rx_paparazzo.entities;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.size.ScreenSize;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.Size;
 import com.yalantis.ucrop.UCrop;
 
 public class Config {
@@ -25,7 +27,7 @@ public class Config {
     private boolean useInternalStorage;
 
     public Config() {
-        this.size = Size.Screen;
+        this.size = new ScreenSize();
         this.doCrop = false;
         this.useInternalStorage = false;
     }

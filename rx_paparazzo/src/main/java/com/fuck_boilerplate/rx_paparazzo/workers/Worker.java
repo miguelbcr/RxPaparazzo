@@ -29,6 +29,7 @@ import rx.exceptions.Exceptions;
 import rx.functions.Func1;
 
 abstract class Worker {
+
     private final TargetUi targetUi;
 
     public Worker(TargetUi targetUi) {

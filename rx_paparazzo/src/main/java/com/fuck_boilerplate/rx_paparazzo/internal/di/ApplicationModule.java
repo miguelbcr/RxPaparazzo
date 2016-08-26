@@ -20,6 +20,7 @@ import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
 public class ApplicationModule {
+
     private final Config config;
     private final TargetUi ui;
 

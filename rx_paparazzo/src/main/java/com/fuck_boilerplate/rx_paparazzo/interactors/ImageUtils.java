@@ -26,8 +26,8 @@ import android.os.Environment;
 import android.text.TextUtils;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
-import com.fuck_boilerplate.rx_paparazzo.entities.Size;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import com.fuck_boilerplate.rx_paparazzo.entities.size.OriginalSize;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -98,7 +98,7 @@ public final class ImageUtils {
     }
 
     public String scaleImage(String filePath, String filePathOutput, int[] dimens) {
-        if (config.getSize() == Size.Original) {
+        if (config.getSize() instanceof OriginalSize) {
             return copyFile(filePath, filePathOutput);
         }
 

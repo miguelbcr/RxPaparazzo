@@ -21,6 +21,7 @@ import com.fuck_boilerplate.rx_paparazzo.workers.Camera;
 import com.fuck_boilerplate.rx_paparazzo.workers.Gallery;
 
 public abstract class ApplicationComponent {
+
     public abstract Camera camera();
 
     public abstract Gallery gallery();
