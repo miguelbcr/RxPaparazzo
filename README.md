@@ -165,6 +165,21 @@ options.setAspectRatio(25, 50);
 RxPaparazzo.takeImage(activityOrFragment)
          .crop(options)
 ```
+## Proguard
+
+```
+# Rxjava rules
+-dontwarn rx.internal.util.**
+
+-keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
+    long producerIndex;
+    long consumerIndex;
+}
+-keepclassmembers class rx.internal.util.unsafe.BaseLinkedQueueProducerNodeRef {
+    long producerNode;
+    long consumerNode;
+}
+```
 
 ## Credits
 * Runtime permissions: [RxPermissions](https://github.com/tbruyelle/RxPermissions)
