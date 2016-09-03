@@ -14,12 +14,12 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.3"
+    compileSdkVersion 24
+    buildToolsVersion "24.0.1"
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 23
+        targetSdkVersion 24
         versionCode 1
         versionName "1.0"
     }
@@ -36,12 +36,12 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'io.reactivex:rxjava:1.1.5'
-    compile 'io.reactivex:rxandroid:1.2.0'
+    compile 'io.reactivex:rxjava:1.1.9'
+    compile 'io.reactivex:rxandroid:1.2.1'
 
-    compile 'com.github.VictorAlbertos:RxActivityResult:0.3.4'
+    compile 'com.github.VictorAlbertos:RxActivityResult:0.3.5'
     compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.0@aar'
-    compile 'com.yalantis:ucrop:2.1.1'
+    compile 'com.yalantis:ucrop:2.1.2'
 
     testCompile 'junit:junit:4.12'
 }
