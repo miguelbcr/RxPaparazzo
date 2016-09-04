@@ -61,6 +61,7 @@ public final class TakePhoto extends UseCase<Uri> {
     private Uri getUri() {
         Context context = targetUi.getContext();
         File dir = new File(context.getFilesDir(), SUBDIR);
+        dir.mkdirs();
         File file = new File(dir, SHOOT_APPEND);
 
         return FileProvider.getUriForFile(context, context.getPackageName() + ".file_provider", file);

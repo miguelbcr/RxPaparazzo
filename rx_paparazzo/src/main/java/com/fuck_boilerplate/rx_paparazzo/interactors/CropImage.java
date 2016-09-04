@@ -114,6 +114,7 @@ public final class CropImage extends UseCase<Uri> {
     private Observable<Uri> getOutputUri() {
         Context context = targetUi.getContext();
         File dir = new File(context.getFilesDir(), SUBDIR);
+        dir.mkdirs();
         File file = new File(dir, CROP_APPEND);
         return Observable.just(Uri.fromFile(file).buildUpon().build());
     }
