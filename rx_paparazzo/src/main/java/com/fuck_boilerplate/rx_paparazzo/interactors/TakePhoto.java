@@ -36,6 +36,7 @@ import rx.functions.Func1;
 public final class TakePhoto extends UseCase<Uri> {
     private static final int READ_WRITE_PERMISSIONS = Intent.FLAG_GRANT_READ_URI_PERMISSION
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+    private static final String SUBDIR = "RxPaparazzo";
     private static final String SHOOT_APPEND = "shoot.jpg";
     private final StartIntent startIntent;
     private final TargetUi targetUi;
@@ -59,15 +60,10 @@ public final class TakePhoto extends UseCase<Uri> {
 
     private Uri getUri() {
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), getApplicationName(context));
+        File dir = new File(context.getFilesDir(), SUBDIR);
         File file = new File(dir, SHOOT_APPEND);
 
         return FileProvider.getUriForFile(context, context.getPackageName() + ".file_provider", file);
-    }
-
-    private String getApplicationName(Context context) {
-        int stringId = context.getApplicationInfo().labelRes;
-        return context.getString(stringId);
     }
 
     private Intent getIntentCamera(Uri uri) {

@@ -56,7 +56,7 @@ public final class ImageUtils {
         String filename = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date());
         filename = "IMG-" + filename + ".jpg";
         String dirname = getApplicationName(targetUi.getContext());
-        File dir = getPublicDir(null, dirname);
+        File dir = getDir(null, dirname);
         return new File(dir.getAbsolutePath(), filename);
     }
 
@@ -65,22 +65,30 @@ public final class ImageUtils {
         return context.getString(stringId);
     }
 
-    private File getPublicDir(String dirRoot, String dirname) {
+    private File getDir(String dirRoot, String dirname) {
         File storageDir = null;
 
         if (!config.useInternalStorage()) {
-            if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-                File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
-                storageDir = new File(dir, dirname);
-
-                if (!storageDir.exists() && !storageDir.mkdirs()) {
-                    storageDir = null;
-                }
-            }
+            storageDir = getPublicDir(dirRoot, dirname);
         }
 
         if (storageDir == null) {
             storageDir = getPrivateDir(dirname);
+        }
+
+        return storageDir;
+    }
+
+    private File getPublicDir(String dirRoot, String dirname) {
+        File storageDir = null;
+
+        if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
+            File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot) : Environment.getExternalStorageDirectory();
+            storageDir = new File(dir, dirname);
+
+            if (!storageDir.exists() && !storageDir.mkdirs()) {
+                storageDir = null;
+            }
         }
 
         return storageDir;
