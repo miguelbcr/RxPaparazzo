@@ -9,6 +9,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme.NoActionBar">
+
         <activity android:name="com.fuck_boilerplate.rx_paparazzo.sample.activities.StartActivity"
             android:configChanges="orientation|screenSize">
             <intent-filter>
