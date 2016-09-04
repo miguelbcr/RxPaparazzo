@@ -28,13 +28,7 @@ import android.provider.MediaStore;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
-import java.io.File;
-import java.io.InputStream;
-
 import rx.Observable;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.exceptions.Exceptions;
-import rx.schedulers.Schedulers;
 
 public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;
@@ -57,7 +51,7 @@ public final class GetPath extends UseCase<String> {
 
     @SuppressLint("NewApi")
     private Observable<String> getPath() {
-        boolean isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+        boolean isFromKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
         Context context = targetUi.activity();
         String filePath = null;
 
@@ -65,7 +59,7 @@ public final class GetPath extends UseCase<String> {
             return null;
         }
 
-        if (isKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+        if (isFromKitKat && DocumentsContract.isDocumentUri(context, uri)) {
             if (isExternalStorageDocument(uri)) {
                 Document document = getDocument(uri);
                 if ("primary".equalsIgnoreCase(document.type)) {
@@ -88,7 +82,8 @@ public final class GetPath extends UseCase<String> {
                     contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
                 }
 
-                filePath = getDataColumn(context, contentUri, "_id=?", new String[] {document.id});
+                filePath = getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?",
+                        new String[] {document.id});
             }
         }
         else if ("content".equalsIgnoreCase(uri.getScheme())) {
@@ -130,7 +125,8 @@ public final class GetPath extends UseCase<String> {
             cursor.moveToFirst();
             return cursor.getString(cursor.getColumnIndexOrThrow(column));
         } catch (Exception e) {
-            throw Exceptions.propagate(e);
+//            throw Exceptions.propagate(e);
+            return null;
         } finally {
             if (cursor != null) {
                 cursor.close();

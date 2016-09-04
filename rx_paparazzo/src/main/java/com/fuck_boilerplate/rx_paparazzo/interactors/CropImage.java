@@ -16,6 +16,7 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -28,21 +29,21 @@ import java.io.File;
 
 import rx.Observable;
 import rx.functions.Func1;
+import rx.functions.Func2;
 
 public final class CropImage extends UseCase<Uri> {
+    private static final String CROP_APPEND = "cropped.jpg";
     private final Config config;
     private final StartIntent startIntent;
     private final GetPath getPath;
     private final TargetUi targetUi;
-    private final GetDimens getDimens;
     private Uri uri;
 
-    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath, GetDimens getDimens) {
+    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath) {
         this.targetUi = targetUi;
         this.config = config;
         this.startIntent = startIntent;
         this.getPath = getPath;
-        this.getDimens = getDimens;
     }
 
     public CropImage with(Uri uri) {
@@ -56,6 +57,7 @@ public final class CropImage extends UseCase<Uri> {
             return getIntent().flatMap(new Func1<Intent, Observable<Uri>>() {
                 @Override
                 public Observable<Uri> call(Intent intent) {
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                     return startIntent.with(intent).react().map(new Func1<Intent, Uri>() {
                         @Override
                         public Uri call(Intent intentResult) {
@@ -70,21 +72,22 @@ public final class CropImage extends UseCase<Uri> {
     }
 
     public Observable<Intent> getIntent() {
-        return getOutputUri().map(new Func1<Uri, Intent>() {
-            @Override
-            public Intent call(Uri outputUri) {
-                UCrop.Options options = config.getOptions();
-                if (options == null)
-                    return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
+        return Observable.zip(getInputUri(), getOutputUri(),
+                new Func2<Uri, Uri, Intent>() {
+                    @Override
+                    public Intent call(Uri uri, Uri outputUri) {
+                        UCrop.Options options = config.getOptions();
+                        if (options == null)
+                            return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
 
-                if (options instanceof Options) {
-                    return getIntentWithOptions((Options) options, outputUri);
-                } else {
-                    return UCrop.of(uri, outputUri).withOptions(config.getOptions())
-                            .getIntent(targetUi.getContext());
-                }
-            }
-        });
+                        if (options instanceof Options) {
+                            return getIntentWithOptions((Options) options, outputUri);
+                        } else {
+                            return UCrop.of(uri, outputUri).withOptions(config.getOptions())
+                                    .getIntent(targetUi.getContext());
+                        }
+                    }
+                });
     }
 
     private Intent getIntentWithOptions(Options options, Uri outputUri) {
@@ -98,13 +101,24 @@ public final class CropImage extends UseCase<Uri> {
         return uCrop.getIntent(targetUi.getContext());
     }
 
-    private Observable<Uri> getOutputUri() {
+    private Observable<Uri> getInputUri() {
         return getPath.with(uri).react().map(new Func1<String, Uri>() {
             @Override
             public Uri call(String filePath) {
-                File file = targetUi.activity().getExternalCacheDir();
-                return Uri.fromFile(file).buildUpon().appendPath("cropped.jpg").build();
+                return Uri.fromFile(new File(filePath)).buildUpon().build();
             }
         });
+    }
+
+    private Observable<Uri> getOutputUri() {
+        Context context = targetUi.getContext();
+        File dir = new File(context.getFilesDir(), getApplicationName(context));
+        File file = new File(dir, CROP_APPEND);
+        return Observable.just(Uri.fromFile(file).buildUpon().build());
+    }
+
+    private String getApplicationName(Context context) {
+        int stringId = context.getApplicationInfo().labelRes;
+        return context.getString(stringId);
     }
 }
