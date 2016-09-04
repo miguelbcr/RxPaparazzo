@@ -32,6 +32,7 @@ import rx.functions.Func1;
 import rx.functions.Func2;
 
 public final class CropImage extends UseCase<Uri> {
+    private static final String SUBDIR = "RxPaparazzo";
     private static final String CROP_APPEND = "cropped.jpg";
     private final Config config;
     private final StartIntent startIntent;
@@ -112,13 +113,8 @@ public final class CropImage extends UseCase<Uri> {
 
     private Observable<Uri> getOutputUri() {
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), getApplicationName(context));
+        File dir = new File(context.getFilesDir(), SUBDIR);
         File file = new File(dir, CROP_APPEND);
         return Observable.just(Uri.fromFile(file).buildUpon().build());
-    }
-
-    private String getApplicationName(Context context) {
-        int stringId = context.getApplicationInfo().labelRes;
-        return context.getString(stringId);
     }
 }
