@@ -72,7 +72,7 @@ public final class CropImage extends UseCase<Uri> {
         return Observable.just(uri);
     }
 
-    public Observable<Intent> getIntent() {
+    private Observable<Intent> getIntent() {
         return Observable.zip(getInputUri(), getOutputUri(),
                 new Func2<Uri, Uri, Intent>() {
                     @Override

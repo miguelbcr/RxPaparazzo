@@ -41,7 +41,7 @@ public final class TakePhoto extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-      public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+    public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
@@ -93,7 +93,7 @@ public final class TakePhoto extends UseCase<Uri> {
         }
     }
 
-    public void revokeFileReadWritePermissions(Uri uri) {
+    private void revokeFileReadWritePermissions(Uri uri) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             targetUi.getContext().revokeUriPermission(uri, READ_WRITE_PERMISSIONS);
         }

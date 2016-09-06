@@ -53,11 +53,22 @@ public final class ImageUtils {
     }
 
     public File getOutputFile() {
-        String filename = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN)).format(new Date());
-        filename = "IMG-" + filename + ".jpg";
         String dirname = getApplicationName(targetUi.getContext());
         File dir = getDir(null, dirname);
-        return new File(dir.getAbsolutePath(), filename);
+        return getFile(dir);
+    }
+
+    private File getFile(File dir) {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
+        String datetime = simpleDateFormat.format(new Date());
+        File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + ".jpg");
+
+        while (file.exists()) {
+            datetime = simpleDateFormat.format(new Date());
+            file = new File(dir.getAbsolutePath(), "IMG-" + datetime + ".jpg");
+        }
+
+        return file;
     }
 
     private String getApplicationName(Context context) {

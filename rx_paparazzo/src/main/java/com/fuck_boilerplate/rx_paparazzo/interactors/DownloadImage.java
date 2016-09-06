@@ -16,26 +16,24 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
+import android.content.Context;
 import android.net.Uri;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.TimeUnit;
 
 import rx.Observable;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.exceptions.Exceptions;
-import rx.functions.Func0;
 import rx.schedulers.Schedulers;
 
 public final class DownloadImage extends UseCase<String> {
+    private static final String SUBDIR = "RxPaparazzo";
     private final TargetUi targetUi;
     private final ImageUtils imageUtils;
     private Uri uri;
@@ -60,9 +58,8 @@ public final class DownloadImage extends UseCase<String> {
             public void call(Subscriber<? super String> subscriber) {
                 try {
                     if ("content".equalsIgnoreCase(uri.getScheme())){
-                        subscriber.onNext(downloadContent());
-                    }
-                    else {
+                        subscriber.onNext(getContent());
+                    } else {
                         subscriber.onNext(downloadFile());
                     }
 
@@ -82,15 +79,20 @@ public final class DownloadImage extends UseCase<String> {
         URLConnection connection = url.openConnection();
         connection.connect();
         InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-        File file = imageUtils.getOutputFile();
-
+        Context context = targetUi.getContext();
+        File dir = new File(context.getFilesDir(), SUBDIR);
+        dir.mkdirs();
+        File file = new File(dir, uri.getLastPathSegment() + ".tmp");
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
     }
 
-    private String downloadContent() throws Exception {
+    private String getContent() throws Exception {
         InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
-        File file = imageUtils.getOutputFile();
+        Context context = targetUi.getContext();
+        File dir = new File(context.getFilesDir(), SUBDIR);
+        dir.mkdirs();
+        File file = new File(dir, uri.getLastPathSegment() + ".tmp");
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
     }
