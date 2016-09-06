@@ -22,6 +22,8 @@ import android.net.Uri;
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 
+import java.io.File;
+
 import rx.Observable;
 import rx.functions.Func1;
 import rx.functions.Func3;
@@ -53,12 +55,15 @@ public final class SaveImage extends UseCase<String> {
                 .flatMap(new Func1<Uri, Observable<String>>() {
                     @Override
                     public Observable<String> call(Uri outputUri) {
-                        return Observable.zip(getPath.with(uri).react(),
-                                getPath.with(outputUri).react(), getDimens.with(uri).react(),
+                        return Observable.zip(
+                                getPath.with(uri).react(),
+                                getPath.with(outputUri).react(),
+                                getDimens.with(uri).react(),
                                 new Func3<String, String, int[], String>() {
                                     @Override
                                     public String call(String filePath, String filePathOutput, int[] dimens) {
                                         String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
+                                        new File(filePath).delete();
                                         MediaScannerConnection.scanFile(targetUi.getContext(), new String[]{filePathScaled}, new String[]{"image/jpeg"}, null);
 
                                         return filePathScaled;

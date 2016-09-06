@@ -36,12 +36,10 @@ import rx.functions.Func1;
 public final class TakePhoto extends UseCase<Uri> {
     private static final int READ_WRITE_PERMISSIONS = Intent.FLAG_GRANT_READ_URI_PERMISSION
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-    private static final String SUBDIR = "RxPaparazzo";
-    private static final String SHOOT_APPEND = "shoot.jpg";
     private final StartIntent startIntent;
     private final TargetUi targetUi;
 
-      public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+    public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
     }
@@ -60,11 +58,12 @@ public final class TakePhoto extends UseCase<Uri> {
 
     private Uri getUri() {
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), SUBDIR);
+        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
         dir.mkdirs();
-        File file = new File(dir, SHOOT_APPEND);
+        File file = new File(dir, Constants.SHOOT_APPEND);
 
-        return FileProvider.getUriForFile(context, context.getPackageName() + ".file_provider", file);
+        String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+        return FileProvider.getUriForFile(context, authority, file);
     }
 
     private Intent getIntentCamera(Uri uri) {
@@ -93,7 +92,7 @@ public final class TakePhoto extends UseCase<Uri> {
         }
     }
 
-    public void revokeFileReadWritePermissions(Uri uri) {
+    private void revokeFileReadWritePermissions(Uri uri) {
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
             targetUi.getContext().revokeUriPermission(uri, READ_WRITE_PERMISSIONS);
         }
