@@ -33,7 +33,6 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public final class DownloadImage extends UseCase<String> {
-    private static final String SUBDIR = "RxPaparazzo";
     private final TargetUi targetUi;
     private final ImageUtils imageUtils;
     private Uri uri;
@@ -80,7 +79,7 @@ public final class DownloadImage extends UseCase<String> {
         connection.connect();
         InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), SUBDIR);
+        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
         dir.mkdirs();
         File file = new File(dir, uri.getLastPathSegment() + ".tmp");
         imageUtils.copy(inputStream, file);
@@ -90,7 +89,7 @@ public final class DownloadImage extends UseCase<String> {
     private String getContent() throws Exception {
         InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), SUBDIR);
+        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
         dir.mkdirs();
         File file = new File(dir, uri.getLastPathSegment() + ".tmp");
         imageUtils.copy(inputStream, file);

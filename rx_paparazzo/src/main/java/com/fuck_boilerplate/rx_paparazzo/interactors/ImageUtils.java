@@ -42,8 +42,6 @@ import java.util.Locale;
 import rx.exceptions.Exceptions;
 
 public final class ImageUtils {
-    private static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";
-    private static final String LOCALE_EN = "en";
     private final TargetUi targetUi;
     private final Config config;
 
@@ -59,7 +57,7 @@ public final class ImageUtils {
     }
 
     private File getFile(File dir) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
         String datetime = simpleDateFormat.format(new Date());
         File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + ".jpg");
 
