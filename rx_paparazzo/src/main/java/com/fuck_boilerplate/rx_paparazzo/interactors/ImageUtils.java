@@ -50,23 +50,29 @@ public final class ImageUtils {
         this.config = config;
     }
 
-    public File getOutputFile() {
+    File getOutputFile(String extension) {
         String dirname = getApplicationName(targetUi.getContext());
         File dir = getDir(null, dirname);
-        return getFile(dir);
+        return getFile(dir, extension);
     }
 
-    private File getFile(File dir) {
+    private File getFile(File dir, String extension) {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
         String datetime = simpleDateFormat.format(new Date());
-        File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + ".jpg");
+        File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
 
         while (file.exists()) {
             datetime = simpleDateFormat.format(new Date());
-            file = new File(dir.getAbsolutePath(), "IMG-" + datetime + ".jpg");
+            file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
         }
 
         return file;
+    }
+
+    File getPrivateFile(String filename) {
+        File dir = new File(targetUi.getContext().getFilesDir(), Constants.SUBDIR);
+        dir.mkdirs();
+        return new File(dir, filename);
     }
 
     private String getApplicationName(Context context) {
@@ -111,10 +117,22 @@ public final class ImageUtils {
         if (!storageDir.exists() && !storageDir.mkdirs()) {
             storageDir = null;
         }
+
         return storageDir;
     }
 
-    public String scaleImage(String filePath, String filePathOutput, int[] dimens) {
+    String getFileExtension(String filepath) {
+        String extension = "";
+
+        if (filepath != null) {
+            int i = filepath.lastIndexOf('.');
+            extension = i > 0 ? filepath.substring(i) : "";
+        }
+
+        return extension;
+    }
+
+    String scaleImage(String filePath, String filePathOutput, int[] dimens) {
         if (config.getSize() instanceof OriginalSize) {
             return copyFile(filePath, filePathOutput);
         }
@@ -128,13 +146,19 @@ public final class ImageUtils {
 
         File file = new File(filePath);
         File fileScaled = new File(filePathOutput);
-        bitmap2file(bitmap, fileScaled, Bitmap.CompressFormat.JPEG);
+
+        Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
+        if (getFileExtension(filePathOutput).toLowerCase().contains(Constants.EXT_PNG)) {
+            compressFormat = Bitmap.CompressFormat.PNG;
+        }
+
+        bitmap2file(bitmap, fileScaled, compressFormat);
         copyExifRotation(file, fileScaled, rotateIfNeeded);
 
         return filePathOutput;
     }
 
-    private String copyFile(String filePath, String newfilePath) {
+    String copyFile(String filePath, String newfilePath) {
         File file = new File(filePath);
         File fileOutput = new File(newfilePath);
 

@@ -38,10 +38,12 @@ public final class TakePhoto extends UseCase<Uri> {
             | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
     private final StartIntent startIntent;
     private final TargetUi targetUi;
+    private final ImageUtils imageUtils;
 
-    public TakePhoto(StartIntent startIntent, TargetUi targetUi) {
+    public TakePhoto(StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
         this.startIntent = startIntent;
         this.targetUi = targetUi;
+        this.imageUtils = imageUtils;
     }
 
     @Override public Observable<Uri> react() {
@@ -58,10 +60,7 @@ public final class TakePhoto extends UseCase<Uri> {
 
     private Uri getUri() {
         Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
-        dir.mkdirs();
-        File file = new File(dir, Constants.SHOOT_APPEND);
-
+        File file = imageUtils.getPrivateFile(Constants.SHOOT_APPEND);
         String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
         return FileProvider.getUriForFile(context, authority, file);
     }

@@ -78,20 +78,18 @@ public final class DownloadImage extends UseCase<String> {
         URLConnection connection = url.openConnection();
         connection.connect();
         InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-        Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
-        dir.mkdirs();
-        File file = new File(dir, uri.getLastPathSegment() + ".tmp");
+        String filename = uri.getLastPathSegment();
+        filename += imageUtils.getFileExtension(filename);
+        File file = imageUtils.getPrivateFile(filename);
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
     }
 
     private String getContent() throws Exception {
         InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
-        Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
-        dir.mkdirs();
-        File file = new File(dir, uri.getLastPathSegment() + ".tmp");
+        String filename = uri.getLastPathSegment();
+        filename += imageUtils.getFileExtension(filename);
+        File file = imageUtils.getPrivateFile(filename);
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
     }

@@ -19,7 +19,9 @@ package com.fuck_boilerplate.rx_paparazzo.interactors;
 class Constants {
     static final String SUBDIR = "RxPaparazzo";
     static final String SHOOT_APPEND = "shoot.jpg";
-    static final String CROP_APPEND = "cropped.jpg";
+    static final String CROP_APPEND = "cropped";
+    static final String NO_CROP_APPEND = "no_cropped";
+    static final String EXT_PNG = "png";
     /**
      * The same name that is placed on the manifest on <code>provivder</code> tag
      */

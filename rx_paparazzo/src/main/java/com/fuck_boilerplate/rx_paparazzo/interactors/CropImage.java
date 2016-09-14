@@ -36,13 +36,16 @@ public final class CropImage extends UseCase<Uri> {
     private final StartIntent startIntent;
     private final GetPath getPath;
     private final TargetUi targetUi;
+    private final ImageUtils imageUtils;
     private Uri uri;
 
-    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath) {
+    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath,
+                     ImageUtils imageUtils) {
         this.targetUi = targetUi;
         this.config = config;
         this.startIntent = startIntent;
         this.getPath = getPath;
+        this.imageUtils = imageUtils;
     }
 
     public CropImage with(Uri uri) {
@@ -67,11 +70,11 @@ public final class CropImage extends UseCase<Uri> {
             });
         }
 
-        return Observable.just(uri);
+        return getOutputUriNoCrop();
     }
 
     private Observable<Intent> getIntent() {
-        return Observable.zip(getInputUri(), getOutputUri(),
+        return Observable.zip(getInputUri(), getOutputUriCrop(),
                 new Func2<Uri, Uri, Intent>() {
                     @Override
                     public Intent call(Uri uri, Uri outputUri) {
@@ -109,11 +112,30 @@ public final class CropImage extends UseCase<Uri> {
         });
     }
 
-    private Observable<Uri> getOutputUri() {
-        Context context = targetUi.getContext();
-        File dir = new File(context.getFilesDir(), Constants.SUBDIR);
-        dir.mkdirs();
-        File file = new File(dir, Constants.CROP_APPEND);
-        return Observable.just(Uri.fromFile(file).buildUpon().build());
+    private Observable<Uri> getOutputUriCrop() {
+        return getPath.with(uri).react()
+                .flatMap(new Func1<String, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(String filepath) {
+                        String extension = imageUtils.getFileExtension(filepath);
+                        String filename = Constants.CROP_APPEND + extension;
+                        File file = imageUtils.getPrivateFile(filename);
+                        return Observable.just(Uri.fromFile(file).buildUpon().build());
+                    }
+                });
+    }
+
+    private Observable<Uri> getOutputUriNoCrop() {
+        return getPath.with(uri).react()
+                .flatMap(new Func1<String, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(String filepath) {
+                        String extension = imageUtils.getFileExtension(filepath);
+                        String filename = Constants.NO_CROP_APPEND + extension;
+                        File file = imageUtils.getPrivateFile(filename);
+                        imageUtils.copyFile(filepath, file.getAbsolutePath());
+                        return Observable.just(Uri.fromFile(file).buildUpon().build());
+                    }
+                });
     }
 }

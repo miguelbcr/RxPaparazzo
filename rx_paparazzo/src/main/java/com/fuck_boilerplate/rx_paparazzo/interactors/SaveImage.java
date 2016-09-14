@@ -25,6 +25,7 @@ import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import java.io.File;
 
 import rx.Observable;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.functions.Func3;
 
@@ -64,7 +65,12 @@ public final class SaveImage extends UseCase<String> {
                                     public String call(String filePath, String filePathOutput, int[] dimens) {
                                         String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
                                         new File(filePath).delete();
-                                        MediaScannerConnection.scanFile(targetUi.getContext(), new String[]{filePathScaled}, new String[]{"image/jpeg"}, null);
+
+                                        MediaScannerConnection.scanFile(
+                                                targetUi.getContext(),
+                                                new String[]{filePathScaled},
+                                                new String[]{"image/*"},
+                                                null);
 
                                         return filePathScaled;
                                     }
@@ -74,6 +80,13 @@ public final class SaveImage extends UseCase<String> {
     }
 
     private Observable<Uri> getOutputUri() {
-        return Observable.just(Uri.fromFile(imageUtils.getOutputFile()));
+        return getPath.with(uri).react()
+                .flatMap(new Func1<String, Observable<Uri>>() {
+                    @Override
+                    public Observable<Uri> call(String filepath) {
+                        String extension = imageUtils.getFileExtension(filepath);
+                        return Observable.just(Uri.fromFile(imageUtils.getOutputFile(extension)));
+                    }
+                });
     }
 }
