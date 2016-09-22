@@ -35,7 +35,7 @@ And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
     compile "com.github.miguelbcr:RxPaparazzo:0.2.9"
-    compile "io.reactivex:rxjava:1.1.9"
+    compile "io.reactivex:rxjava:1.1.10"
 }
 ```
 
