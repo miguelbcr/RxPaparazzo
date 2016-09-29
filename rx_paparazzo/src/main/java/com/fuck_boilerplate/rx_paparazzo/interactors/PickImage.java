@@ -27,11 +27,9 @@ import rx.functions.Func1;
 
 public final class PickImage extends UseCase<Uri> {
     private final StartIntent startIntent;
-    private final TargetUi targetUi;
 
-     public PickImage(StartIntent startIntent, TargetUi targetUi) {
+     public PickImage(StartIntent startIntent) {
         this.startIntent = startIntent;
-        this.targetUi = targetUi;
     }
 
     @Override public Observable<Uri> react() {
@@ -47,13 +45,7 @@ public final class PickImage extends UseCase<Uri> {
     private Intent getFileChooserIntent() {
         Intent intent = new Intent();
         intent.setType("image/*");
-
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-        } else {
-            intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
-            intent.addCategory(Intent.CATEGORY_OPENABLE);
-        }
+        intent.setAction(Intent.ACTION_GET_CONTENT);
 
         return intent;
     }
