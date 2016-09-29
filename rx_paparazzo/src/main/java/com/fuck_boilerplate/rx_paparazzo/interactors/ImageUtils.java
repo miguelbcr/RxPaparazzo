@@ -17,13 +17,16 @@
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.media.ExifInterface;
+import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.webkit.MimeTypeMap;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
@@ -129,7 +132,22 @@ public final class ImageUtils {
             extension = i > 0 ? filepath.substring(i) : "";
         }
 
-        return extension;
+        return (TextUtils.isEmpty(extension)) ? ".jpg" : extension;
+    }
+
+    String getFileExtension(Uri uri) {
+        String mimeType;
+
+        if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+            mimeType = targetUi.getContext().getContentResolver().getType(uri);
+        } else {
+            String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
+            mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+        }
+
+        return (TextUtils.isEmpty(mimeType)) ?
+                getFileExtension(uri.getLastPathSegment())
+                : "." + mimeType.split("/")[1];
     }
 
     String scaleImage(String filePath, String filePathOutput, int[] dimens) {

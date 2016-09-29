@@ -78,8 +78,8 @@ public final class DownloadImage extends UseCase<String> {
         URLConnection connection = url.openConnection();
         connection.connect();
         InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-        String filename = uri.getLastPathSegment();
-        filename += imageUtils.getFileExtension(filename);
+        String filename = getFilename(uri);
+        filename += imageUtils.getFileExtension(uri);
         File file = imageUtils.getPrivateFile(filename);
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
@@ -87,10 +87,15 @@ public final class DownloadImage extends UseCase<String> {
 
     private String getContent() throws Exception {
         InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
-        String filename = uri.getLastPathSegment();
-        filename += imageUtils.getFileExtension(filename);
+        String filename = getFilename(uri);
+        filename += imageUtils.getFileExtension(uri);
         File file = imageUtils.getPrivateFile(filename);
         imageUtils.copy(inputStream, file);
         return file.getAbsolutePath();
+    }
+
+    private String getFilename(Uri uri) {
+        // Remove non alphanumeric characters
+        return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "");
     }
 }
