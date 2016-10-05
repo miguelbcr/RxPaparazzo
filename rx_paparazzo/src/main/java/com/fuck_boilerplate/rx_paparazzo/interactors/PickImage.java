@@ -16,24 +16,29 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
+import android.support.annotation.Nullable;
 
-import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
+import java.io.File;
 
 import rx.Observable;
 import rx.functions.Func1;
+import rx.schedulers.Schedulers;
+import rx_activity_result.OnPreResult;
 
 public final class PickImage extends UseCase<Uri> {
     private final StartIntent startIntent;
+    private final GetPath getPath;
 
-     public PickImage(StartIntent startIntent) {
+     public PickImage(StartIntent startIntent, GetPath getPath) {
         this.startIntent = startIntent;
-    }
+         this.getPath = getPath;
+     }
 
     @Override public Observable<Uri> react() {
-        return startIntent.with(getFileChooserIntent()).react()
+        return startIntent.with(getFileChooserIntent(), getOnPreResultProcessing()).react()
                 .map(new Func1<Intent, Uri>() {
                     @Override
                     public Uri call(Intent intent) {
@@ -48,5 +53,26 @@ public final class PickImage extends UseCase<Uri> {
         intent.setAction(Intent.ACTION_GET_CONTENT);
 
         return intent;
+    }
+
+    private OnPreResult getOnPreResultProcessing() {
+        return new OnPreResult() {
+            @Override
+            public Observable<String> response(int responseCode, @Nullable final Intent intent) {
+                if (responseCode == Activity.RESULT_OK) {
+                    return getPath.with(intent.getData()).react()
+                            .subscribeOn(Schedulers.io())
+                            .map(new Func1<String, String>() {
+                                @Override
+                                public String call(String filePath) {
+                                    intent.setData(Uri.fromFile(new File(filePath)));
+                                    return filePath;
+                                }
+                            });
+                } else {
+                    return Observable.just("");
+                }
+            }
+        };
     }
 }

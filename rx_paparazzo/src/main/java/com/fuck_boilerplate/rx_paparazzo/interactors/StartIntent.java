@@ -25,19 +25,28 @@ import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
 
 import rx.Observable;
 import rx.functions.Func1;
+import rx_activity_result.OnPreResult;
 import rx_activity_result.Result;
 import rx_activity_result.RxActivityResult;
 
 public final class StartIntent extends UseCase<Intent> {
     private final TargetUi targetUi;
     private Intent intent;
+    private OnPreResult onPreResult;
 
-     public StartIntent(TargetUi targetUi) {
+    public StartIntent(TargetUi targetUi) {
         this.targetUi = targetUi;
     }
 
     StartIntent with(Intent intent) {
         this.intent = intent;
+        this.onPreResult = null;
+        return this;
+    }
+
+    StartIntent with(Intent intent, OnPreResult onPreResult) {
+        this.intent = intent;
+        this.onPreResult = onPreResult;
         return this;
     }
 
@@ -45,7 +54,7 @@ public final class StartIntent extends UseCase<Intent> {
         final Fragment fragment = targetUi.fragment();
         if (fragment != null) {
             return RxActivityResult.on(fragment)
-                    .startIntent(intent)
+                    .startIntent(intent, onPreResult)
                     .map(new Func1<Result<Fragment>, Intent>() {
                         @Override
                         public Intent call(Result<Fragment> result) {
@@ -54,7 +63,7 @@ public final class StartIntent extends UseCase<Intent> {
                     });
         } else {
             return RxActivityResult.on(targetUi.activity())
-                    .startIntent(intent)
+                    .startIntent(intent, onPreResult)
                     .map(new Func1<Result<Activity>, Intent>() {
                         @Override
                         public Intent call(Result<Activity> result) {
