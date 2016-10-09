@@ -166,12 +166,17 @@ public final class ImageUtils {
         File fileScaled = new File(filePathOutput);
 
         Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
-        if (getFileExtension(filePathOutput).toLowerCase().contains(Constants.EXT_PNG)) {
+        final String extension = getFileExtension(filePathOutput);
+
+        if (extension.toLowerCase().contains(Constants.EXT_PNG)) {
             compressFormat = Bitmap.CompressFormat.PNG;
         }
 
         bitmap2file(bitmap, fileScaled, compressFormat);
-        copyExifRotation(file, fileScaled, rotateIfNeeded);
+
+        if (!extension.toLowerCase().contains(Constants.EXT_PNG)) {
+            copyExifRotation(file, fileScaled, rotateIfNeeded);
+        }
 
         return filePathOutput;
     }
@@ -257,7 +262,7 @@ public final class ImageUtils {
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            throw Exceptions.propagate(e);
+            return false;
         }
     }
 
