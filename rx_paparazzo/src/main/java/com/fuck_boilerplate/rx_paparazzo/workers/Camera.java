@@ -18,6 +18,9 @@ package com.fuck_boilerplate.rx_paparazzo.workers;
 
 import android.Manifest;
 import android.app.Activity;
+import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
@@ -80,10 +83,41 @@ public final class Camera extends Worker {
 
     private String[] permissions() {
         if (config.useInternalStorage()) {
-            return new String[] {};
+            if (hasCameraPermissionInManifest()) {
+                return new String[] { Manifest.permission.CAMERA };
+            } else {
+                return new String[] {};
+            }
         } else {
-            return new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE};
+            if (hasCameraPermissionInManifest()) {
+                return new String[] {
+                    Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                };
+            } else {
+                return new String[] {
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.READ_EXTERNAL_STORAGE
+                };
+            }
         }
+    }
+
+    private boolean hasCameraPermissionInManifest() {
+        final String packageName = targetUi.getContext().getPackageName();
+        try {
+            final PackageInfo packageInfo = targetUi.getContext().getPackageManager()
+                .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+            final String[] declaredPermisisons = packageInfo.requestedPermissions;
+            if (declaredPermisisons != null && declaredPermisisons.length > 0) {
+                for (String p : declaredPermisisons) {
+                    if (p.equals(Manifest.permission.CAMERA)) {
+                        return true;
+                    }
+                }
+            }
+        } catch (PackageManager.NameNotFoundException e) {}
+
+        return false;
     }
 }
