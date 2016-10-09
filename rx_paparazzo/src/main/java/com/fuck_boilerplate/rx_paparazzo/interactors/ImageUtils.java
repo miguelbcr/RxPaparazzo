@@ -21,9 +21,9 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
@@ -39,7 +39,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 import rx.exceptions.Exceptions;
@@ -152,41 +154,36 @@ public final class ImageUtils {
 
     String scaleImage(String filePath, String filePathOutput, int[] dimens) {
         if (config.getSize() instanceof OriginalSize) {
-            return copyFile(filePath, filePathOutput);
+            copyFileAndExifTags(filePath, filePathOutput, dimens);
+            return filePathOutput;
         }
 
-        boolean rotateIfNeeded = false;
-        Bitmap bitmap = handleSamplingAndRotationBitmap(filePath, dimens[0], dimens[1], rotateIfNeeded);
-
+        Bitmap bitmap = handleBitmapSampling(filePath, dimens[0], dimens[1]);
         if (bitmap == null) {
-            return copyFile(filePath, filePathOutput);
+            copyFileAndExifTags(filePath, filePathOutput, dimens);
+            return filePathOutput;
         }
 
-        File file = new File(filePath);
-        File fileScaled = new File(filePathOutput);
+        bitmap2file(bitmap, new File(filePathOutput), getCompressFormat(filePathOutput));
+        copyExifTags(filePath, filePathOutput, dimens);
 
+        return filePathOutput;
+    }
+
+    private Bitmap.CompressFormat getCompressFormat(String filePath) {
         Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
-        final String extension = getFileExtension(filePathOutput);
+        final String extension = getFileExtension(filePath);
 
         if (extension.toLowerCase().contains(Constants.EXT_PNG)) {
             compressFormat = Bitmap.CompressFormat.PNG;
         }
 
-        bitmap2file(bitmap, fileScaled, compressFormat);
-
-        if (!extension.toLowerCase().contains(Constants.EXT_PNG)) {
-            copyExifRotation(file, fileScaled, rotateIfNeeded);
-        }
-
-        return filePathOutput;
+        return compressFormat;
     }
 
-    String copyFile(String filePath, String newfilePath) {
-        File file = new File(filePath);
-        File fileOutput = new File(newfilePath);
-
-        copy(file, fileOutput);
-        return newfilePath;
+    private void copyFileAndExifTags(String filePath, String filePathOutput, int[] dimens) {
+        copy(new File(filePath), new File(filePathOutput));
+        copyExifTags(filePath, filePathOutput, dimens);
     }
 
     public void copy(InputStream in, File dst) {
@@ -218,7 +215,7 @@ public final class ImageUtils {
         }
     }
 
-    private void copy(File src, File dst) {
+    public void copy(File src, File dst) {
         try {
             InputStream in = new FileInputStream(src);
             copy(in, dst);
@@ -228,12 +225,11 @@ public final class ImageUtils {
         }
     }
 
-    private boolean bitmap2file(Bitmap bitmap, File file, Bitmap.CompressFormat compressFormat) {
+    private void bitmap2file(Bitmap bitmap, File file, Bitmap.CompressFormat compressFormat) {
         FileOutputStream fileOutputStream = null;
         try {
             fileOutputStream = new FileOutputStream(file);
             bitmap.compress(compressFormat, 90, fileOutputStream);
-            return true;
         } catch (Exception e) {
             e.printStackTrace();
             throw Exceptions.propagate(e);
@@ -249,39 +245,57 @@ public final class ImageUtils {
         }
     }
 
-    private boolean copyExifRotation(File sourceFile, File destFile, boolean rotateIfNeeded) {
-        if (sourceFile == null || destFile == null) {
-            return false;
-        }
-        try {
-            ExifInterface exifSource = new ExifInterface(sourceFile.getAbsolutePath());
-            ExifInterface exifDest = new ExifInterface(destFile.getAbsolutePath());
-            String value = rotateIfNeeded ? String.valueOf(ExifInterface.ORIENTATION_NORMAL) : exifSource.getAttribute(ExifInterface.TAG_ORIENTATION);
-            exifDest.setAttribute(ExifInterface.TAG_ORIENTATION, value);
-            exifDest.saveAttributes();
-            return true;
-        } catch (IOException e) {
-            e.printStackTrace();
-            return false;
+    private void copyExifTags(String srcFilePath, String dstFilePath, int[] dimens) {
+        if (getCompressFormat(dstFilePath) == Bitmap.CompressFormat.JPEG) {
+            try {
+                ExifInterface exifSource = new ExifInterface(srcFilePath);
+                ExifInterface exifDest = new ExifInterface(dstFilePath);
+
+                for (String attribute : getExifTags()) {
+                    String tagValue = exifSource.getAttribute(attribute);
+
+                    if (!TextUtils.isEmpty(tagValue)) {
+                        exifDest.setAttribute(attribute, tagValue);
+                    }
+                }
+
+                exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens[0]));
+                exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens[1]));
+                exifDest.saveAttributes();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 
-    private Bitmap handleSamplingAndRotationBitmap(String filePath, int maxWidth, int maxHeight, boolean rotateIfNeeded) {
+    private String[] getExifTags() {
+      return new String[] {
+          ExifInterface.TAG_DATETIME, ExifInterface.TAG_EXPOSURE_TIME, ExifInterface.TAG_FLASH,
+          ExifInterface.TAG_FOCAL_LENGTH, ExifInterface.TAG_GPS_ALTITUDE,
+          ExifInterface.TAG_GPS_ALTITUDE_REF, ExifInterface.TAG_GPS_DATESTAMP,
+          ExifInterface.TAG_GPS_LATITUDE, ExifInterface.TAG_GPS_LATITUDE_REF,
+          ExifInterface.TAG_GPS_LONGITUDE, ExifInterface.TAG_GPS_LONGITUDE_REF,
+          ExifInterface.TAG_GPS_PROCESSING_METHOD, ExifInterface.TAG_WHITE_BALANCE,
+          ExifInterface.TAG_ORIENTATION, ExifInterface.TAG_MAKE, ExifInterface.TAG_GPS_TIMESTAMP,
+          ExifInterface.TAG_MODEL, ExifInterface.TAG_ISO_SPEED_RATINGS,
+          ExifInterface.TAG_SUBSEC_TIME, ExifInterface.TAG_DATETIME_DIGITIZED,
+          ExifInterface.TAG_SUBSEC_TIME_DIGITIZED, ExifInterface.TAG_SUBSEC_TIME_ORIGINAL,
+          ExifInterface.TAG_METERING_MODE, ExifInterface.TAG_F_NUMBER
+      };
+    }
+
+    private Bitmap handleBitmapSampling(String filePath, int maxWidth, int maxHeight) {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
         BitmapFactory.decodeFile(filePath, options);
         options.inSampleSize = (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
 
-        if (options.inSampleSize == 1)
+        if (options.inSampleSize == 1) {
             return null;
+        }
 
         options.inJustDecodeBounds = false;
-        Bitmap bitmap = BitmapFactory.decodeFile(filePath, options);
-
-        if (rotateIfNeeded)
-            bitmap = rotateImageIfRequired(bitmap, filePath);
-
-        return bitmap;
+        return BitmapFactory.decodeFile(filePath, options);
     }
 
     private int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {
@@ -314,37 +328,5 @@ public final class ImageUtils {
         } else {
             return new int[]{height, width};
         }
-    }
-
-    private Bitmap rotateImageIfRequired(Bitmap img, String filePath) {
-        try {
-            ExifInterface ei = new ExifInterface(filePath);
-            int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
-            Bitmap processedImage = img;
-            switch (orientation) {
-                case ExifInterface.ORIENTATION_ROTATE_90:
-                    processedImage = rotateImage(img, 90);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_180:
-                    processedImage = rotateImage(img, 180);
-                    break;
-                case ExifInterface.ORIENTATION_ROTATE_270:
-                    processedImage = rotateImage(img, 270);
-                    break;
-                default:
-                    break;
-            }
-            return processedImage;
-        } catch (IOException e) {
-            throw Exceptions.propagate(e);
-        }
-    }
-
-    private Bitmap rotateImage(Bitmap img, int degree) {
-        Matrix matrix = new Matrix();
-        matrix.postRotate(degree);
-        Bitmap rotatedImg = Bitmap.createBitmap(img, 0, 0, img.getWidth(), img.getHeight(), matrix, true);
-        img.recycle();
-        return rotatedImg;
     }
 }

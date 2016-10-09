@@ -133,7 +133,7 @@ public final class CropImage extends UseCase<Uri> {
                         String extension = imageUtils.getFileExtension(filepath);
                         String filename = Constants.NO_CROP_APPEND + extension;
                         File file = imageUtils.getPrivateFile(filename);
-                        imageUtils.copyFile(filepath, file.getAbsolutePath());
+                        imageUtils.copy(new File(filepath), file);
                         return Observable.just(Uri.fromFile(file).buildUpon().build());
                     }
                 });

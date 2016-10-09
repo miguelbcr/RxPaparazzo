@@ -8,11 +8,15 @@ import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.espresso.UiController;
+import android.support.test.espresso.ViewAction;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.espresso.matcher.BoundedMatcher;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.uiautomator.UiDevice;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
 import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
@@ -43,6 +47,7 @@ import java.util.List;
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
+import static android.support.test.espresso.matcher.ViewMatchers.isAssignableFrom;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static com.fuck_boilerplate.rx_paparazzo.sample.recyclerview.RecyclerViewUtils.withRecyclerView;
 import static org.hamcrest.Matchers.greaterThan;
@@ -155,12 +160,15 @@ public class ApplicationTest {
 
         if (onlyOne) onView(withId(R.id.fab_pickup_image)).perform(click());
         else onView(withId(R.id.fab_pickup_images)).perform(click());
+
         waitTime();
 
         clickImagesOnScreen(imagesToPick);
 
         // Open selected images
         if (!onlyOne) clickTopRightScreen();
+
+        waitTime();
 
         // Close crop screen/s
         for (int i = 0; i < imagesToPick; i++) {
@@ -286,11 +294,22 @@ public class ApplicationTest {
         waitTime();
     }
 
+    private void closeDrawer() {
+        int screenDimens[] = getScreenDimensions();
+        int width = screenDimens[0];
+        int height = screenDimens[1];
+
+        uiDevice.click(width - 50, height / 2);
+        waitTime();
+    }
+
     private void clickImagesOnScreen(int imagesToPick) {
         int screenDimens[] = getScreenDimensions();
         int width = screenDimens[0];
         int height = screenDimens[1];
         int y = 0;
+
+        //closeDrawer();
 
         for (int i = 0; i < imagesToPick; i++) {
             int widthQuarter = width / 4;

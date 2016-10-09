@@ -116,7 +116,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         UCrop.Options options = new UCrop.Options();
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorPrimaryDark));
 
-        size = new SmallSize();
+        size = new CustomMaxSize(500);
         RxPaparazzo.takeImage(SampleActivity.this)
                 .useInternalStorage()
                 .crop(options)
