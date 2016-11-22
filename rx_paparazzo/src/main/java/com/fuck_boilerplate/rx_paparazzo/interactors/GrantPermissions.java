@@ -42,7 +42,7 @@ public final class GrantPermissions extends UseCase<Void> {
             return Observable.just(null);
         }
 
-        return RxPermissions.getInstance(targetUi.activity())
+        return new RxPermissions(targetUi.activity())
                 .request(permissions)
                 .flatMap(new Func1<Boolean, Observable<Void>>() {
                     @Override

@@ -26,6 +26,8 @@ import com.yalantis.ucrop.UCrop;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class SampleFragment extends Fragment implements Testable {
     private ImageView imageView;
@@ -67,6 +69,8 @@ public class SampleFragment extends Fragment implements Testable {
         RxPaparazzo.takeImage(this)
                 .size(size)
                 .usingCamera()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
 
                     if (response.resultCode() != Activity.RESULT_OK) {
@@ -88,6 +92,8 @@ public class SampleFragment extends Fragment implements Testable {
                 .size(size)
                 .crop(options)
                 .usingCamera()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != Activity.RESULT_OK) {
                         response.targetUI().showUserCanceled();
@@ -108,6 +114,8 @@ public class SampleFragment extends Fragment implements Testable {
                 .crop(options)
                 .size(size)
                 .usingGallery()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != Activity.RESULT_OK) {
                         response.targetUI().showUserCanceled();
@@ -125,6 +133,8 @@ public class SampleFragment extends Fragment implements Testable {
                 .crop()
                 .size(size)
                 .usingGallery()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != Activity.RESULT_OK) {
                         response.targetUI().showUserCanceled();
