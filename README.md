@@ -59,7 +59,7 @@ Every feature RxPaparazzo exposes can be accessed from both, an `activity` or a 
 
 **Limitation:**: Your fragments need to extend from `android.support.v4.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified. 
 
-The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/Response.java) class. 
+The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/Response.java) class. 
 
 This instance holds a reference to the current Activity/Fragment, accessible calling `targetUI()` method. Because the original one may be recreated it would be unsafe calling it. Instead, you must call any method/variable of your Activity/Fragment from this instance encapsulated in the `response` instance.
 
@@ -129,14 +129,14 @@ The `response` instance holds a reference to the paths where the images were per
 When asking RxPaparazzo for an image -whether it was retrieved using the built-in camera or via gallery, it's possible to apply some configurations to the action. 
 
 ### Size options
-[Size](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/Size.java) values can be used to set the size of the image to retrieve. There are 4 options:
+[Size](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/Size.java) values can be used to set the size of the image to retrieve. There are 4 options:
 
-* [SmallSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/SmallSize.java): 1/8 aprox. of the screen resolution
-* [ScreenSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/ScreenSize.java): The size image matches aprox. the screen resolution.
-* [OriginalSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/OriginalSize.java): The original size of the image.
-* [CustomMaxSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/CustomMaxSize.java): Yot can specify max size you want and image will be scaled proportionally.
+* [SmallSize](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/SmallSize.java): 1/8 aprox. of the screen resolution
+* [ScreenSize](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/ScreenSize.java): The size image matches aprox. the screen resolution.
+* [OriginalSize](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/OriginalSize.java): The original size of the image.
+* [CustomMaxSize](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/CustomMaxSize.java): Yot can specify max size you want and image will be scaled proportionally.
 
-[ScreenSize](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/size/ScreenSize.java) value will be set as default.
+[ScreenSize](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/size/ScreenSize.java) value will be set as default.
 
 ```java
 RxPaparazzo.takeImages(activityOrFragment)
@@ -154,7 +154,7 @@ RxPaparazzo.takeImages(activityOrFragment)
 
 By calling `crop()` method when building the observable instance, all they images retrieved will be able to be cropped, regardless if the images were retrieved using the built-in camera or gallery, even if multiple images were requested in a single call using `takeImages()` approach.
 Because uCrop Yalantis library exposes some configuration in order to customize the crop screen, RxPaparazzo exposes an overloaded method of `crop(UCrop.Options)` which allow to pass an instance of [UCrop.Options](https://github.com/Yalantis/uCrop/blob/master/ucrop/src/main/java/com/yalantis/ucrop/UCrop.java#L211).
-If you need to configure the aspect ratio, the max result size or using the source image aspect ratio, you must pass an instance of [Options](https://github.com/FuckBoilerplate/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/fuck_boilerplate/rx_paparazzo/entities/Options.java) class, which extends from `UCrop.Options` and adds the three missing properties.  
+If you need to configure the aspect ratio, the max result size or using the source image aspect ratio, you must pass an instance of [Options](https://github.com/miguelbcr/RxPaparazzo/blob/master/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/Options.java) class, which extends from `UCrop.Options` and adds the three missing properties.  
 
 ```java
 UCrop.Options options = new UCrop.Options();

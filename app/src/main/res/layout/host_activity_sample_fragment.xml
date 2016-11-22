@@ -8,7 +8,7 @@
         android:id="@+id/sample_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        class="com.fuck_boilerplate.rx_paparazzo.sample.fragments.SampleFragment"
+        class="com.miguelbcr.ui.rx_paparazzo2.sample.fragments.SampleFragment"
         tools:layout="@layout/sample_layout" />
 
 </LinearLayout>
