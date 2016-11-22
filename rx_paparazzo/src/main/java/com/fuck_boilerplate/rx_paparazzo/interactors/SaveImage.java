@@ -31,15 +31,13 @@ import rx.functions.Func3;
 
 public final class SaveImage extends UseCase<String> {
     private final TargetUi targetUi;
-    private final Config config;
     private final GetPath getPath;
     private final GetDimens getDimens;
     private final ImageUtils imageUtils;
     private Uri uri;
 
-    public SaveImage(TargetUi targetUi, Config config, GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
+    public SaveImage(TargetUi targetUi, GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
         this.targetUi = targetUi;
-        this.config = config;
         this.getPath = getPath;
         this.getDimens = getDimens;
         this.imageUtils = imageUtils;
