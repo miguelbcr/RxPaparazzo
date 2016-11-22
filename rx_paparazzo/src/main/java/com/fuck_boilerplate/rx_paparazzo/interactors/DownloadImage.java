@@ -16,21 +16,17 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
-import android.content.Context;
 import android.net.Uri;
-
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.schedulers.Schedulers;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
-import rx.Observable;
-import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
 
 public final class DownloadImage extends UseCase<String> {
     private final TargetUi targetUi;
@@ -52,9 +48,8 @@ public final class DownloadImage extends UseCase<String> {
     }
 
     private Observable<String> getObservableDownloadFile() {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
+        return Observable.create(new ObservableOnSubscribe<String>() {
+            @Override public void subscribe(ObservableEmitter<String> subscriber) throws Exception {
                 try {
                     if ("content".equalsIgnoreCase(uri.getScheme())){
                         subscriber.onNext(getContent());
@@ -62,15 +57,13 @@ public final class DownloadImage extends UseCase<String> {
                         subscriber.onNext(downloadFile());
                     }
 
-                    subscriber.onCompleted();
+                    subscriber.onComplete();
                 } catch (Exception e) {
-                    subscriber.onNext(null);
                     subscriber.onError(e);
                 }
             }
         })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+        .subscribeOn(Schedulers.io());
     }
 
     private String downloadFile() throws Exception {

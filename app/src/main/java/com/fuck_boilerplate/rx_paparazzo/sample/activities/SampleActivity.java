@@ -21,6 +21,8 @@ import com.fuck_boilerplate.rx_paparazzo.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -72,6 +74,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         RxPaparazzo.takeImage(SampleActivity.this)
                 .size(size)
                 .usingCamera()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() == RxPaparazzo.RESULT_DENIED_PERMISSION) {
                         response.targetUI().showUserDidNotGrantPermissions();
@@ -99,6 +103,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .size(size)
                 .crop(options)
                 .usingCamera()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
                         response.targetUI().showUserCanceled();
@@ -122,6 +128,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .crop(options)
                 .size(size)
                 .usingGallery()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
                         response.targetUI().showUserCanceled();
@@ -142,6 +150,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .crop()
                 .size(size)
                 .usingGallery()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (response.resultCode() != RESULT_OK) {
                         response.targetUI().showUserCanceled();

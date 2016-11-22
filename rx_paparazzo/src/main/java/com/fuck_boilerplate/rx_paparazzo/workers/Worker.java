@@ -23,10 +23,11 @@ import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
-
-import rx.Observable;
-import rx.exceptions.Exceptions;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.ObservableTransformer;
+import io.reactivex.exceptions.Exceptions;
+import io.reactivex.functions.Function;
 
 abstract class Worker {
 
@@ -37,13 +38,12 @@ abstract class Worker {
     }
 
     @SuppressWarnings("unchecked")
-    protected <T> Observable.Transformer<T, T> applyOnError() {
-        return new Observable.Transformer<T, T>() {
-            @Override
-            public Observable<T> call(Observable<T> observable) {
-                return observable.onErrorResumeNext(new Func1<Throwable, Observable<? extends T>>() {
-                    @Override
-                    public Observable<? extends T> call(Throwable throwable) {
+    protected <T> ObservableTransformer<T, T> applyOnError() {
+        return new ObservableTransformer<T, T>() {
+            @Override public ObservableSource<T> apply(Observable<T> observable) {
+                return observable.onErrorResumeNext(new Function<Throwable, ObservableSource<? extends T>>() {
+                    @Override public ObservableSource<? extends T> apply(Throwable throwable)
+                        throws Exception {
                         if (throwable instanceof UserCanceledException) {
                             return Observable.just((T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
                         } else if (throwable instanceof PermissionDeniedException) {

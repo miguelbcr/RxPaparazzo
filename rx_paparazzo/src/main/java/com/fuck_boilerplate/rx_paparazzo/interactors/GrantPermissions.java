@@ -16,14 +16,15 @@
 
 package com.fuck_boilerplate.rx_paparazzo.interactors;
 
+import com.fuck_boilerplate.rx_paparazzo.entities.Ignore;
 import com.fuck_boilerplate.rx_paparazzo.entities.PermissionDeniedException;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-import com.tbruyelle.rxpermissions.RxPermissions;
+import com.tbruyelle.rxpermissions2.RxPermissions;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 
-import rx.Observable;
-import rx.functions.Func1;
-
-public final class GrantPermissions extends UseCase<Void> {
+public final class GrantPermissions extends UseCase<Ignore> {
     private final TargetUi targetUi;
     private String[] permissions;
 
@@ -37,21 +38,20 @@ public final class GrantPermissions extends UseCase<Void> {
     }
 
     @Override
-    public Observable<Void> react() {
+    public Observable<Ignore> react() {
         if (permissions.length == 0) {
-            return Observable.just(null);
+            return Observable.just(Ignore.Get);
         }
 
         return RxPermissions.getInstance(targetUi.activity())
-                .request(permissions)
-                .flatMap(new Func1<Boolean, Observable<Void>>() {
-                    @Override
-                    public Observable<Void> call(Boolean granted) {
-                        if (granted) {
-                            return Observable.just(null);
-                        }
-                        return Observable.error(new PermissionDeniedException());
+            .request(permissions)
+            .flatMap(new Function<Boolean, ObservableSource<Ignore>>() {
+                @Override public ObservableSource<Ignore> apply(Boolean granted) throws Exception {
+                    if (granted) {
+                        return Observable.just(Ignore.Get);
                     }
-                });
+                    return Observable.error(new PermissionDeniedException());
+                }
+            });
     }
 }

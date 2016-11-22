@@ -18,21 +18,20 @@ package com.fuck_boilerplate.rx_paparazzo.workers;
 
 import android.Manifest;
 import android.app.Activity;
-import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
-
 import com.fuck_boilerplate.rx_paparazzo.entities.Config;
+import com.fuck_boilerplate.rx_paparazzo.entities.Ignore;
 import com.fuck_boilerplate.rx_paparazzo.entities.Response;
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.interactors.CropImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.GrantPermissions;
 import com.fuck_boilerplate.rx_paparazzo.interactors.SaveImage;
 import com.fuck_boilerplate.rx_paparazzo.interactors.TakePhoto;
-
-import rx.Observable;
-import rx.functions.Func1;
+import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.functions.Function;
 
 public final class Camera extends Worker {
     private final TakePhoto takePhoto;
@@ -54,27 +53,23 @@ public final class Camera extends Worker {
 
     public <T> Observable<Response<T, String>> takePhoto() {
         return grantPermissions.with(permissions()).react()
-                .flatMap(new Func1<Void, Observable<Uri>>() {
-                    @Override
-                    public Observable<Uri> call(Void granted) {
+                .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
+                    @Override public ObservableSource<Uri> apply(Ignore ignore) throws Exception {
                         return takePhoto.react();
                     }
                 })
-                .flatMap(new Func1<Uri, Observable<Uri>>() {
-                    @Override
-                    public Observable<Uri> call(Uri uri) {
+                .flatMap(new Function<Uri, ObservableSource<Uri>>() {
+                    @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
                         return cropImage.with(uri).react();
                     }
                 })
-                .flatMap(new Func1<Uri, Observable<String>>() {
-                    @Override
-                    public Observable<String> call(Uri uri) {
+                .flatMap(new Function<Uri, ObservableSource<String>>() {
+                    @Override public ObservableSource<String> apply(Uri uri) throws Exception {
                         return saveImage.with(uri).react();
                     }
                 })
-                .map(new Func1<String, Response<T, String>>() {
-                    @Override
-                    public Response<T, String> call(String path) {
+                .map(new Function<String, Response<T, String>>() {
+                    @Override public Response<T, String> apply(String path) throws Exception {
                         return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
                     }
                 })
@@ -108,15 +103,15 @@ public final class Camera extends Worker {
         try {
             final PackageInfo packageInfo = targetUi.getContext().getPackageManager()
                 .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
-            final String[] declaredPermisisons = packageInfo.requestedPermissions;
-            if (declaredPermisisons != null && declaredPermisisons.length > 0) {
-                for (String p : declaredPermisisons) {
+            final String[] declaredPermissions = packageInfo.requestedPermissions;
+            if (declaredPermissions != null && declaredPermissions.length > 0) {
+                for (String p : declaredPermissions) {
                     if (p.equals(Manifest.permission.CAMERA)) {
                         return true;
                     }
                 }
             }
-        } catch (PackageManager.NameNotFoundException e) {}
+        } catch (PackageManager.NameNotFoundException e) { /*Nothing*/ }
 
         return false;
     }

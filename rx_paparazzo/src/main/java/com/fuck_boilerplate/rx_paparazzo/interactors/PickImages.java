@@ -20,13 +20,11 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
-import rx.Observable;
-import rx.functions.Func1;
 
 public final class PickImages extends UseCase<List<Uri>>{
     private final StartIntent startIntent;
@@ -37,9 +35,8 @@ public final class PickImages extends UseCase<List<Uri>>{
 
     @Override public Observable<List<Uri>> react() {
         return startIntent.with(getFileChooserIntent()).react()
-                .map(new Func1<Intent, List<Uri>>() {
-                    @Override
-                    public List<Uri> call(Intent intent) {
+                .map(new Function<Intent, List<Uri>>() {
+                    @Override public List<Uri> apply(Intent intent) throws Exception {
                         if (intent.getData() != null) {
                             return Arrays.asList(intent.getData());
                         }

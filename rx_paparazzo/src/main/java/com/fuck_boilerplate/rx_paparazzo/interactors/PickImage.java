@@ -20,13 +20,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+import io.reactivex.schedulers.Schedulers;
 import java.io.File;
-
-import rx.Observable;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
-import rx_activity_result.OnPreResult;
+import rx_activity_result2.OnPreResult;
 
 public final class PickImage extends UseCase<Uri> {
     private final StartIntent startIntent;
@@ -39,12 +37,11 @@ public final class PickImage extends UseCase<Uri> {
 
     @Override public Observable<Uri> react() {
         return startIntent.with(getFileChooserIntent(), getOnPreResultProcessing()).react()
-                .map(new Func1<Intent, Uri>() {
-                    @Override
-                    public Uri call(Intent intent) {
-                        return intent.getData();
-                    }
-                });
+            .map(new Function<Intent, Uri>() {
+              @Override public Uri apply(Intent intent) throws Exception {
+                return intent.getData();
+              }
+            });
     }
 
     private Intent getFileChooserIntent() {
@@ -62,12 +59,11 @@ public final class PickImage extends UseCase<Uri> {
                 if (responseCode == Activity.RESULT_OK) {
                     return getPath.with(intent.getData()).react()
                             .subscribeOn(Schedulers.io())
-                            .map(new Func1<String, String>() {
-                                @Override
-                                public String call(String filePath) {
-                                    intent.setData(Uri.fromFile(new File(filePath)));
-                                    return filePath;
-                                }
+                            .map(new Function<String, String>() {
+                              @Override public String apply(String filePath) throws Exception {
+                                intent.setData(Uri.fromFile(new File(filePath)));
+                                return filePath;
+                              }
                             });
                 } else {
                     return Observable.just("");

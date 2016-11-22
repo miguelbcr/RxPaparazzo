@@ -24,14 +24,11 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
-
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 import java.io.File;
 import java.util.List;
-
-import rx.Observable;
-import rx.functions.Func1;
 
 public final class TakePhoto extends UseCase<Uri> {
     private static final int READ_WRITE_PERMISSIONS = Intent.FLAG_GRANT_READ_URI_PERMISSION
@@ -49,9 +46,8 @@ public final class TakePhoto extends UseCase<Uri> {
     @Override public Observable<Uri> react() {
         final Uri uri = getUri();
         return startIntent.with(getIntentCamera(uri)).react()
-                .map(new Func1<Intent, Uri>() {
-                    @Override
-                    public Uri call(Intent data) {
+                .map(new Function<Intent, Uri>() {
+                    @Override public Uri apply(Intent data) throws Exception {
                         revokeFileReadWritePermissions(uri);
                         return uri;
                     }

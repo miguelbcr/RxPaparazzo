@@ -34,8 +34,8 @@ allprojects {
 And add next dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.miguelbcr:RxPaparazzo:0.3.2"
-    compile "io.reactivex:rxjava:1.1.10"
+    compile "com.github.miguelbcr:RxPaparazzo:0.4.0-2.x"
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 }
 ```
 
@@ -69,6 +69,8 @@ Also, this instance holds a reference to the data as the appropriate response, a
 ```java
 RxPaparazzo.takeImage(activityOrFragment)
         .usingCamera()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(response -> {
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();
@@ -88,6 +90,8 @@ By default, the path is under app name folder on the root of the external storag
 ```java
 RxPaparazzo.takeImage(activityOrFragment)
         .usingGallery()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(response -> {
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();
@@ -104,6 +108,8 @@ The `response` instance holds a reference to the path where the image was persis
 ```java
 RxPaparazzo.takeImages(activityOrFragment)
         .usingGallery()
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
         .subscribe(response -> {
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();

@@ -22,12 +22,11 @@ import android.support.v4.app.Fragment;
 
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
 import com.fuck_boilerplate.rx_paparazzo.entities.UserCanceledException;
-
-import rx.Observable;
-import rx.functions.Func1;
-import rx_activity_result.OnPreResult;
-import rx_activity_result.Result;
-import rx_activity_result.RxActivityResult;
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+import rx_activity_result2.OnPreResult;
+import rx_activity_result2.Result;
+import rx_activity_result2.RxActivityResult;
 
 public final class StartIntent extends UseCase<Intent> {
     private final TargetUi targetUi;
@@ -55,18 +54,16 @@ public final class StartIntent extends UseCase<Intent> {
         if (fragment != null) {
             return RxActivityResult.on(fragment)
                     .startIntent(intent, onPreResult)
-                    .map(new Func1<Result<Fragment>, Intent>() {
-                        @Override
-                        public Intent call(Result<Fragment> result) {
+                    .map(new Function<Result<Fragment>, Intent>() {
+                        @Override public Intent apply(Result<Fragment> result) throws Exception {
                             return StartIntent.this.getResponse(result);
                         }
                     });
         } else {
             return RxActivityResult.on(targetUi.activity())
                     .startIntent(intent, onPreResult)
-                    .map(new Func1<Result<Activity>, Intent>() {
-                        @Override
-                        public Intent call(Result<Activity> result) {
+                    .map(new Function<Result<Activity>, Intent>() {
+                        @Override public Intent apply(Result<Activity> result) throws Exception {
                             return StartIntent.this.getResponse(result);
                         }
                     });
@@ -78,6 +75,6 @@ public final class StartIntent extends UseCase<Intent> {
         if (result.resultCode() != Activity.RESULT_OK) {
             throw new UserCanceledException();
         }
-        return result.data();
+        return result.data() == null ? new Intent() : result.data();
     }
 }

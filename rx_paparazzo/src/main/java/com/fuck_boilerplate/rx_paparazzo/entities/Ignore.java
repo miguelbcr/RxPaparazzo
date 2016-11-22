@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 FuckBoilerplate
+ * Copyright 2016 Miguel Garcia
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.fuck_boilerplate.rx_paparazzo.interactors;
+package com.fuck_boilerplate.rx_paparazzo.entities;
 
-import io.reactivex.Observable;
-
-abstract class UseCase<D> {
-    abstract Observable<D> react();
+/**
+ * A dummy value to be ignored when dealing with RxJava 2 which does not return anything useful.
+ */
+public enum Ignore {
+  Get
 }

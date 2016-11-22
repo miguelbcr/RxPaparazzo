@@ -25,10 +25,8 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
-
 import com.fuck_boilerplate.rx_paparazzo.entities.TargetUi;
-
-import rx.Observable;
+import io.reactivex.Observable;
 
 public final class GetPath extends UseCase<String> {
     private final TargetUi targetUi;

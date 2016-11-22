@@ -36,11 +36,9 @@ android {
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'io.reactivex:rxjava:1.1.10'
-    compile 'io.reactivex:rxandroid:1.2.1'
-
-    compile 'com.github.VictorAlbertos:RxActivityResult:0.3.7'
-    compile 'com.tbruyelle.rxpermissions:rxpermissions:0.7.1@aar'
+    compile "io.reactivex.rxjava2:rxjava:2.0.1"
+    compile "com.github.VictorAlbertos:RxActivityResult:0.4.0-2.x"
+    compile 'com.tbruyelle.rxpermissions2:rxpermissions:0.8.2@aar'
     compile 'com.yalantis:ucrop:2.2.0'
 
     testCompile 'junit:junit:4.12'

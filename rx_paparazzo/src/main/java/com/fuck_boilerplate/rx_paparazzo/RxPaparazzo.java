@@ -27,10 +27,9 @@ import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationComponent;
 import com.fuck_boilerplate.rx_paparazzo.internal.di.ApplicationModule;
 import com.yalantis.ucrop.UCrop;
 
+import io.reactivex.Observable;
 import java.util.List;
-
-import rx.Observable;
-import rx_activity_result.RxActivityResult;
+import rx_activity_result2.RxActivityResult;
 
 public final class RxPaparazzo {
     public static final int RESULT_DENIED_PERMISSION = 2;
