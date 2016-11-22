@@ -17,18 +17,14 @@
 package com.miguelbcr.ui.rx_paparazzo.interactors;
 
 import android.net.Uri;
-
 import com.miguelbcr.ui.rx_paparazzo.entities.TargetUi;
-
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-
 import rx.Observable;
 import rx.Subscriber;
-import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public final class DownloadImage extends UseCase<String> {
@@ -63,13 +59,11 @@ public final class DownloadImage extends UseCase<String> {
 
                     subscriber.onCompleted();
                 } catch (Exception e) {
-                    subscriber.onNext(null);
                     subscriber.onError(e);
                 }
             }
         })
-        .subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread());
+        .subscribeOn(Schedulers.io());
     }
 
     private String downloadFile() throws Exception {

@@ -78,6 +78,6 @@ public final class StartIntent extends UseCase<Intent> {
         if (result.resultCode() != Activity.RESULT_OK) {
             throw new UserCanceledException();
         }
-        return result.data();
+        return result.data() == null ? new Intent() : result.data();
     }
 }

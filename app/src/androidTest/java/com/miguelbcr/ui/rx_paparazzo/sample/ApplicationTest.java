@@ -17,7 +17,6 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-
 import com.miguelbcr.ui.rx_paparazzo.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo.entities.size.Size;
@@ -27,7 +26,8 @@ import com.miguelbcr.ui.rx_paparazzo.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo.interactors.ImageUtils;
 import com.miguelbcr.ui.rx_paparazzo.sample.activities.StartActivity;
 import com.miguelbcr.ui.rx_paparazzo.sample.activities.Testable;
-
+import java.io.File;
+import java.util.List;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
@@ -36,9 +36,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
-
-import java.io.File;
-import java.util.List;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
