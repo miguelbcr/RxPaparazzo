@@ -20,7 +20,7 @@ This library does that. Not really. But it was a funny name, thought. Was it?
 - Honors the observable chain (it means you can go crazy chaining operators). [RxOnActivityResult](https://github.com/VictorAlbertos/RxActivityResult) allows RxPaparazzo to transform every intent into an observable for a wonderful chaining process.
 
 
-## Setup
+## Setup RxJava1
 Add the JitPack repository in your build.gradle (top level module):
 ```gradle
 allprojects {
@@ -38,7 +38,24 @@ dependencies {
     compile 'io.reactivex:rxandroid:1.2.1'
 }
 ```
+## Setup RxJava2
+Add the JitPack repository in your build.gradle (top level module):
+```gradle
+allprojects {
+    repositories {
+        jcenter()
+        maven { url "https://jitpack.io" }
+    }
+}
+```
 
+And add next dependencies in the build.gradle of the module:
+```gradle
+dependencies {
+    compile "com.github.miguelbcr:RxPaparazzo:0.4.1-2.x"
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+}
+```
 
 ## Usage
 Because RxPaparazzo uses RxActivityResult to deal with intent calls, all its requirements and features are inherited too.
