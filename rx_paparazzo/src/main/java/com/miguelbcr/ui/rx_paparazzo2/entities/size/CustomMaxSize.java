@@ -6,16 +6,16 @@ package com.miguelbcr.ui.rx_paparazzo2.entities.size;
  */
 public class CustomMaxSize implements Size {
 
-    private int maxImageSize = 1024;
+  private int maxImageSize = 1024;
 
-    public CustomMaxSize() {
-    }
+  public CustomMaxSize() {
+  }
 
-    public CustomMaxSize(int maxSize) {
-        this.maxImageSize = maxSize;
-    }
+  public CustomMaxSize(int maxSize) {
+    this.maxImageSize = maxSize;
+  }
 
-    public int getMaxImageSize() {
-        return maxImageSize;
-    }
+  public int getMaxImageSize() {
+    return maxImageSize;
+  }
 }

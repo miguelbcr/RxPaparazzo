@@ -21,48 +21,48 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.yalantis.ucrop.UCrop;
 
 public class Config {
-    private Size size;
-    private boolean doCrop;
-    private UCrop.Options options;
-    private boolean useInternalStorage;
+  private Size size;
+  private boolean doCrop;
+  private UCrop.Options options;
+  private boolean useInternalStorage;
 
-    public Config() {
-        this.size = new ScreenSize();
-        this.doCrop = false;
-        this.useInternalStorage = false;
-    }
+  public Config() {
+    this.size = new ScreenSize();
+    this.doCrop = false;
+    this.useInternalStorage = false;
+  }
 
-    public Size getSize() {
-        return size;
-    }
+  public Size getSize() {
+    return size;
+  }
 
-    public boolean doCrop() {
-        return doCrop;
-    }
+  public boolean doCrop() {
+    return doCrop;
+  }
 
-    public void setCrop(UCrop.Options options) {
-        this.options = options;
-        this.doCrop = true;
-    }
+  public void setCrop(UCrop.Options options) {
+    this.options = options;
+    this.doCrop = true;
+  }
 
-    public void setCrop() {
-        this.options = new UCrop.Options();
-        this.doCrop = true;
-    }
+  public void setCrop() {
+    this.options = new UCrop.Options();
+    this.doCrop = true;
+  }
 
-    public UCrop.Options getOptions() {
-        return options;
-    }
+  public UCrop.Options getOptions() {
+    return options;
+  }
 
-    public void setSize(Size size) {
-        this.size = size;
-    }
+  public void setSize(Size size) {
+    this.size = size;
+  }
 
-    public boolean useInternalStorage() {
-        return useInternalStorage;
-    }
+  public boolean useInternalStorage() {
+    return useInternalStorage;
+  }
 
-    public void setUseInternalStorage() {
-        this.useInternalStorage = true;
-    }
+  public void setUseInternalStorage() {
+    this.useInternalStorage = true;
+  }
 }

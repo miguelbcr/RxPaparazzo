@@ -22,32 +22,32 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 public class TargetUi {
-    private Object ui;
+  private Object ui;
 
-    public TargetUi(Object ui) {
-        this.ui = ui;
-    }
+  public TargetUi(Object ui) {
+    this.ui = ui;
+  }
 
-    public Activity activity() {
-        return fragment() != null ? fragment().getActivity() : (Activity) ui;
-    }
+  public Activity activity() {
+    return fragment() != null ? fragment().getActivity() : (Activity) ui;
+  }
 
-    @Nullable public Fragment fragment() {
-        if (ui instanceof Fragment) {
-            return (Fragment) ui;
-        }
-        return null;
+  @Nullable public Fragment fragment() {
+    if (ui instanceof Fragment) {
+      return (Fragment) ui;
     }
+    return null;
+  }
 
-    public Object ui() {
-        return ui;
-    }
+  public Object ui() {
+    return ui;
+  }
 
-    public void setUi(Object ui) {
-        this.ui = ui;
-    }
+  public void setUi(Object ui) {
+    this.ui = ui;
+  }
 
-    public Context getContext() {
-        return fragment() == null ? activity() : fragment().getContext();
-    }
+  public Context getContext() {
+    return fragment() == null ? activity() : fragment().getContext();
+  }
 }

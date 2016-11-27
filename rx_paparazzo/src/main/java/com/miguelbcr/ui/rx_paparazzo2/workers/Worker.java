@@ -17,8 +17,6 @@
 package com.miguelbcr.ui.rx_paparazzo2.workers;
 
 import android.app.Activity;
-
-import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
 import com.miguelbcr.ui.rx_paparazzo2.entities.PermissionDeniedException;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
@@ -31,28 +29,30 @@ import io.reactivex.functions.Function;
 
 abstract class Worker {
 
-    private final TargetUi targetUi;
+  private final TargetUi targetUi;
 
-    public Worker(TargetUi targetUi) {
-        this.targetUi = targetUi;
-    }
+  public Worker(TargetUi targetUi) {
+    this.targetUi = targetUi;
+  }
 
-    @SuppressWarnings("unchecked")
-    protected <T> ObservableTransformer<T, T> applyOnError() {
-        return new ObservableTransformer<T, T>() {
-            @Override public ObservableSource<T> apply(Observable<T> observable) {
-                return observable.onErrorResumeNext(new Function<Throwable, ObservableSource<? extends T>>() {
-                    @Override public ObservableSource<? extends T> apply(Throwable throwable)
-                        throws Exception {
-                        if (throwable instanceof UserCanceledException) {
-                            return Observable.just((T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
-                        } else if (throwable instanceof PermissionDeniedException) {
-                            return Observable.just((T) new Response(targetUi.ui(), null, ((PermissionDeniedException) throwable).getCode()));
-                        }
-                        throw Exceptions.propagate(throwable);
-                    }
-                });
-            }
-        };
-    }
+  @SuppressWarnings("unchecked") protected <T> ObservableTransformer<T, T> applyOnError() {
+    return new ObservableTransformer<T, T>() {
+      @Override public ObservableSource<T> apply(Observable<T> observable) {
+        return observable.onErrorResumeNext(
+            new Function<Throwable, ObservableSource<? extends T>>() {
+              @Override public ObservableSource<? extends T> apply(Throwable throwable)
+                  throws Exception {
+                if (throwable instanceof UserCanceledException) {
+                  return Observable.just(
+                      (T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
+                } else if (throwable instanceof PermissionDeniedException) {
+                  return Observable.just((T) new Response(targetUi.ui(), null,
+                      ((PermissionDeniedException) throwable).getCode()));
+                }
+                throw Exceptions.propagate(throwable);
+              }
+            });
+      }
+    };
+  }
 }

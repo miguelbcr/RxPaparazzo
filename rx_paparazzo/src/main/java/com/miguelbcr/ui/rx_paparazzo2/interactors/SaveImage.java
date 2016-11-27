@@ -26,57 +26,50 @@ import io.reactivex.functions.Function3;
 import java.io.File;
 
 public final class SaveImage extends UseCase<String> {
-    private final TargetUi targetUi;
-    private final GetPath getPath;
-    private final GetDimens getDimens;
-    private final ImageUtils imageUtils;
-    private Uri uri;
+  private final TargetUi targetUi;
+  private final GetPath getPath;
+  private final GetDimens getDimens;
+  private final ImageUtils imageUtils;
+  private Uri uri;
 
-    public SaveImage(TargetUi targetUi, GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
-        this.targetUi = targetUi;
-        this.getPath = getPath;
-        this.getDimens = getDimens;
-        this.imageUtils = imageUtils;
-    }
+  public SaveImage(TargetUi targetUi, GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
+    this.targetUi = targetUi;
+    this.getPath = getPath;
+    this.getDimens = getDimens;
+    this.imageUtils = imageUtils;
+  }
 
-    public SaveImage with(Uri uri) {
-        this.uri = uri;
-        return this;
-    }
+  public SaveImage with(Uri uri) {
+    this.uri = uri;
+    return this;
+  }
 
-    @Override
-    public Observable<String> react() {
-        return getOutputUri()
-                .flatMap(new Function<Uri, ObservableSource<String>>() {
-                  @Override public ObservableSource<String> apply(Uri outputUri) throws Exception {
-                    return Observable.zip(getPath.with(uri).react(),
-                        getPath.with(outputUri).react(), getDimens.with(uri).react(),
-                        new Function3<String, String, int[], String>() {
-                          @Override public String apply(String filePath, String filePathOutput, int[] dimens)
-                              throws Exception {
-                            String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
-                            new File(filePath).delete();
+  @Override public Observable<String> react() {
+    return getOutputUri().flatMap(new Function<Uri, ObservableSource<String>>() {
+      @Override public ObservableSource<String> apply(Uri outputUri) throws Exception {
+        return Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(),
+            getDimens.with(uri).react(), new Function3<String, String, int[], String>() {
+              @Override public String apply(String filePath, String filePathOutput, int[] dimens)
+                  throws Exception {
+                String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
+                new File(filePath).delete();
 
-                            MediaScannerConnection.scanFile(
-                                targetUi.getContext(),
-                                new String[]{filePathScaled},
-                                new String[]{"image/*"},
-                                null);
+                MediaScannerConnection.scanFile(targetUi.getContext(),
+                    new String[] { filePathScaled }, new String[] { "image/*" }, null);
 
-                            return filePathScaled;
-                          }
-                        });
-                  }
-                });
-    }
+                return filePathScaled;
+              }
+            });
+      }
+    });
+  }
 
-    private Observable<Uri> getOutputUri() {
-        return getPath.with(uri).react()
-                .flatMap(new Function<String, ObservableSource<Uri>>() {
-                  @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
-                    String extension = imageUtils.getFileExtension(filepath);
-                    return Observable.just(Uri.fromFile(imageUtils.getOutputFile(extension)));
-                  }
-                });
-    }
+  private Observable<Uri> getOutputUri() {
+    return getPath.with(uri).react().flatMap(new Function<String, ObservableSource<Uri>>() {
+      @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
+        String extension = imageUtils.getFileExtension(filepath);
+        return Observable.just(Uri.fromFile(imageUtils.getOutputFile(extension)));
+      }
+    });
+  }
 }

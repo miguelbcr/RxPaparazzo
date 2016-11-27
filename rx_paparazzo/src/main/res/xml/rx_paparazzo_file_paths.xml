@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
-    <files-path name="RxPaparazzoImages" path="RxPaparazzo/" />
+  <files-path
+      name="RxPaparazzoImages"
+      path="RxPaparazzo/"/>
 </paths>

@@ -29,118 +29,114 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import io.reactivex.Observable;
 
 public final class GetPath extends UseCase<String> {
-    private final TargetUi targetUi;
-    private final DownloadImage downloadImage;
-    private Uri uri;
+  private final TargetUi targetUi;
+  private final DownloadImage downloadImage;
+  private Uri uri;
 
-    public GetPath(TargetUi targetUi, DownloadImage downloadImage) {
-        this.targetUi = targetUi;
-        this.downloadImage = downloadImage;
+  public GetPath(TargetUi targetUi, DownloadImage downloadImage) {
+    this.targetUi = targetUi;
+    this.downloadImage = downloadImage;
+  }
+
+  public GetPath with(Uri uri) {
+    this.uri = uri;
+    return this;
+  }
+
+  @Override public Observable<String> react() {
+    return getPath();
+  }
+
+  @SuppressLint("NewApi") private Observable<String> getPath() {
+    boolean isFromKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
+    Context context = targetUi.activity();
+    String filePath = null;
+
+    if (uri == null) {
+      return null;
     }
 
-    public GetPath with(Uri uri) {
-        this.uri = uri;
-        return this;
-    }
-
-    @Override public Observable<String> react() {
-        return getPath();
-    }
-
-    @SuppressLint("NewApi")
-    private Observable<String> getPath() {
-        boolean isFromKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-        Context context = targetUi.activity();
-        String filePath = null;
-
-        if (uri == null) {
-            return null;
+    if (isFromKitKat && DocumentsContract.isDocumentUri(context, uri)) {
+      if (isExternalStorageDocument(uri)) {
+        Document document = getDocument(uri);
+        if ("primary".equalsIgnoreCase(document.type)) {
+          filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
+        }
+      } else if (isDownloadsDocument(uri)) {
+        String id = DocumentsContract.getDocumentId(uri);
+        Uri contentUri =
+            ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
+                Long.valueOf(id));
+        filePath = getDataColumn(context, contentUri, null, null);
+      } else if (isMediaDocument(uri)) {
+        Document document = getDocument(uri);
+        Uri contentUri = null;
+        if ("image".equals(document.type)) {
+          contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        } else if ("video".equals(document.type)) {
+          contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+        } else if ("audio".equals(document.type)) {
+          contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         }
 
-        if (isFromKitKat && DocumentsContract.isDocumentUri(context, uri)) {
-            if (isExternalStorageDocument(uri)) {
-                Document document = getDocument(uri);
-                if ("primary".equalsIgnoreCase(document.type)) {
-                    filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
-                }
-            } else if (isDownloadsDocument(uri)) {
-                String id = DocumentsContract.getDocumentId(uri);
-                Uri contentUri = ContentUris.withAppendedId( Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
-                filePath = getDataColumn(context, contentUri, null, null);
-            } else if (isMediaDocument(uri)) {
-                Document document = getDocument(uri);
-                Uri contentUri = null;
-                if ("image".equals(document.type)) {
-                    contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-                }
-                else if ("video".equals(document.type)) {
-                    contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-                }
-                else if ("audio".equals(document.type)) {
-                    contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
-                }
-
-                filePath = getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?",
-                        new String[] {document.id});
-            }
-        }
-        else if ("content".equalsIgnoreCase(uri.getScheme())) {
-            filePath = getDataColumn(context, uri, null, null);
-        }
-        else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            filePath = uri.getPath();
-        }
-
-        if (filePath == null) {
-            return downloadImage.with(uri).react();
-        }
-
-        return Observable.just(filePath);
+        filePath = getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?",
+            new String[] { document.id });
+      }
+    } else if ("content".equalsIgnoreCase(uri.getScheme())) {
+      filePath = getDataColumn(context, uri, null, null);
+    } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+      filePath = uri.getPath();
     }
 
-    private class Document {
-        String type;
-        String id;
+    if (filePath == null) {
+      return downloadImage.with(uri).react();
     }
 
-    @SuppressLint("NewApi")
-    private Document getDocument(Uri uri) {
-        Document document = new Document();
-        String docId = DocumentsContract.getDocumentId(uri);
-        String[] docArray = docId.split(":");
-        document.type = docArray[0];
-        document.id = docArray[1];
-        return document;
-    }
+    return Observable.just(filePath);
+  }
 
-    private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
-        Cursor cursor = null;
-        String column = MediaStore.Images.Media.DATA;
-        String[] projection = {column};
+  private class Document {
+    String type;
+    String id;
+  }
 
-        try {
-            cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-            cursor.moveToFirst();
-            return cursor.getString(cursor.getColumnIndexOrThrow(column));
-        } catch (Exception e) {
-//            throw Exceptions.propagate(e);
-            return null;
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-    }
+  @SuppressLint("NewApi") private Document getDocument(Uri uri) {
+    Document document = new Document();
+    String docId = DocumentsContract.getDocumentId(uri);
+    String[] docArray = docId.split(":");
+    document.type = docArray[0];
+    document.id = docArray[1];
+    return document;
+  }
 
-    private boolean isExternalStorageDocument(Uri uri) {
-        return "com.android.externalstorage.documents".equals(uri.getAuthority());
-    }
+  private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+    Cursor cursor = null;
+    String column = MediaStore.Images.Media.DATA;
+    String[] projection = { column };
 
-    private boolean isDownloadsDocument(Uri uri) {
-        return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    try {
+      cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
+      cursor.moveToFirst();
+      return cursor.getString(cursor.getColumnIndexOrThrow(column));
+    } catch (Exception e) {
+      //            throw Exceptions.propagate(e);
+      return null;
+    } finally {
+      if (cursor != null) {
+        cursor.close();
+      }
     }
+  }
 
-    private boolean isMediaDocument(Uri uri) {
-        return "com.android.providers.media.documents".equals(uri.getAuthority());
-    }
+  private boolean isExternalStorageDocument(Uri uri) {
+    return "com.android.externalstorage.documents".equals(uri.getAuthority());
+  }
+
+  private boolean isDownloadsDocument(Uri uri) {
+    return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+  }
+
+  private boolean isMediaDocument(Uri uri) {
+    return "com.android.providers.media.documents".equals(uri.getAuthority());
+  }
 }

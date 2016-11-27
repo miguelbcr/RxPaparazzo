@@ -19,7 +19,6 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 import android.app.Activity;
 import android.content.Intent;
 import android.support.v4.app.Fragment;
-
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.UserCanceledException;
 import io.reactivex.Observable;
@@ -29,52 +28,52 @@ import rx_activity_result2.Result;
 import rx_activity_result2.RxActivityResult;
 
 public final class StartIntent extends UseCase<Intent> {
-    private final TargetUi targetUi;
-    private Intent intent;
-    private OnPreResult onPreResult;
+  private final TargetUi targetUi;
+  private Intent intent;
+  private OnPreResult onPreResult;
 
-    public StartIntent(TargetUi targetUi) {
-        this.targetUi = targetUi;
-    }
+  public StartIntent(TargetUi targetUi) {
+    this.targetUi = targetUi;
+  }
 
-    StartIntent with(Intent intent) {
-        this.intent = intent;
-        this.onPreResult = null;
-        return this;
-    }
+  StartIntent with(Intent intent) {
+    this.intent = intent;
+    this.onPreResult = null;
+    return this;
+  }
 
-    StartIntent with(Intent intent, OnPreResult onPreResult) {
-        this.intent = intent;
-        this.onPreResult = onPreResult;
-        return this;
-    }
+  StartIntent with(Intent intent, OnPreResult onPreResult) {
+    this.intent = intent;
+    this.onPreResult = onPreResult;
+    return this;
+  }
 
-    @Override public Observable<Intent> react() {
-        final Fragment fragment = targetUi.fragment();
-        if (fragment != null) {
-            return RxActivityResult.on(fragment)
-                    .startIntent(intent, onPreResult)
-                    .map(new Function<Result<Fragment>, Intent>() {
-                        @Override public Intent apply(Result<Fragment> result) throws Exception {
-                            return StartIntent.this.getResponse(result);
-                        }
-                    });
-        } else {
-            return RxActivityResult.on(targetUi.activity())
-                    .startIntent(intent, onPreResult)
-                    .map(new Function<Result<Activity>, Intent>() {
-                        @Override public Intent apply(Result<Activity> result) throws Exception {
-                            return StartIntent.this.getResponse(result);
-                        }
-                    });
-        }
+  @Override public Observable<Intent> react() {
+    final Fragment fragment = targetUi.fragment();
+    if (fragment != null) {
+      return RxActivityResult.on(fragment)
+          .startIntent(intent, onPreResult)
+          .map(new Function<Result<Fragment>, Intent>() {
+            @Override public Intent apply(Result<Fragment> result) throws Exception {
+              return StartIntent.this.getResponse(result);
+            }
+          });
+    } else {
+      return RxActivityResult.on(targetUi.activity())
+          .startIntent(intent, onPreResult)
+          .map(new Function<Result<Activity>, Intent>() {
+            @Override public Intent apply(Result<Activity> result) throws Exception {
+              return StartIntent.this.getResponse(result);
+            }
+          });
     }
+  }
 
-    private Intent getResponse(Result result) {
-        targetUi.setUi(result.targetUI());
-        if (result.resultCode() != Activity.RESULT_OK) {
-            throw new UserCanceledException();
-        }
-        return result.data() == null ? new Intent() : result.data();
+  private Intent getResponse(Result result) {
+    targetUi.setUi(result.targetUI());
+    if (result.resultCode() != Activity.RESULT_OK) {
+      throw new UserCanceledException();
     }
+    return result.data() == null ? new Intent() : result.data();
+  }
 }

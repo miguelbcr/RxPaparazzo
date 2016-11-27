@@ -27,48 +27,50 @@ import java.io.File;
 import rx_activity_result2.OnPreResult;
 
 public final class PickImage extends UseCase<Uri> {
-    private final StartIntent startIntent;
-    private final GetPath getPath;
+  private final StartIntent startIntent;
+  private final GetPath getPath;
 
-     public PickImage(StartIntent startIntent, GetPath getPath) {
-        this.startIntent = startIntent;
-         this.getPath = getPath;
-     }
+  public PickImage(StartIntent startIntent, GetPath getPath) {
+    this.startIntent = startIntent;
+    this.getPath = getPath;
+  }
 
-    @Override public Observable<Uri> react() {
-        return startIntent.with(getFileChooserIntent(), getOnPreResultProcessing()).react()
-            .map(new Function<Intent, Uri>() {
-              @Override public Uri apply(Intent intent) throws Exception {
-                return intent.getData();
-              }
-            });
-    }
+  @Override public Observable<Uri> react() {
+    return startIntent.with(getFileChooserIntent(), getOnPreResultProcessing())
+        .react()
+        .map(new Function<Intent, Uri>() {
+          @Override public Uri apply(Intent intent) throws Exception {
+            return intent.getData();
+          }
+        });
+  }
 
-    private Intent getFileChooserIntent() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
+  private Intent getFileChooserIntent() {
+    Intent intent = new Intent();
+    intent.setType("image/*");
+    intent.setAction(Intent.ACTION_GET_CONTENT);
 
-        return intent;
-    }
+    return intent;
+  }
 
-    private OnPreResult getOnPreResultProcessing() {
-        return new OnPreResult() {
-            @Override
-            public Observable<String> response(int responseCode, @Nullable final Intent intent) {
-                if (responseCode == Activity.RESULT_OK) {
-                    return getPath.with(intent.getData()).react()
-                            .subscribeOn(Schedulers.io())
-                            .map(new Function<String, String>() {
-                              @Override public String apply(String filePath) throws Exception {
-                                intent.setData(Uri.fromFile(new File(filePath)));
-                                return filePath;
-                              }
-                            });
-                } else {
-                    return Observable.just("");
+  private OnPreResult getOnPreResultProcessing() {
+    return new OnPreResult() {
+      @Override
+      public Observable<String> response(int responseCode, @Nullable final Intent intent) {
+        if (responseCode == Activity.RESULT_OK) {
+          return getPath.with(intent.getData())
+              .react()
+              .subscribeOn(Schedulers.io())
+              .map(new Function<String, String>() {
+                @Override public String apply(String filePath) throws Exception {
+                  intent.setData(Uri.fromFile(new File(filePath)));
+                  return filePath;
                 }
-            }
-        };
-    }
+              });
+        } else {
+          return Observable.just("");
+        }
+      }
+    };
+  }
 }

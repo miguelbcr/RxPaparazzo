@@ -34,85 +34,87 @@ import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public final class Camera extends Worker {
-    private final TakePhoto takePhoto;
-    private final CropImage cropImage;
-    private final SaveImage saveImage;
-    private final GrantPermissions grantPermissions;
-    private final TargetUi targetUi;
-    private final Config config;
+  private final TakePhoto takePhoto;
+  private final CropImage cropImage;
+  private final SaveImage saveImage;
+  private final GrantPermissions grantPermissions;
+  private final TargetUi targetUi;
+  private final Config config;
 
-    public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage, GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
-        super(targetUi);
-        this.takePhoto = takePhoto;
-        this.cropImage = cropImage;
-        this.saveImage = saveImage;
-        this.grantPermissions = grantPermissions;
-        this.targetUi = targetUi;
-        this.config = config;
+  public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage,
+      GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
+    super(targetUi);
+    this.takePhoto = takePhoto;
+    this.cropImage = cropImage;
+    this.saveImage = saveImage;
+    this.grantPermissions = grantPermissions;
+    this.targetUi = targetUi;
+    this.config = config;
+  }
+
+  public <T> Observable<Response<T, String>> takePhoto() {
+    return grantPermissions.with(permissions())
+        .react()
+        .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
+          @Override public ObservableSource<Uri> apply(Ignore ignore) throws Exception {
+            return takePhoto.react();
+          }
+        })
+        .flatMap(new Function<Uri, ObservableSource<Uri>>() {
+          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
+            return cropImage.with(uri).react();
+          }
+        })
+        .flatMap(new Function<Uri, ObservableSource<String>>() {
+          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
+            return saveImage.with(uri).react();
+          }
+        })
+        .map(new Function<String, Response<T, String>>() {
+          @Override public Response<T, String> apply(String path) throws Exception {
+            return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
+          }
+        })
+        .compose(this.<Response<T, String>>applyOnError());
+  }
+
+  private String[] permissions() {
+    if (config.useInternalStorage()) {
+      if (hasCameraPermissionInManifest()) {
+        return new String[] { Manifest.permission.CAMERA };
+      } else {
+        return new String[] {};
+      }
+    } else {
+      if (hasCameraPermissionInManifest()) {
+        return new String[] {
+            Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        };
+      } else {
+        return new String[] {
+            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+        };
+      }
     }
+  }
 
-    public <T> Observable<Response<T, String>> takePhoto() {
-        return grantPermissions.with(permissions()).react()
-                .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
-                    @Override public ObservableSource<Uri> apply(Ignore ignore) throws Exception {
-                        return takePhoto.react();
-                    }
-                })
-                .flatMap(new Function<Uri, ObservableSource<Uri>>() {
-                    @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-                        return cropImage.with(uri).react();
-                    }
-                })
-                .flatMap(new Function<Uri, ObservableSource<String>>() {
-                    @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-                        return saveImage.with(uri).react();
-                    }
-                })
-                .map(new Function<String, Response<T, String>>() {
-                    @Override public Response<T, String> apply(String path) throws Exception {
-                        return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
-                    }
-                })
-                .compose(this.<Response<T, String>>applyOnError());
-    }
-
-    private String[] permissions() {
-        if (config.useInternalStorage()) {
-            if (hasCameraPermissionInManifest()) {
-                return new String[] { Manifest.permission.CAMERA };
-            } else {
-                return new String[] {};
-            }
-        } else {
-            if (hasCameraPermissionInManifest()) {
-                return new String[] {
-                    Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                };
-            } else {
-                return new String[] {
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Manifest.permission.READ_EXTERNAL_STORAGE
-                };
-            }
+  private boolean hasCameraPermissionInManifest() {
+    final String packageName = targetUi.getContext().getPackageName();
+    try {
+      final PackageInfo packageInfo = targetUi.getContext()
+          .getPackageManager()
+          .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+      final String[] declaredPermissions = packageInfo.requestedPermissions;
+      if (declaredPermissions != null && declaredPermissions.length > 0) {
+        for (String p : declaredPermissions) {
+          if (p.equals(Manifest.permission.CAMERA)) {
+            return true;
+          }
         }
-    }
+      }
+    } catch (PackageManager.NameNotFoundException e) { /*Nothing*/ }
 
-    private boolean hasCameraPermissionInManifest() {
-        final String packageName = targetUi.getContext().getPackageName();
-        try {
-            final PackageInfo packageInfo = targetUi.getContext().getPackageManager()
-                .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
-            final String[] declaredPermissions = packageInfo.requestedPermissions;
-            if (declaredPermissions != null && declaredPermissions.length > 0) {
-                for (String p : declaredPermissions) {
-                    if (p.equals(Manifest.permission.CAMERA)) {
-                        return true;
-                    }
-                }
-            }
-        } catch (PackageManager.NameNotFoundException e) { /*Nothing*/ }
-
-        return false;
-    }
+    return false;
+  }
 }

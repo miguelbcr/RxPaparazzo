@@ -29,106 +29,101 @@ import io.reactivex.functions.Function;
 import java.io.File;
 
 public final class CropImage extends UseCase<Uri> {
-    private final Config config;
-    private final StartIntent startIntent;
-    private final GetPath getPath;
-    private final TargetUi targetUi;
-    private final ImageUtils imageUtils;
-    private Uri uri;
+  private final Config config;
+  private final StartIntent startIntent;
+  private final GetPath getPath;
+  private final TargetUi targetUi;
+  private final ImageUtils imageUtils;
+  private Uri uri;
 
-    public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath,
-                     ImageUtils imageUtils) {
-        this.targetUi = targetUi;
-        this.config = config;
-        this.startIntent = startIntent;
-        this.getPath = getPath;
-        this.imageUtils = imageUtils;
-    }
+  public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, GetPath getPath,
+      ImageUtils imageUtils) {
+    this.targetUi = targetUi;
+    this.config = config;
+    this.startIntent = startIntent;
+    this.getPath = getPath;
+    this.imageUtils = imageUtils;
+  }
 
-    public CropImage with(Uri uri) {
-        this.uri = uri;
-        return this;
-    }
+  public CropImage with(Uri uri) {
+    this.uri = uri;
+    return this;
+  }
 
-    @Override
-    public Observable<Uri> react() {
-        if (config.doCrop()) {
-            return getIntent()
-                .flatMap(new Function<Intent, ObservableSource<Uri>>() {
-                    @Override public ObservableSource<Uri> apply(Intent intent) throws Exception {
-                        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-                        return startIntent.with(intent).react()
-                            .map(new Function<Intent, Uri>() {
-                                @Override public Uri apply(Intent intentResult) throws Exception {
-                                    return UCrop.getOutput(intentResult);
-                                }
-                            });
-                    }
-                });
-        }
-
-        return getOutputUriNoCrop();
-    }
-
-    private Observable<Intent> getIntent() {
-        return Observable.zip(getInputUri(), getOutputUriCrop(), new BiFunction<Uri, Uri, Intent>() {
-            @Override public Intent apply(Uri uri, Uri outputUri) throws Exception {
-                UCrop.Options options = config.getOptions();
-                if (options == null)
-                    return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
-
-                if (options instanceof Options) {
-                    return getIntentWithOptions((Options) options, outputUri);
-                } else {
-                    return UCrop.of(uri, outputUri).withOptions(config.getOptions())
-                        .getIntent(targetUi.getContext());
-                }
+  @Override public Observable<Uri> react() {
+    if (config.doCrop()) {
+      return getIntent().flatMap(new Function<Intent, ObservableSource<Uri>>() {
+        @Override public ObservableSource<Uri> apply(Intent intent) throws Exception {
+          intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+          return startIntent.with(intent).react().map(new Function<Intent, Uri>() {
+            @Override public Uri apply(Intent intentResult) throws Exception {
+              return UCrop.getOutput(intentResult);
             }
-        });
+          });
+        }
+      });
     }
 
-    private Intent getIntentWithOptions(Options options, Uri outputUri) {
-        UCrop uCrop = UCrop.of(uri, outputUri);
+    return getOutputUriNoCrop();
+  }
 
-        uCrop = uCrop.withOptions(options);
-        if (options.getX() != 0) uCrop = uCrop.withAspectRatio(options.getX(), options.getY());
-        if (options.getWidth() != 0)
-            uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
+  private Observable<Intent> getIntent() {
+    return Observable.zip(getInputUri(), getOutputUriCrop(), new BiFunction<Uri, Uri, Intent>() {
+      @Override public Intent apply(Uri uri, Uri outputUri) throws Exception {
+        UCrop.Options options = config.getOptions();
+        if (options == null) return UCrop.of(uri, outputUri).getIntent(targetUi.getContext());
 
-        return uCrop.getIntent(targetUi.getContext());
+        if (options instanceof Options) {
+          return getIntentWithOptions((Options) options, outputUri);
+        } else {
+          return UCrop.of(uri, outputUri)
+              .withOptions(config.getOptions())
+              .getIntent(targetUi.getContext());
+        }
+      }
+    });
+  }
+
+  private Intent getIntentWithOptions(Options options, Uri outputUri) {
+    UCrop uCrop = UCrop.of(uri, outputUri);
+
+    uCrop = uCrop.withOptions(options);
+    if (options.getX() != 0) uCrop = uCrop.withAspectRatio(options.getX(), options.getY());
+    if (options.getWidth() != 0) {
+      uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
     }
 
-    private Observable<Uri> getInputUri() {
-        return getPath.with(uri).react()
-            .map(new Function<String, Uri>() {
-                @Override public Uri apply(String filePath) throws Exception {
-                    return Uri.fromFile(new File(filePath)).buildUpon().build();
-                }
-            });
-    }
+    return uCrop.getIntent(targetUi.getContext());
+  }
 
-    private Observable<Uri> getOutputUriCrop() {
-        return getPath.with(uri).react()
-            .flatMap(new Function<String, ObservableSource<Uri>>() {
-                @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
-                    String extension = imageUtils.getFileExtension(filepath);
-                    String filename = Constants.CROP_APPEND + extension;
-                    File file = imageUtils.getPrivateFile(filename);
-                    return Observable.just(Uri.fromFile(file).buildUpon().build());
-                }
-            });
-    }
+  private Observable<Uri> getInputUri() {
+    return getPath.with(uri).react().map(new Function<String, Uri>() {
+      @Override public Uri apply(String filePath) throws Exception {
+        return Uri.fromFile(new File(filePath)).buildUpon().build();
+      }
+    });
+  }
 
-    private Observable<Uri> getOutputUriNoCrop() {
-        return getPath.with(uri).react()
-            .flatMap(new Function<String, ObservableSource<Uri>>() {
-                @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
-                    String extension = imageUtils.getFileExtension(filepath);
-                    String filename = Constants.NO_CROP_APPEND + extension;
-                    File file = imageUtils.getPrivateFile(filename);
-                    imageUtils.copy(new File(filepath), file);
-                    return Observable.just(Uri.fromFile(file).buildUpon().build());
-                }
-            });
-    }
+  private Observable<Uri> getOutputUriCrop() {
+    return getPath.with(uri).react().flatMap(new Function<String, ObservableSource<Uri>>() {
+      @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
+        String extension = imageUtils.getFileExtension(filepath);
+        String filename = Constants.CROP_APPEND + extension;
+        File file = imageUtils.getPrivateFile(filename);
+        return Observable.just(Uri.fromFile(file).buildUpon().build());
+      }
+    });
+  }
+
+  private Observable<Uri> getOutputUriNoCrop() {
+    return getPath.with(uri).react().flatMap(new Function<String, ObservableSource<Uri>>() {
+      @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
+        String extension = imageUtils.getFileExtension(filepath);
+        String filename = Constants.NO_CROP_APPEND + extension;
+        File file = imageUtils.getPrivateFile(filename);
+        imageUtils.copy(new File(filepath), file);
+        return Observable.just(Uri.fromFile(file).buildUpon().build());
+      }
+    });
+  }
 }

@@ -21,19 +21,19 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 public class ApplicationModule {
 
-    private final Config config;
-    private final TargetUi ui;
+  private final Config config;
+  private final TargetUi ui;
 
-    public ApplicationModule(Config config, Object originUi) {
-        this.config = config;
-        ui = new TargetUi(originUi);
-    }
+  public ApplicationModule(Config config, Object originUi) {
+    this.config = config;
+    ui = new TargetUi(originUi);
+  }
 
-    public Config getConfig() {
-        return config;
-    }
+  public Config getConfig() {
+    return config;
+  }
 
-    public TargetUi getUi() {
-        return ui;
-    }
+  public TargetUi getUi() {
+    return ui;
+  }
 }
