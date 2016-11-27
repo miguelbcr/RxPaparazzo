@@ -47,7 +47,7 @@ abstract class Worker {
                         if (throwable instanceof UserCanceledException) {
                             return Observable.just((T) new Response(targetUi.ui(), null, Activity.RESULT_CANCELED));
                         } else if (throwable instanceof PermissionDeniedException) {
-                            return Observable.just((T) new Response(targetUi.ui(), null, RxPaparazzo.RESULT_DENIED_PERMISSION));
+                            return Observable.just((T) new Response(targetUi.ui(), null, ((PermissionDeniedException) throwable).getCode()));
                         }
                         throw Exceptions.propagate(throwable);
                     }

@@ -16,26 +16,37 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.entities;
 
+import android.app.Activity;
+import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
+
 public class Response<T, D> {
-    private final T targetUI;
-    private final D data;
-    private final int resultCode;
+  private final T targetUI;
+  private final D data;
+  private final int resultCode;
 
-    public Response(T targetUI, D data, int resultCode) {
-        this.targetUI = targetUI;
-        this.data = data;
-        this.resultCode = resultCode;
-    }
+  public Response(T targetUI, D data, int resultCode) {
+    this.targetUI = targetUI;
+    this.data = data;
+    this.resultCode = resultCode;
+  }
 
-    public T targetUI() {
-        return targetUI;
-    }
+  public T targetUI() {
+    return targetUI;
+  }
 
-    public D data() {
-        return data;
-    }
+  public D data() {
+    return data;
+  }
 
-    public int resultCode() {
-        return resultCode;
-    }
+  /**
+   * @return <ul>
+   * <li>{@link Activity#RESULT_OK}</li>
+   * <li>{@link Activity#RESULT_CANCELED}</li>
+   * <li>{@link RxPaparazzo#RESULT_DENIED_PERMISSION}</li>
+   * <li>{@link RxPaparazzo#RESULT_DENIED_PERMISSION_NEVER_ASK}</li>
+   * </ul>
+   */
+  public int resultCode() {
+    return resultCode;
+  }
 }

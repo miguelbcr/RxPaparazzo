@@ -77,17 +77,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() == RxPaparazzo.RESULT_DENIED_PERMISSION) {
-                        response.targetUI().showUserDidNotGrantPermissions();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    if (response.resultCode() != RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
-                    }
-
-                    response.targetUI().loadImage(response.data());
                 }, throwable -> {
                     throwable.printStackTrace();
                     Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
@@ -106,12 +98,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    response.targetUI().loadImage(response.data());
                 }, throwable -> {
                     throwable.printStackTrace();
                     Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
@@ -131,12 +120,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    response.targetUI().loadImage(response.data());
                 }, throwable -> {
                     throwable.printStackTrace();
                     Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
@@ -153,18 +139,27 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        if (response.data().size() == 1)
+                            response.targetUI().loadImage(response.data().get(0));
+                        else response.targetUI().loadImages(response.data());
                     }
-
-                    if (response.data().size() == 1)
-                        response.targetUI().loadImage(response.data().get(0));
-                    else response.targetUI().loadImages(response.data());
                 }, throwable -> {
                     throwable.printStackTrace();
                     Toast.makeText(getApplicationContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
+    }
+
+    private boolean checkResultCode(int code) {
+        if (code == RxPaparazzo.RESULT_DENIED_PERMISSION) {
+            showUserDidNotGrantPermissions();
+        } else if (code == RxPaparazzo.RESULT_DENIED_PERMISSION_NEVER_ASK) {
+            showUserDidNotGrantPermissionsNeverAsk();
+        } else if (code != RESULT_OK) {
+            showUserCanceled();
+        }
+
+        return code == RESULT_OK;
     }
 
     private void loadImage(String filePath) {
@@ -194,6 +189,10 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
     private void showUserDidNotGrantPermissions() {
         Toast.makeText(this, getString(R.string.user_did_not_grant_permissions), Toast.LENGTH_SHORT).show();
+    }
+
+    private void showUserDidNotGrantPermissionsNeverAsk() {
+        Toast.makeText(this, getString(R.string.user_did_not_grant_permissions_never_ask), Toast.LENGTH_SHORT).show();
     }
 
     @Override

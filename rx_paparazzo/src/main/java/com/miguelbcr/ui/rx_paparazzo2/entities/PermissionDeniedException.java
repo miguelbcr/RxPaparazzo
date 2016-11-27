@@ -17,4 +17,13 @@
 package com.miguelbcr.ui.rx_paparazzo2.entities;
 
 public class PermissionDeniedException extends RuntimeException {
+  private int code;
+
+  public PermissionDeniedException(int code) {
+    this.code = code;
+  }
+
+  public int getCode() {
+    return code;
+  }
 }

@@ -72,13 +72,9 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-
-                    if (response.resultCode() != Activity.RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    response.targetUI().loadImage(response.data());
                 });
     }
 
@@ -95,12 +91,9 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != Activity.RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    response.targetUI().loadImage(response.data());
                 });
     }
 
@@ -117,12 +110,9 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != Activity.RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
-
-                    response.targetUI().loadImage(response.data());
                 });
     }
 
@@ -136,15 +126,24 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (response.resultCode() != Activity.RESULT_OK) {
-                        response.targetUI().showUserCanceled();
-                        return;
+                    if (checkResultCode(response.resultCode())) {
+                        if (response.data().size() == 1)
+                            response.targetUI().loadImage(response.data().get(0));
+                        else response.targetUI().loadImages(response.data());
                     }
-
-                    if (response.data().size() == 1)
-                        response.targetUI().loadImage(response.data().get(0));
-                    else response.targetUI().loadImages(response.data());
                 });
+    }
+
+    private boolean checkResultCode(int code) {
+        if (code == RxPaparazzo.RESULT_DENIED_PERMISSION) {
+            showUserDidNotGrantPermissions();
+        } else if (code == RxPaparazzo.RESULT_DENIED_PERMISSION_NEVER_ASK) {
+            showUserDidNotGrantPermissionsNeverAsk();
+        } else if (code != Activity.RESULT_OK) {
+            showUserCanceled();
+        }
+
+        return code == Activity.RESULT_OK;
     }
 
     private void loadImage(String filePath) {
@@ -168,6 +167,14 @@ public class SampleFragment extends Fragment implements Testable {
 
     private void showUserCanceled() {
         Toast.makeText(getActivity(), getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
+    }
+
+    private void showUserDidNotGrantPermissions() {
+        Toast.makeText(getActivity(), getString(R.string.user_did_not_grant_permissions), Toast.LENGTH_SHORT).show();
+    }
+
+    private void showUserDidNotGrantPermissionsNeverAsk() {
+        Toast.makeText(getActivity(), getString(R.string.user_did_not_grant_permissions_never_ask), Toast.LENGTH_SHORT).show();
     }
 
     @Override
