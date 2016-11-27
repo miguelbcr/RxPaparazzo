@@ -19,5 +19,5 @@ package com.miguelbcr.ui.rx_paparazzo.interactors;
 import rx.Observable;
 
 abstract class UseCase<D> {
-    abstract Observable<D> react();
+  abstract Observable<D> react();
 }

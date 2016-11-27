@@ -28,67 +28,65 @@ import rx.Subscriber;
 import rx.schedulers.Schedulers;
 
 public final class DownloadImage extends UseCase<String> {
-    private final TargetUi targetUi;
-    private final ImageUtils imageUtils;
-    private Uri uri;
+  private final TargetUi targetUi;
+  private final ImageUtils imageUtils;
+  private Uri uri;
 
-    public DownloadImage(TargetUi targetUi, ImageUtils imageUtils) {
-        this.targetUi = targetUi;
-        this.imageUtils = imageUtils;
-    }
+  public DownloadImage(TargetUi targetUi, ImageUtils imageUtils) {
+    this.targetUi = targetUi;
+    this.imageUtils = imageUtils;
+  }
 
-    @Override Observable<String> react() {
-        return getObservableDownloadFile();
-    }
+  @Override Observable<String> react() {
+    return getObservableDownloadFile();
+  }
 
-    public DownloadImage with(Uri uri) {
-        this.uri = uri;
-        return this;
-    }
+  public DownloadImage with(Uri uri) {
+    this.uri = uri;
+    return this;
+  }
 
-    private Observable<String> getObservableDownloadFile() {
-        return Observable.create(new Observable.OnSubscribe<String>() {
-            @Override
-            public void call(Subscriber<? super String> subscriber) {
-                try {
-                    if ("content".equalsIgnoreCase(uri.getScheme())){
-                        subscriber.onNext(getContent());
-                    } else {
-                        subscriber.onNext(downloadFile());
-                    }
+  private Observable<String> getObservableDownloadFile() {
+    return Observable.create(new Observable.OnSubscribe<String>() {
+      @Override public void call(Subscriber<? super String> subscriber) {
+        try {
+          if ("content".equalsIgnoreCase(uri.getScheme())) {
+            subscriber.onNext(getContent());
+          } else {
+            subscriber.onNext(downloadFile());
+          }
 
-                    subscriber.onCompleted();
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
-            }
-        })
-        .subscribeOn(Schedulers.io());
-    }
+          subscriber.onCompleted();
+        } catch (Exception e) {
+          subscriber.onError(e);
+        }
+      }
+    }).subscribeOn(Schedulers.io());
+  }
 
-    private String downloadFile() throws Exception {
-        URL url = new URL(uri.toString());
-        URLConnection connection = url.openConnection();
-        connection.connect();
-        InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-        String filename = getFilename(uri);
-        filename += imageUtils.getFileExtension(uri);
-        File file = imageUtils.getPrivateFile(filename);
-        imageUtils.copy(inputStream, file);
-        return file.getAbsolutePath();
-    }
+  private String downloadFile() throws Exception {
+    URL url = new URL(uri.toString());
+    URLConnection connection = url.openConnection();
+    connection.connect();
+    InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
+    String filename = getFilename(uri);
+    filename += imageUtils.getFileExtension(uri);
+    File file = imageUtils.getPrivateFile(filename);
+    imageUtils.copy(inputStream, file);
+    return file.getAbsolutePath();
+  }
 
-    private String getContent() throws Exception {
-        InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
-        String filename = getFilename(uri);
-        filename += imageUtils.getFileExtension(uri);
-        File file = imageUtils.getPrivateFile(filename);
-        imageUtils.copy(inputStream, file);
-        return file.getAbsolutePath();
-    }
+  private String getContent() throws Exception {
+    InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
+    String filename = getFilename(uri);
+    filename += imageUtils.getFileExtension(uri);
+    File file = imageUtils.getPrivateFile(filename);
+    imageUtils.copy(inputStream, file);
+    return file.getAbsolutePath();
+  }
 
-    private String getFilename(Uri uri) {
-        // Remove non alphanumeric characters
-        return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "");
-    }
+  private String getFilename(Uri uri) {
+    // Remove non alphanumeric characters
+    return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "");
+  }
 }

@@ -24,76 +24,70 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
-
 import com.miguelbcr.ui.rx_paparazzo.entities.TargetUi;
-
 import java.io.File;
 import java.util.List;
-
 import rx.Observable;
 import rx.functions.Func1;
 
 public final class TakePhoto extends UseCase<Uri> {
-    private static final int READ_WRITE_PERMISSIONS = Intent.FLAG_GRANT_READ_URI_PERMISSION
-            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
-    private final StartIntent startIntent;
-    private final TargetUi targetUi;
-    private final ImageUtils imageUtils;
+  private static final int READ_WRITE_PERMISSIONS =
+      Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+  private final StartIntent startIntent;
+  private final TargetUi targetUi;
+  private final ImageUtils imageUtils;
 
-    public TakePhoto(StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
-        this.startIntent = startIntent;
-        this.targetUi = targetUi;
-        this.imageUtils = imageUtils;
-    }
+  public TakePhoto(StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
+    this.startIntent = startIntent;
+    this.targetUi = targetUi;
+    this.imageUtils = imageUtils;
+  }
 
-    @Override public Observable<Uri> react() {
-        final Uri uri = getUri();
-        return startIntent.with(getIntentCamera(uri)).react()
-                .map(new Func1<Intent, Uri>() {
-                    @Override
-                    public Uri call(Intent data) {
-                        revokeFileReadWritePermissions(uri);
-                        return uri;
-                    }
-                });
-    }
+  @Override public Observable<Uri> react() {
+    final Uri uri = getUri();
+    return startIntent.with(getIntentCamera(uri)).react().map(new Func1<Intent, Uri>() {
+      @Override public Uri call(Intent data) {
+        revokeFileReadWritePermissions(uri);
+        return uri;
+      }
+    });
+  }
 
-    private Uri getUri() {
-        Context context = targetUi.getContext();
-        File file = imageUtils.getPrivateFile(Constants.SHOOT_APPEND);
-        String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
-        return FileProvider.getUriForFile(context, authority, file);
-    }
+  private Uri getUri() {
+    Context context = targetUi.getContext();
+    File file = imageUtils.getPrivateFile(Constants.SHOOT_APPEND);
+    String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+    return FileProvider.getUriForFile(context, authority, file);
+  }
 
-    private Intent getIntentCamera(Uri uri) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        intent.addFlags(READ_WRITE_PERMISSIONS);
-        intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-        grantFileReadWritePermissions(intent, uri);
-        return intent;
-    }
+  private Intent getIntentCamera(Uri uri) {
+    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+    intent.addFlags(READ_WRITE_PERMISSIONS);
+    intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+    grantFileReadWritePermissions(intent, uri);
+    return intent;
+  }
 
-    /**
-     * Workaround for Android bug.<br/>
-     * See https://code.google.com/p/android/issues/detail?id=76683 <br/>
-     * See http://stackoverflow.com/questions/18249007/how-to-use-support-fileprovider-for-sharing-content-to-other-apps
-     * @param intent
-     * @param uri
-     */
-    private void grantFileReadWritePermissions(Intent intent, Uri uri) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            List<ResolveInfo> resInfoList = targetUi.getContext().getPackageManager()
-                    .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-            for (ResolveInfo resolveInfo : resInfoList) {
-                String packageName = resolveInfo.activityInfo.packageName;
-                targetUi.getContext().grantUriPermission(packageName, uri, READ_WRITE_PERMISSIONS);
-            }
-        }
+  /**
+   * Workaround for Android bug.<br/>
+   * See https://code.google.com/p/android/issues/detail?id=76683 <br/>
+   * See http://stackoverflow.com/questions/18249007/how-to-use-support-fileprovider-for-sharing-content-to-other-apps
+   */
+  private void grantFileReadWritePermissions(Intent intent, Uri uri) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+      List<ResolveInfo> resInfoList = targetUi.getContext()
+          .getPackageManager()
+          .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+      for (ResolveInfo resolveInfo : resInfoList) {
+        String packageName = resolveInfo.activityInfo.packageName;
+        targetUi.getContext().grantUriPermission(packageName, uri, READ_WRITE_PERMISSIONS);
+      }
     }
+  }
 
-    private void revokeFileReadWritePermissions(Uri uri) {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-            targetUi.getContext().revokeUriPermission(uri, READ_WRITE_PERMISSIONS);
-        }
+  private void revokeFileReadWritePermissions(Uri uri) {
+    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+      targetUi.getContext().revokeUriPermission(uri, READ_WRITE_PERMISSIONS);
     }
+  }
 }

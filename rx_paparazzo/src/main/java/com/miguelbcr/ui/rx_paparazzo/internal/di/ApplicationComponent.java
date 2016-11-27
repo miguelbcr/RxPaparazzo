@@ -22,13 +22,13 @@ import com.miguelbcr.ui.rx_paparazzo.workers.Gallery;
 
 public abstract class ApplicationComponent {
 
-    public abstract Camera camera();
+  public abstract Camera camera();
 
-    public abstract Gallery gallery();
+  public abstract Gallery gallery();
 
-    public abstract GetPath getPath();
+  public abstract GetPath getPath();
 
-    public static ApplicationComponent create(final ApplicationModule applicationModule) {
-        return new ApplicationComponentImpl(applicationModule.getUi(), applicationModule.getConfig());
-    }
+  public static ApplicationComponent create(final ApplicationModule applicationModule) {
+    return new ApplicationComponentImpl(applicationModule.getUi(), applicationModule.getConfig());
+  }
 }
