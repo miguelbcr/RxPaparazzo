@@ -3,6 +3,7 @@
     <string name="action_settings">Settings</string>
     <string name="user_canceled">User canceled action</string>
     <string name="user_did_not_grant_permissions">User has not accepted permissions</string>
+    <string name="user_did_not_grant_permissions_never_ask">User has not accepted permissions with never ask. Go to settings</string>
     <string name="activity">Activity</string>
     <string name="fragment">Fragment</string>
 </resources>

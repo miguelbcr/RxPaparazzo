@@ -16,6 +16,9 @@
 
 package com.miguelbcr.ui.rx_paparazzo.entities;
 
+import android.app.Activity;
+import com.miguelbcr.ui.rx_paparazzo.RxPaparazzo;
+
 public class Response<T, D> {
     private final T targetUI;
     private final D data;
@@ -35,7 +38,16 @@ public class Response<T, D> {
         return data;
     }
 
-    public int resultCode() {
+  /**
+   * @return
+   * <ul>
+   *   <li>{@link Activity#RESULT_OK}</li>
+   *   <li>{@link Activity#RESULT_CANCELED}</li>
+   *   <li>{@link RxPaparazzo#RESULT_DENIED_PERMISSION}</li>
+   *   <li>{@link RxPaparazzo#RESULT_DENIED_PERMISSION_NEVER_ASK}</li>
+   * </ul>
+   */
+  public int resultCode() {
         return resultCode;
     }
 }
