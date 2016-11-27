@@ -91,6 +91,7 @@ RxPaparazzo.takeImage(activityOrFragment)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(response -> {
+            // See response.resultCode() doc
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();
                 return;
@@ -111,7 +112,8 @@ RxPaparazzo.takeImage(activityOrFragment)
         .usingGallery()
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(response -> {
+        .subscribe(response -> {        
+            // See response.resultCode() doc
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();
                 return;
@@ -130,6 +132,7 @@ RxPaparazzo.takeImages(activityOrFragment)
         .subscribeOn(Schedulers.io())
         .observeOn(AndroidSchedulers.mainThread())
         .subscribe(response -> {
+            // See response.resultCode() doc
             if (response.resultCode() != RESULT_OK) {
                 response.targetUI().showUserCanceled();
                 return;
