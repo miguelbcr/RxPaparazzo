@@ -8,12 +8,15 @@ import com.miguelbcr.ui.rx_paparazzo2.interactors.GetDimens;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.ImageUtils;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFile;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFiles;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImages;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.StartIntent;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Camera;
+import com.miguelbcr.ui.rx_paparazzo2.workers.Files;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Gallery;
 
 class ApplicationComponentImpl extends ApplicationComponent {
@@ -30,6 +33,7 @@ class ApplicationComponentImpl extends ApplicationComponent {
   private final PickImage pickImage;
   private final Camera camera;
   private final Gallery gallery;
+  private final Files files;
 
   public ApplicationComponentImpl(TargetUi ui, Config config) {
     startIntent = new StartIntent(ui);
@@ -44,8 +48,8 @@ class ApplicationComponentImpl extends ApplicationComponent {
     pickImages = new PickImages(startIntent);
     pickImage = new PickImage(startIntent, getPath);
     camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui, config);
-    gallery =
-        new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui, config);
+    gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui, config);
+    files = new Files(grantPermissions, startIntent, getPath, cropImage, saveImage, ui, config);
   }
 
   @Override public Camera camera() {
@@ -58,5 +62,9 @@ class ApplicationComponentImpl extends ApplicationComponent {
 
   @Override public GetPath getPath() {
     return getPath;
+  }
+
+  @Override public Files files() {
+    return files;
   }
 }

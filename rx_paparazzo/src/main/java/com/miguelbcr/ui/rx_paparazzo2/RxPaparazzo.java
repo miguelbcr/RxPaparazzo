@@ -126,6 +126,13 @@ public final class RxPaparazzo {
     public Observable<Response<T, String>> usingCamera() {
       return applicationComponent.camera().takePhoto();
     }
+
+    /**
+     * Use file pickers to retrieve the files.
+     */
+    public Observable<Response<T, String>> usingFiles() {
+      return applicationComponent.files().pickFile();
+    }
   }
 
   /**
@@ -177,6 +184,13 @@ public final class RxPaparazzo {
      */
     public Observable<Response<T, List<String>>> usingGallery() {
       return applicationComponent.gallery().pickImages();
+    }
+
+    /**
+     * Use file pickers to retrieve the files.
+     */
+    public Observable<Response<T, List<String>>> usingFiles() {
+      return applicationComponent.files().pickFiles();
     }
   }
 }

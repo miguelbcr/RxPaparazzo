@@ -16,66 +16,12 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-import android.app.Activity;
-import android.content.Intent;
-import android.net.Uri;
-import android.support.annotation.Nullable;
-import android.text.TextUtils;
-import io.reactivex.Observable;
-import io.reactivex.ObservableSource;
-import io.reactivex.exceptions.Exceptions;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
-import java.io.File;
-import rx_activity_result2.OnPreResult;
+public final class PickImage extends PickFile {
 
-public final class PickImage extends UseCase<Uri> {
-  private final StartIntent startIntent;
-  private final GetPath getPath;
+  public static final String IMAGE_MIME_TYPE = "image/*";
 
   public PickImage(StartIntent startIntent, GetPath getPath) {
-    this.startIntent = startIntent;
-    this.getPath = getPath;
+    super(IMAGE_MIME_TYPE, startIntent, getPath, false);
   }
 
-  @Override public Observable<Uri> react() {
-    return startIntent.with(getFileChooserIntent(), getOnPreResultProcessing())
-        .react()
-        .map(new Function<Intent, Uri>() {
-          @Override public Uri apply(Intent intent) throws Exception {
-            return intent.getData();
-          }
-        });
-  }
-
-  private Intent getFileChooserIntent() {
-    Intent intent = new Intent();
-    intent.setType("image/*");
-    intent.setAction(Intent.ACTION_GET_CONTENT);
-
-    return intent;
-  }
-
-  private OnPreResult getOnPreResultProcessing() {
-    return new OnPreResult() {
-      @Override
-      public Observable<String> response(int responseCode, @Nullable final Intent intent) {
-        if (responseCode == Activity.RESULT_OK) {
-          return getPath.with(intent.getData())
-              .react()
-              .subscribeOn(Schedulers.io())
-              .map(new Function<String, String>() {
-                @Override public String apply(String filePath) throws Exception {
-                  intent.setData(Uri.fromFile(new File(filePath)));
-                  return filePath;
-                }
-              })
-              .onErrorReturnItem("");
-        } else {
-          return Observable.just("");
-        }
-      }
-    };
-  }
 }
