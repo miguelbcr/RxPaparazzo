@@ -68,3 +68,17 @@ artifacts {
     archives javadocJar
 }
 
+install {
+    repositories.mavenInstaller {
+        pom {
+            project {
+                packaging 'aar'
+                name 'com.github.miguelbcr'
+                pom.groupId = 'com.github.miguelbcr'
+                pom.artifactId = 'RxPaparazzo'
+                pom.version = '0.2x-agrimap'
+            }
+        }
+    }
+}
+
