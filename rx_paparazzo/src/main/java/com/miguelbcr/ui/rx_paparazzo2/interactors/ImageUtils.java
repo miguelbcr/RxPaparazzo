@@ -40,6 +40,9 @@ import java.util.Date;
 import java.util.Locale;
 
 public final class ImageUtils {
+
+  private static final String DEFAULT_EXTENSION = ""; // ".jpg";
+
   private final TargetUi targetUi;
   private final Config config;
 
@@ -48,13 +51,20 @@ public final class ImageUtils {
     this.config = config;
   }
 
+  public File getOutputDirectory() {
+    String dirname = getApplicationName(targetUi.getContext());
+
+    return getDir(null, dirname);
+  }
+
   File getOutputFile(String extension) {
     String dirname = getApplicationName(targetUi.getContext());
     File dir = getDir(null, dirname);
-    return getFile(dir, extension);
+
+    return createNewFile(dir, extension);
   }
 
-  private File getFile(File dir, String extension) {
+  public File createNewFile(File dir, String extension) {
     SimpleDateFormat simpleDateFormat =
         new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
     String datetime = simpleDateFormat.format(new Date());
@@ -121,7 +131,21 @@ public final class ImageUtils {
     return storageDir;
   }
 
-  String getFileExtension(String filepath) {
+  public String getFileNameWithoutExtension(String filepath) {
+    File file = new File(filepath);
+
+    String fileName = file.getName();
+    String extension = getFileExtension(fileName);
+
+    int extensionIndex = fileName.indexOf(extension);
+    if (extensionIndex == -1) {
+      return fileName;
+    }
+
+    return fileName.substring(0, extensionIndex);
+  }
+
+  public String getFileExtension(String filepath) {
     String extension = "";
 
     if (filepath != null) {
@@ -129,7 +153,7 @@ public final class ImageUtils {
       extension = i > 0 ? filepath.substring(i) : "";
     }
 
-    return (TextUtils.isEmpty(extension)) ? ".jpg" : extension;
+    return (TextUtils.isEmpty(extension)) ? DEFAULT_EXTENSION : extension;
   }
 
   String getFileExtension(Uri uri) {
@@ -146,22 +170,24 @@ public final class ImageUtils {
         : "." + mimeType.split("/")[1];
   }
 
-  String scaleImage(String filePath, String filePathOutput, int[] dimens) {
+  File scaleImage(String filePath, String filePathOutput, int[] dimens) {
+    File destination = new File(filePathOutput);
+
     if (config.getSize() instanceof OriginalSize) {
       copyFileAndExifTags(filePath, filePathOutput, dimens);
-      return filePathOutput;
+      return destination;
     }
 
     Bitmap bitmap = handleBitmapSampling(filePath, dimens[0], dimens[1]);
     if (bitmap == null) {
       copyFileAndExifTags(filePath, filePathOutput, dimens);
-      return filePathOutput;
+      return destination;
     }
 
-    bitmap2file(bitmap, new File(filePathOutput), getCompressFormat(filePathOutput));
+    bitmap2file(bitmap, destination, getCompressFormat(filePathOutput));
     copyExifTags(filePath, filePathOutput, dimens);
 
-    return filePathOutput;
+    return destination;
   }
 
   private Bitmap.CompressFormat getCompressFormat(String filePath) {

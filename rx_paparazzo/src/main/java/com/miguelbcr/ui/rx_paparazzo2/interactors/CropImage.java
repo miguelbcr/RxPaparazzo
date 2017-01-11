@@ -110,6 +110,7 @@ public final class CropImage extends UseCase<Uri> {
         String extension = imageUtils.getFileExtension(filepath);
         String filename = Constants.CROP_APPEND + extension;
         File file = imageUtils.getPrivateFile(filename);
+
         return Observable.just(Uri.fromFile(file).buildUpon().build());
       }
     });
@@ -121,7 +122,10 @@ public final class CropImage extends UseCase<Uri> {
         String extension = imageUtils.getFileExtension(filepath);
         String filename = Constants.NO_CROP_APPEND + extension;
         File file = imageUtils.getPrivateFile(filename);
-        imageUtils.copy(new File(filepath), file);
+        File source = new File(filepath);
+
+        imageUtils.copy(source, file);
+
         return Observable.just(Uri.fromFile(file).buildUpon().build());
       }
     });

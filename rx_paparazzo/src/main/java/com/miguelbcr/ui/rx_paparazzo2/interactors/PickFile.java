@@ -38,7 +38,7 @@ public class PickFile extends UseCase<Uri> {
   private final boolean openableOnly;
 
   public PickFile(StartIntent startIntent, GetPath getPath) {
-    this(DEFAULT_MIME_TYPE, startIntent, getPath, false);
+    this(DEFAULT_MIME_TYPE, startIntent, getPath, true);
   }
 
   public PickFile(String mimeType, StartIntent startIntent, GetPath getPath, boolean openableOnly) {

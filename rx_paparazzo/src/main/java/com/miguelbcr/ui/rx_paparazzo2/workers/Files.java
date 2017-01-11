@@ -21,6 +21,7 @@ import android.app.Activity;
 import android.net.Uri;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Ignore;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
@@ -29,13 +30,15 @@ import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFiles;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.StartIntent;
 
+import java.io.File;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
+import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 
 public final class Files extends Worker {
@@ -43,47 +46,47 @@ public final class Files extends Worker {
   private final StartIntent startIntent;
   private final GetPath getPath;
   private final CropImage cropImage;
-  private final SaveImage saveImage;
+  private final SaveFile saveFile;
   private final TargetUi targetUi;
   private final Config config;
 
   public Files(GrantPermissions grantPermissions, StartIntent startIntent, GetPath getPath,
-               CropImage cropImage, SaveImage saveImage, TargetUi targetUi, Config config) {
+               CropImage cropImage, SaveFile saveFile, TargetUi targetUi, Config config) {
     super(targetUi);
     this.grantPermissions = grantPermissions;
     this.startIntent = startIntent;
     this.getPath = getPath;
     this.cropImage = cropImage;
-    this.saveImage = saveImage;
+    this.saveFile = saveFile;
     this.targetUi = targetUi;
     this.config = config;
   }
 
-  public <T> Observable<Response<T, String>> pickFile() {
+  public <T> Observable<Response<T, FileData>> pickFile() {
     PickFile pickFile = new PickFile(startIntent, getPath);
 
     return pickFile(pickFile);
   }
 
-  public <T> Observable<Response<T, String>> pickFile(String mimeType, boolean openableOnly) {
+  public <T> Observable<Response<T, FileData>> pickFile(String mimeType, boolean openableOnly) {
     PickFile pickFile = new PickFile(mimeType, startIntent, getPath, openableOnly);
 
     return pickFile(pickFile);
   }
 
-  public <T> Observable<Response<T, List<String>>> pickFiles() {
+  public <T> Observable<Response<T, List<FileData>>> pickFiles() {
     PickFiles pickFiles = new PickFiles(startIntent);
 
     return pickFiles(pickFiles);
   }
 
-  public <T> Observable<Response<T, List<String>>> pickFiles(String mimeType, boolean openableOnly) {
+  public <T> Observable<Response<T, List<FileData>>> pickFiles(String mimeType, boolean openableOnly) {
     PickFiles pickFiles = new PickFiles(mimeType, startIntent, openableOnly);
 
     return pickFiles(pickFiles);
   }
 
-  public <T> Observable<Response<T, String>> pickFile(final PickFile pickFile) {
+  public <T> Observable<Response<T, FileData>> pickFile(final PickFile pickFile) {
     return grantPermissions.with(permissions())
         .react()
         .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
@@ -91,25 +94,41 @@ public final class Files extends Worker {
             return pickFile.react();
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
+        .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(final Uri uri) throws Exception {
+            BiFunction<String, File, FileData> biFunction = new BiFunction<String, File, FileData>() {
+              @Override
+              public FileData apply(String filename, File result) throws Exception {
+                return new FileData(result, filename);
+              }
+            };
+            return Observable.zip(getFileName(uri), handleSavingFile(uri), biFunction);
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
+        .map(new Function<FileData, Response<T, FileData>>() {
+          @Override public Response<T, FileData> apply(FileData file) throws Exception {
+            return new Response<>((T) targetUi.ui(), file, Activity.RESULT_OK);
           }
         })
-        .map(new Function<String, Response<T, String>>() {
-          @Override public Response<T, String> apply(String path) throws Exception {
-            return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
-          }
-        })
-        .compose(this.<Response<T, String>>applyOnError());
+        .compose(this.<Response<T, FileData>>applyOnError());
   }
 
-  public <T> Observable<Response<T, List<String>>> pickFiles(final PickFiles pickFiles) {
+  private <T> Observable<String> getFileName(Uri uri) {
+
+    return null;
+  }
+
+  private Observable<File> handleSavingFile(Uri uri) {
+    return cropImage.with(uri).react()
+            .flatMap(new Function<Uri, ObservableSource<File>>() {
+              @Override public ObservableSource<File> apply(Uri uri) throws Exception {
+                return saveFile.with(uri).react();
+              }
+            });
+  }
+
+  public <T> Observable<Response<T, List<FileData>>> pickFiles(final PickFiles pickFiles) {
     return grantPermissions.with(permissions())
         .react()
         .flatMap(new Function<Ignore, ObservableSource<List<Uri>>>() {
@@ -122,24 +141,26 @@ public final class Files extends Worker {
             return uris;
           }
         })
-        .concatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
-          }
-        })
-        .concatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
+        .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(final Uri uri) throws Exception {
+            BiFunction<String, File, FileData> biFunction = new BiFunction<String, File, FileData>() {
+              @Override
+              public FileData apply(String filename, File result) throws Exception {
+                return new FileData(result, filename);
+              }
+            };
+            return Observable.zip(getFileName(uri), handleSavingFile(uri), biFunction);
           }
         })
         .toList()
         .toObservable()
-        .map(new Function<List<String>, Response<T, List<String>>>() {
-          @Override public Response<T, List<String>> apply(List<String> paths) throws Exception {
+        .map(new Function<List<FileData>, Response<T, List<FileData>>>() {
+          @Override public Response<T, List<FileData>> apply(List<FileData> paths) throws Exception {
             return new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK);
           }
         })
-        .compose(this.<Response<T, List<String>>>applyOnError());
+        .compose(this.<Response<T, List<FileData>>>applyOnError());
   }
 
   private String[] permissions() {

@@ -51,13 +51,14 @@ public final class SaveImage extends UseCase<String> {
             getDimens.with(uri).react(), new Function3<String, String, int[], String>() {
               @Override public String apply(String filePath, String filePathOutput, int[] dimens)
                   throws Exception {
-                String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
+                File filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
+
                 new File(filePath).delete();
 
                 MediaScannerConnection.scanFile(targetUi.getContext(),
-                    new String[] { filePathScaled }, new String[] { "image/*" }, null);
+                    new String[] { filePathOutput }, new String[] { "image/*" }, null);
 
-                return filePathScaled;
+                return filePathOutput;
               }
             });
       }

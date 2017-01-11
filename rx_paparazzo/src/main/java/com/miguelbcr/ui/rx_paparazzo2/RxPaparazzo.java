@@ -19,14 +19,18 @@ package com.miguelbcr.ui.rx_paparazzo2;
 import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.internal.di.ApplicationComponent;
 import com.miguelbcr.ui.rx_paparazzo2.internal.di.ApplicationModule;
 import com.yalantis.ucrop.UCrop;
-import io.reactivex.Observable;
+
 import java.util.List;
+
+import io.reactivex.Observable;
 import rx_activity_result2.RxActivityResult;
 
 public final class RxPaparazzo {
@@ -117,6 +121,7 @@ public final class RxPaparazzo {
      * Use gallery to retrieve the image.
      */
     public Observable<Response<T, String>> usingGallery() {
+      // TODO: maintain file name from gallery???
       return applicationComponent.gallery().pickImage();
     }
 
@@ -130,7 +135,7 @@ public final class RxPaparazzo {
     /**
      * Use file pickers to retrieve the files.
      */
-    public Observable<Response<T, String>> usingFiles() {
+    public Observable<Response<T, FileData>> usingFiles() {
       return applicationComponent.files().pickFile();
     }
   }
@@ -189,7 +194,7 @@ public final class RxPaparazzo {
     /**
      * Use file pickers to retrieve the files.
      */
-    public Observable<Response<T, List<String>>> usingFiles() {
+    public Observable<Response<T, List<FileData>>> usingFiles() {
       return applicationComponent.files().pickFiles();
     }
   }
