@@ -21,14 +21,18 @@ import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Ignore;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
@@ -40,11 +44,13 @@ public final class Camera extends Worker {
   private final GrantPermissions grantPermissions;
   private final TargetUi targetUi;
   private final Config config;
+  private final GetPath getPath;
 
-  public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage,
+  public Camera(TakePhoto takePhoto, GetPath getPath, CropImage cropImage, SaveImage saveImage,
       GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
     super(targetUi);
     this.takePhoto = takePhoto;
+    this.getPath = getPath;
     this.cropImage = cropImage;
     this.saveImage = saveImage;
     this.grantPermissions = grantPermissions;
@@ -52,7 +58,7 @@ public final class Camera extends Worker {
     this.config = config;
   }
 
-  public <T> Observable<Response<T, String>> takePhoto() {
+  public <T> Observable<Response<T, FileData>> takePhoto() {
     return grantPermissions.with(permissions())
         .react()
         .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
@@ -60,22 +66,45 @@ public final class Camera extends Worker {
             return takePhoto.react();
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
+        .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(final Uri uri) throws Exception {
+            return getPath.with(uri).react();
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
+        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+          @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+            return handleSavingFile(fileData);
           }
         })
-        .map(new Function<String, Response<T, String>>() {
-          @Override public Response<T, String> apply(String path) throws Exception {
-            return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
+        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+          @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+            return saveImage.with(fileData).react();
           }
         })
-        .compose(this.<Response<T, String>>applyOnError());
+        .map(new Function<FileData, Response<T, FileData>>() {
+          @Override public Response<T, FileData> apply(FileData fileData) throws Exception {
+            return new Response<>((T) targetUi.ui(), fileData, Activity.RESULT_OK);
+          }
+        })
+        .compose(this.<Response<T, FileData>>applyOnError());
+  }
+
+  private Observable<FileData> handleSavingFile(final FileData sourceFileData) {
+    return cropImage.with(sourceFileData).react()
+            .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+              @Override
+              public ObservableSource<FileData> apply(Uri uri) throws Exception {
+                return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
+                  @Override
+                  public ObservableSource<FileData> apply(FileData cropped) throws Exception {
+                    FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
+
+                    return saveImage.with(destination).react();
+                  }
+                });
+              }
+            });
   }
 
   private String[] permissions() {

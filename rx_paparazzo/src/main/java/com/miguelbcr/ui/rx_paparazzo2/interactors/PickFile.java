@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
+
 import java.io.File;
 
 import io.reactivex.Observable;
@@ -74,19 +76,19 @@ public class PickFile extends UseCase<Uri> {
   private OnPreResult getOnPreResultProcessing() {
     return new OnPreResult() {
       @Override
-      public Observable<String> response(int responseCode, @Nullable final Intent intent) {
+      public Observable<FileData> response(int responseCode, @Nullable final Intent intent) {
         if (responseCode == Activity.RESULT_OK) {
           return getPath.with(intent.getData())
                   .react()
                   .subscribeOn(Schedulers.io())
-                  .map(new Function<String, String>() {
-                    @Override public String apply(String filePath) throws Exception {
-                      intent.setData(Uri.fromFile(new File(filePath)));
-                      return filePath;
+                  .map(new Function<FileData, FileData>() {
+                    @Override public FileData apply(FileData fileData) throws Exception {
+                      intent.setData(Uri.fromFile(fileData.getFile()));
+                      return fileData;
                     }
                   });
         } else {
-          return Observable.just("");
+          return Observable.just(null);
         }
       }
     };

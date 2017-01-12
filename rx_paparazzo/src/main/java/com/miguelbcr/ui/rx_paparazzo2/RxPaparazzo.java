@@ -120,7 +120,7 @@ public final class RxPaparazzo {
     /**
      * Use gallery to retrieve the image.
      */
-    public Observable<Response<T, String>> usingGallery() {
+    public Observable<Response<T, FileData>> usingGallery() {
       // TODO: maintain file name from gallery???
       return applicationComponent.gallery().pickImage();
     }
@@ -128,7 +128,7 @@ public final class RxPaparazzo {
     /**
      * Use camera to retrieve the image.
      */
-    public Observable<Response<T, String>> usingCamera() {
+    public Observable<Response<T, FileData>> usingCamera() {
       return applicationComponent.camera().takePhoto();
     }
 
@@ -187,7 +187,7 @@ public final class RxPaparazzo {
     /**
      * Call it when crop option is required.
      */
-    public Observable<Response<T, List<String>>> usingGallery() {
+    public Observable<Response<T, List<FileData>>> usingGallery() {
       return applicationComponent.gallery().pickImages();
     }
 

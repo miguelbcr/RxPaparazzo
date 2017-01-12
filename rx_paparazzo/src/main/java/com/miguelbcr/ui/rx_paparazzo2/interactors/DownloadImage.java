@@ -17,6 +17,8 @@
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.net.Uri;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -29,7 +31,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-public final class DownloadImage extends UseCase<String> {
+public final class DownloadImage extends UseCase<FileData> {
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private Uri uri;
@@ -39,7 +41,7 @@ public final class DownloadImage extends UseCase<String> {
     this.imageUtils = imageUtils;
   }
 
-  @Override Observable<String> react() {
+  @Override Observable<FileData> react() {
     return getObservableDownloadFile();
   }
 
@@ -48,9 +50,9 @@ public final class DownloadImage extends UseCase<String> {
     return this;
   }
 
-  private Observable<String> getObservableDownloadFile() {
-    return Observable.create(new ObservableOnSubscribe<String>() {
-      @Override public void subscribe(ObservableEmitter<String> subscriber) throws Exception {
+  private Observable<FileData> getObservableDownloadFile() {
+    return Observable.create(new ObservableOnSubscribe<FileData>() {
+      @Override public void subscribe(ObservableEmitter<FileData> subscriber) throws Exception {
         if (!subscriber.isDisposed()) {
           try {
             if ("content".equalsIgnoreCase(uri.getScheme())) {
@@ -68,7 +70,7 @@ public final class DownloadImage extends UseCase<String> {
     }).subscribeOn(Schedulers.io());
   }
 
-  private String downloadFile() throws Exception {
+  private FileData downloadFile() throws Exception {
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
     connection.connect();
@@ -77,16 +79,18 @@ public final class DownloadImage extends UseCase<String> {
     filename += imageUtils.getFileExtension(uri);
     File file = imageUtils.getPrivateFile(filename);
     imageUtils.copy(inputStream, file);
-    return file.getAbsolutePath();
+
+    return new FileData(file, filename);
   }
 
-  private String getContent() throws FileNotFoundException {
+  private FileData getContent() throws FileNotFoundException {
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     String filename = getFilename(uri);
     filename += imageUtils.getFileExtension(uri);
     File file = imageUtils.getPrivateFile(filename);
     imageUtils.copy(inputStream, file);
-    return file.getAbsolutePath();
+
+    return new FileData(file, filename);
   }
 
   private String getFilename(Uri uri) {

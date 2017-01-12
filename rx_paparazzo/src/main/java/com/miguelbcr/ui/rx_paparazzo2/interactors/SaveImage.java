@@ -17,60 +17,55 @@
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.media.MediaScannerConnection;
-import android.net.Uri;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
+
+import java.io.File;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Function3;
-import java.io.File;
 
-public final class SaveImage extends UseCase<String> {
+public final class SaveImage extends UseCase<FileData> {
   private final TargetUi targetUi;
-  private final GetPath getPath;
   private final GetDimens getDimens;
   private final ImageUtils imageUtils;
-  private Uri uri;
+  private FileData fileData;
 
-  public SaveImage(TargetUi targetUi, GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
+  public SaveImage(TargetUi targetUi, GetDimens getDimens, ImageUtils imageUtils) {
     this.targetUi = targetUi;
-    this.getPath = getPath;
     this.getDimens = getDimens;
     this.imageUtils = imageUtils;
   }
 
-  public SaveImage with(Uri uri) {
-    this.uri = uri;
+  public SaveImage with(FileData fileData) {
+    this.fileData = fileData;
     return this;
   }
 
-  @Override public Observable<String> react() {
-    return getOutputUri().flatMap(new Function<Uri, ObservableSource<String>>() {
-      @Override public ObservableSource<String> apply(Uri outputUri) throws Exception {
-        return Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(),
-            getDimens.with(uri).react(), new Function3<String, String, int[], String>() {
-              @Override public String apply(String filePath, String filePathOutput, int[] dimens)
-                  throws Exception {
-                File filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
+  @Override public Observable<FileData> react() {
+    return getDimens.with(fileData).react().flatMap(new Function<int[], ObservableSource<FileData>>() {
+      @Override
+      public ObservableSource<FileData> apply(int[] dimens) throws Exception {
+        File output = getOutputFile();
+        File scaled = imageUtils.scaleImage(fileData.getFile(), output, dimens);
 
-                new File(filePath).delete();
+//      TODO: why deleting source file?
+        fileData.getFile().delete();
 
-                MediaScannerConnection.scanFile(targetUi.getContext(),
-                    new String[] { filePathOutput }, new String[] { "image/*" }, null);
+        MediaScannerConnection.scanFile(targetUi.getContext(),
+                new String[] { output.getAbsolutePath() }, new String[] { "image/*" }, null);
 
-                return filePathOutput;
-              }
-            });
+        return Observable.just(new FileData(scaled, fileData.getFilename()));
       }
     });
   }
 
-  private Observable<Uri> getOutputUri() {
-    return getPath.with(uri).react().flatMap(new Function<String, ObservableSource<Uri>>() {
-      @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
-        String extension = imageUtils.getFileExtension(filepath);
-        return Observable.just(Uri.fromFile(imageUtils.getOutputFile(extension)));
-      }
-    });
+  private File getOutputFile() {
+    String fileName = fileData.getFilename();
+    String extension = imageUtils.getFileExtension(fileName);
+
+    return imageUtils.getOutputFile(extension);
   }
 }

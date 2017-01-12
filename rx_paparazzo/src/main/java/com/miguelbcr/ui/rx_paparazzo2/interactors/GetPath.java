@@ -25,10 +25,15 @@ import android.os.Build;
 import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
+
+import java.io.File;
+
 import io.reactivex.Observable;
 
-public final class GetPath extends UseCase<String> {
+public final class GetPath extends UseCase<FileData> {
   private final TargetUi targetUi;
   private final DownloadImage downloadImage;
   private Uri uri;
@@ -43,14 +48,14 @@ public final class GetPath extends UseCase<String> {
     return this;
   }
 
-  @Override public Observable<String> react() {
+  @Override public Observable<FileData> react() {
     return getPath();
   }
 
-  @SuppressLint("NewApi") private Observable<String> getPath() {
+  @SuppressLint("NewApi") private Observable<FileData> getPath() {
     boolean isFromKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
     Context context = targetUi.activity();
-    String filePath = null;
+    FileData fileData = null;
 
     if (uri == null) {
       return null;
@@ -60,14 +65,15 @@ public final class GetPath extends UseCase<String> {
       if (isExternalStorageDocument(uri)) {
         Document document = getDocument(uri);
         if ("primary".equalsIgnoreCase(document.type)) {
-          filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
+          String filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
+          fileData = new FileData(new File(filePath), document.id);
         }
       } else if (isDownloadsDocument(uri)) {
         String id = DocumentsContract.getDocumentId(uri);
         Uri contentUri =
             ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"),
                 Long.valueOf(id));
-        filePath = getDataColumn(context, contentUri, null, null);
+        fileData = getDataColumn(context, contentUri, null, null);
       } else if (isMediaDocument(uri)) {
         Document document = getDocument(uri);
         Uri contentUri = null;
@@ -79,20 +85,22 @@ public final class GetPath extends UseCase<String> {
           contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
         }
 
-        filePath = getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?",
+        fileData = getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?",
             new String[] { document.id });
       }
     } else if ("content".equalsIgnoreCase(uri.getScheme())) {
-      filePath = getDataColumn(context, uri, null, null);
+      fileData = getDataColumn(context, uri, null, null);
     } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-      filePath = uri.getPath();
+      File file = new File(uri.getPath());
+      String fileName = ImageUtils.getFileName(uri.getPath());
+      fileData = new FileData(file, fileName);
     }
 
-    if (filePath == null) {
+    if (fileData == null) {
       return downloadImage.with(uri).react();
     }
 
-    return Observable.just(filePath);
+    return Observable.just(fileData);
   }
 
   private class Document {
@@ -109,15 +117,23 @@ public final class GetPath extends UseCase<String> {
     return document;
   }
 
-  private String getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
+  private FileData getDataColumn(Context context, Uri uri, String selection, String[] selectionArgs) {
     Cursor cursor = null;
-    String column = MediaStore.Images.Media.DATA;
-    String[] projection = { column };
+    String dataColumn = MediaStore.Images.Media.DATA;
+    String nameColumn = MediaStore.Images.Media.DISPLAY_NAME;
+
+//    TODO: ***** this title is useful, add to FileData??? ********
+//    String nameColumn = MediaStore.Images.Media.TITLE;
+
+    String[] projection = { dataColumn, nameColumn };
 
     try {
       cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
       cursor.moveToFirst();
-      return cursor.getString(cursor.getColumnIndexOrThrow(column));
+      String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
+      String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
+
+      return new FileData(new File(fileData), fileName);
     } catch (Exception e) {
       //            throw Exceptions.propagate(e);
       return null;

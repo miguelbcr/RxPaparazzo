@@ -33,12 +33,10 @@ import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFiles;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.StartIntent;
 
-import java.io.File;
 import java.util.List;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
-import io.reactivex.functions.BiFunction;
 import io.reactivex.functions.Function;
 
 public final class Files extends Worker {
@@ -97,13 +95,12 @@ public final class Files extends Worker {
         .flatMap(new Function<Uri, ObservableSource<FileData>>() {
           @Override
           public ObservableSource<FileData> apply(final Uri uri) throws Exception {
-            BiFunction<String, File, FileData> biFunction = new BiFunction<String, File, FileData>() {
+            return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
               @Override
-              public FileData apply(String filename, File result) throws Exception {
-                return new FileData(result, filename);
+              public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+                return handleSavingFile(fileData);
               }
-            };
-            return Observable.zip(getFileName(uri), handleSavingFile(uri), biFunction);
+            });
           }
         })
         .map(new Function<FileData, Response<T, FileData>>() {
@@ -114,16 +111,19 @@ public final class Files extends Worker {
         .compose(this.<Response<T, FileData>>applyOnError());
   }
 
-  private <T> Observable<String> getFileName(Uri uri) {
+  private Observable<FileData> handleSavingFile(final FileData sourceFileData) {
+    return cropImage.with(sourceFileData).react()
+            .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+              @Override
+              public ObservableSource<FileData> apply(Uri uri) throws Exception {
+                return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
+                  @Override
+                  public ObservableSource<FileData> apply(FileData cropped) throws Exception {
+                    FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
 
-    return null;
-  }
-
-  private Observable<File> handleSavingFile(Uri uri) {
-    return cropImage.with(uri).react()
-            .flatMap(new Function<Uri, ObservableSource<File>>() {
-              @Override public ObservableSource<File> apply(Uri uri) throws Exception {
-                return saveFile.with(uri).react();
+                    return saveFile.with(destination).react();
+                  }
+                });
               }
             });
   }
@@ -144,13 +144,13 @@ public final class Files extends Worker {
         .flatMap(new Function<Uri, ObservableSource<FileData>>() {
           @Override
           public ObservableSource<FileData> apply(final Uri uri) throws Exception {
-            BiFunction<String, File, FileData> biFunction = new BiFunction<String, File, FileData>() {
-              @Override
-              public FileData apply(String filename, File result) throws Exception {
-                return new FileData(result, filename);
-              }
-            };
-            return Observable.zip(getFileName(uri), handleSavingFile(uri), biFunction);
+            return getPath.with(uri).react();
+          }
+        })
+        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+            return handleSavingFile(fileData);
           }
         })
         .toList()

@@ -16,68 +16,40 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-import android.net.Uri;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 
 import java.io.File;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
-import io.reactivex.functions.Function3;
 
-public final class SaveFile extends UseCase<File> {
-  private final GetPath getPath;
+public final class SaveFile extends UseCase<FileData> {
   private final GetDimens getDimens;
   private final ImageUtils imageUtils;
 
-  private File destination;
-  private Uri uri;
-  private boolean maintainFilename;
+  private FileData fileData;
 
-  public SaveFile(GetPath getPath, GetDimens getDimens, ImageUtils imageUtils) {
-    this.getPath = getPath;
+  public SaveFile(GetDimens getDimens, ImageUtils imageUtils) {
     this.getDimens = getDimens;
     this.imageUtils = imageUtils;
   }
 
-  public SaveFile with(Uri uri) {
-    this.uri = uri;
-    this.destination = null;
-    this.maintainFilename = false;
+  public SaveFile with(FileData fileData) {
+    this.fileData = fileData;
 
     return this;
   }
 
-  // save as existing file name
-  public SaveFile with(Uri uri, boolean maintainFilename) {
-    this.uri = uri;
-    this.destination = null;
-    this.maintainFilename = maintainFilename;
+  @Override public Observable<FileData> react() {
+    return getDimens.with(fileData).react().flatMap(new Function<int[], ObservableSource<FileData>>() {
+      @Override
+      public ObservableSource<FileData> apply(int[] dimens) throws Exception {
+        File output = getOutputFile();
+        File scaled = imageUtils.scaleImage(fileData.getFile(), output, dimens);
 
-    return this;
-  }
-
-  // specify destination filename
-  public SaveFile with(Uri uri, File destination) {
-    this.uri = uri;
-    this.destination = destination;
-    this.maintainFilename = false;
-
-    return this;
-  }
-
-  @Override public Observable<File> react() {
-    return getOutputUri().flatMap(new Function<Uri, ObservableSource<File>>() {
-      @Override public ObservableSource<File> apply(Uri outputUri) throws Exception {
-        return Observable.zip(getPath.with(uri).react(), getPath.with(outputUri).react(),
-            getDimens.with(uri).react(), new Function3<String, String, int[], File>() {
-              @Override public File apply(String filePath, String filePathOutput, int[] dimens)
-                  throws Exception {
-                File output = imageUtils.scaleImage(filePath, filePathOutput, dimens);
-
-//                 TODO: why deleting source file?
-                File sourceFile = new File(filePath);
-                sourceFile.delete();
+//      TODO: why deleting source file?
+        fileData.getFile().delete();
 
 //                TODO: detecting if it is an image could be return from scaleImage
 //                ScalingResult(File, boolean)
@@ -88,33 +60,17 @@ public final class SaveFile extends UseCase<File> {
 //                MediaScannerConnection.scanFile(targetUi.getContext(),
 //                    new String[] { filePathOutput }, mimeTypes, null);
 
-                return output;
-              }
-            });
+        return Observable.just(new FileData(scaled, fileData.getFilename()));
       }
     });
   }
 
-  private Observable<Uri> getOutputUri() {
-    return getPath.with(uri).react().flatMap(new Function<String, ObservableSource<Uri>>() {
-      @Override public ObservableSource<Uri> apply(String filepath) throws Exception {
-        File finalDestination;
-        if (maintainFilename) {
-          String fileName = imageUtils.getFileNameWithoutExtension(filepath);
-          File outputDirectory = imageUtils.getOutputDirectory();
+  private File getOutputFile() {
+    String fileName = fileData.getFilename();
+    String extension = imageUtils.getFileExtension(fileName);
+    File outputFile = imageUtils.getOutputFile(extension);
 
-          if (fileName != null) {
-            finalDestination = new File(filepath, fileName);
-          } else {
-            String fileExtension = imageUtils.getFileExtension(filepath);
-            finalDestination = imageUtils.createNewFile(outputDirectory, fileExtension);
-          }
-        } else {
-          finalDestination = destination;
-        }
-
-        return Observable.just(Uri.fromFile(finalDestination));
-      }
-    });
+    return outputFile;
   }
+
 }

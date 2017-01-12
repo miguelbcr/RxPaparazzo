@@ -17,49 +17,50 @@
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.util.DisplayMetrics;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize;
+
 import io.reactivex.Observable;
-import io.reactivex.functions.Function;
 
 public final class GetDimens extends UseCase<int[]> {
   private final TargetUi targetUi;
   private final Config config;
-  private final GetPath getPath;
-  private Uri uri;
+  private FileData fileData;
 
-  public GetDimens(TargetUi targetUi, Config config, GetPath getPath) {
+  public GetDimens(TargetUi targetUi, Config config) {
     this.targetUi = targetUi;
     this.config = config;
-    this.getPath = getPath;
   }
 
-  public GetDimens with(Uri uri) {
-    this.uri = uri;
+  public GetDimens with(FileData fileData) {
+    this.fileData = fileData;
     return this;
   }
 
   @Override public Observable<int[]> react() {
-    return getPath.with(uri).react().map(new Function<String, int[]>() {
-      @Override public int[] apply(String filePath) throws Exception {
-        if (config.getSize() instanceof OriginalSize) {
-          return GetDimens.this.getFileDimens(filePath);
-        } else if (config.getSize() instanceof CustomMaxSize) {
-          CustomMaxSize customMaxSize = (CustomMaxSize) config.getSize();
-          return getCustomDimens(customMaxSize, filePath);
-        } else if (config.getSize() instanceof ScreenSize) {
-          return GetDimens.this.getScreenDimens();
-        } else {
-          int[] dimens = GetDimens.this.getScreenDimens();
-          return new int[] { dimens[0] / 8, dimens[1] / 8 };
-        }
-      }
-    });
+    return Observable.just(getDimensions());
+  }
+
+  private int[] getDimensions() {
+    if (config.getSize() instanceof OriginalSize) {
+      String filePath = fileData.getFile().getAbsolutePath();
+      return GetDimens.this.getFileDimens(filePath);
+    } else if (config.getSize() instanceof CustomMaxSize) {
+      CustomMaxSize customMaxSize = (CustomMaxSize) config.getSize();
+      String filePath = fileData.getFile().getAbsolutePath();
+      return getCustomDimens(customMaxSize, filePath);
+    } else if (config.getSize() instanceof ScreenSize) {
+      return GetDimens.this.getScreenDimens();
+    } else {
+      int[] dimens = GetDimens.this.getScreenDimens();
+      return new int[] { dimens[0] / 8, dimens[1] / 8 };
+    }
   }
 
   private int[] getScreenDimens() {

@@ -19,42 +19,49 @@ package com.miguelbcr.ui.rx_paparazzo2.workers;
 import android.Manifest;
 import android.app.Activity;
 import android.net.Uri;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Ignore;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImages;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+
+import java.util.List;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
-import java.util.List;
 
 public final class Gallery extends Worker {
   private final GrantPermissions grantPermissions;
   private final PickImages pickImages;
   private final PickImage pickImage;
+  private final GetPath getPath;
   private final CropImage cropImage;
   private final SaveImage saveImage;
   private final TargetUi targetUi;
   private final Config config;
 
   public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage,
-      CropImage cropImage, SaveImage saveImage, TargetUi targetUi, Config config) {
+                 GetPath getPath, CropImage cropImage, SaveImage saveImage, TargetUi targetUi, Config config) {
     super(targetUi);
     this.grantPermissions = grantPermissions;
     this.pickImages = pickImages;
     this.pickImage = pickImage;
+    this.getPath = getPath;
     this.cropImage = cropImage;
     this.saveImage = saveImage;
     this.targetUi = targetUi;
     this.config = config;
   }
 
-  public <T> Observable<Response<T, String>> pickImage() {
+  public <T> Observable<Response<T, FileData>> pickImage() {
     return grantPermissions.with(permissions())
         .react()
         .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
@@ -62,25 +69,43 @@ public final class Gallery extends Worker {
             return pickImage.react();
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
-          }
-        })
-        .flatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
-          }
-        })
-        .map(new Function<String, Response<T, String>>() {
-          @Override public Response<T, String> apply(String path) throws Exception {
+            .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+              @Override
+              public ObservableSource<FileData> apply(final Uri uri) throws Exception {
+                return getPath.with(uri).react();
+              }
+            })
+            .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+              @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+                return handleSavingFile(fileData);
+              }
+            })
+        .map(new Function<FileData, Response<T, FileData>>() {
+          @Override public Response<T, FileData> apply(FileData path) throws Exception {
             return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
           }
         })
-        .compose(this.<Response<T, String>>applyOnError());
+        .compose(this.<Response<T, FileData>>applyOnError());
   }
 
-  public <T> Observable<Response<T, List<String>>> pickImages() {
+  private Observable<FileData> handleSavingFile(final FileData sourceFileData) {
+    return cropImage.with(sourceFileData).react()
+            .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+              @Override
+              public ObservableSource<FileData> apply(Uri uri) throws Exception {
+                return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
+                  @Override
+                  public ObservableSource<FileData> apply(FileData cropped) throws Exception {
+                    FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
+
+                    return saveImage.with(destination).react();
+                  }
+                });
+              }
+            });
+  }
+
+  public <T> Observable<Response<T, List<FileData>>> pickImages() {
     return grantPermissions.with(permissions())
         .react()
         .flatMap(new Function<Ignore, ObservableSource<List<Uri>>>() {
@@ -93,24 +118,26 @@ public final class Gallery extends Worker {
             return uris;
           }
         })
-        .concatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
+        .concatMap(new Function<Uri, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(final Uri uri) throws Exception {
+            return getPath.with(uri).react();
           }
         })
-        .concatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
+        .concatMap(new Function<FileData, ObservableSource<FileData>>() {
+          @Override
+          public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+            return handleSavingFile(fileData);
           }
         })
         .toList()
         .toObservable()
-        .map(new Function<List<String>, Response<T, List<String>>>() {
-          @Override public Response<T, List<String>> apply(List<String> paths) throws Exception {
+        .map(new Function<List<FileData>, Response<T, List<FileData>>>() {
+          @Override public Response<T, List<FileData>> apply(List<FileData> paths) throws Exception {
             return new Response<>((T) targetUi.ui(), paths, Activity.RESULT_OK);
           }
         })
-        .compose(this.<Response<T, List<String>>>applyOnError());
+        .compose(this.<Response<T, List<FileData>>>applyOnError());
   }
 
   private String[] permissions() {

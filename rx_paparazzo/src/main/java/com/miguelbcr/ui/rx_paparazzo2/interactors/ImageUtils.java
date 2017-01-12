@@ -131,6 +131,13 @@ public final class ImageUtils {
     return storageDir;
   }
 
+  public static String getFileName(String filepath) {
+    File file = new File(filepath);
+
+    return file.getName();
+  }
+
+
   public String getFileNameWithoutExtension(String filepath) {
     File file = new File(filepath);
 
@@ -170,22 +177,20 @@ public final class ImageUtils {
         : "." + mimeType.split("/")[1];
   }
 
-  File scaleImage(String filePath, String filePathOutput, int[] dimens) {
-    File destination = new File(filePathOutput);
-
+  File scaleImage(File input, File destination, int[] dimens) {
     if (config.getSize() instanceof OriginalSize) {
-      copyFileAndExifTags(filePath, filePathOutput, dimens);
+      copyFileAndExifTags(input, destination, dimens);
       return destination;
     }
 
-    Bitmap bitmap = handleBitmapSampling(filePath, dimens[0], dimens[1]);
+    Bitmap bitmap = handleBitmapSampling(input, dimens[0], dimens[1]);
     if (bitmap == null) {
-      copyFileAndExifTags(filePath, filePathOutput, dimens);
+      copyFileAndExifTags(input, destination, dimens);
       return destination;
     }
 
-    bitmap2file(bitmap, destination, getCompressFormat(filePathOutput));
-    copyExifTags(filePath, filePathOutput, dimens);
+    bitmap2file(bitmap, destination, getCompressFormat(destination.getName()));
+    copyExifTags(input, destination, dimens);
 
     return destination;
   }
@@ -201,9 +206,9 @@ public final class ImageUtils {
     return compressFormat;
   }
 
-  private void copyFileAndExifTags(String filePath, String filePathOutput, int[] dimens) {
-    copy(new File(filePath), new File(filePathOutput));
-    copyExifTags(filePath, filePathOutput, dimens);
+  private void copyFileAndExifTags(File input, File fileOutput, int[] dimens) {
+    copy(input, fileOutput);
+    copyExifTags(input, fileOutput, dimens);
   }
 
   public void copy(InputStream in, File dst) {
@@ -265,26 +270,28 @@ public final class ImageUtils {
     }
   }
 
-  private void copyExifTags(String srcFilePath, String dstFilePath, int[] dimens) {
-    if (getCompressFormat(dstFilePath) == Bitmap.CompressFormat.JPEG) {
-      try {
-        ExifInterface exifSource = new ExifInterface(srcFilePath);
-        ExifInterface exifDest = new ExifInterface(dstFilePath);
+  private void copyExifTags(File srcFile, File dstFile, int[] dimens) {
+    try {
+      String dstFilePath = dstFile.getAbsolutePath();
+      String srcFilePath = srcFile.getAbsolutePath();
+      if (getCompressFormat(dstFilePath) == Bitmap.CompressFormat.JPEG) {
+          ExifInterface exifSource = new ExifInterface(srcFilePath);
+          ExifInterface exifDest = new ExifInterface(dstFilePath);
 
-        for (String attribute : getExifTags()) {
-          String tagValue = exifSource.getAttribute(attribute);
+          for (String attribute : getExifTags()) {
+            String tagValue = exifSource.getAttribute(attribute);
 
-          if (!TextUtils.isEmpty(tagValue)) {
-            exifDest.setAttribute(attribute, tagValue);
+            if (!TextUtils.isEmpty(tagValue)) {
+              exifDest.setAttribute(attribute, tagValue);
+            }
           }
-        }
 
-        exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens[0]));
-        exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens[1]));
-        exifDest.saveAttributes();
-      } catch (IOException e) {
-        e.printStackTrace();
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens[0]));
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens[1]));
+          exifDest.saveAttributes();
       }
+    } catch (IOException e) {
+      e.printStackTrace();
     }
   }
 
@@ -304,9 +311,10 @@ public final class ImageUtils {
     };
   }
 
-  private Bitmap handleBitmapSampling(String filePath, int maxWidth, int maxHeight) {
+  private Bitmap handleBitmapSampling(File input, int maxWidth, int maxHeight) {
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;
+    String filePath = input.getAbsolutePath();
     BitmapFactory.decodeFile(filePath, options);
     options.inSampleSize =
         (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);

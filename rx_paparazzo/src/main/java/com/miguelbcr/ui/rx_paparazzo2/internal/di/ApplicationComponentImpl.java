@@ -41,15 +41,15 @@ class ApplicationComponentImpl extends ApplicationComponent {
     downloadImage = new DownloadImage(ui, imageUtils);
     getPath = new GetPath(ui, downloadImage);
     takePhoto = new TakePhoto(startIntent, ui, imageUtils);
-    getDimens = new GetDimens(ui, config, getPath);
-    cropImage = new CropImage(ui, config, startIntent, getPath, imageUtils);
-    saveImage = new SaveImage(ui, getPath, getDimens, imageUtils);
-    saveFile = new SaveFile(getPath, getDimens, imageUtils);
+    getDimens = new GetDimens(ui, config);
+    cropImage = new CropImage(ui, config, startIntent, imageUtils);
+    saveImage = new SaveImage(ui, getDimens, imageUtils);
+    saveFile = new SaveFile(getDimens, imageUtils);
     grantPermissions = new GrantPermissions(ui);
     pickImages = new PickImages(startIntent);
     pickImage = new PickImage(startIntent, getPath);
-    camera = new Camera(takePhoto, cropImage, saveImage, grantPermissions, ui, config);
-    gallery = new Gallery(grantPermissions, pickImages, pickImage, cropImage, saveImage, ui, config);
+    camera = new Camera(takePhoto, getPath, cropImage, saveImage, grantPermissions, ui, config);
+    gallery = new Gallery(grantPermissions, pickImages, pickImage, getPath, cropImage, saveImage, ui, config);
     files = new Files(grantPermissions, startIntent, getPath, cropImage, saveFile, ui, config);
   }
 
