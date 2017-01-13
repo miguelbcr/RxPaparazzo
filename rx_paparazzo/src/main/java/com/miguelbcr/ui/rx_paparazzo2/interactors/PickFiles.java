@@ -29,6 +29,7 @@ import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 
 public class PickFiles extends UseCase<List<Uri>> {
+
   public static final String DEFAULT_MIME_TYPE = "*/*";
 
   private final String mimeType;

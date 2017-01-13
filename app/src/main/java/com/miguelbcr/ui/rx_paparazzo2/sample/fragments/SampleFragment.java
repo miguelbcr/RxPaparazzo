@@ -13,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Options;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
@@ -23,11 +24,12 @@ import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.schedulers.Schedulers;
 
 public class SampleFragment extends Fragment implements Testable {
     private ImageView imageView;
@@ -127,9 +129,11 @@ public class SampleFragment extends Fragment implements Testable {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
                     if (checkResultCode(response.resultCode())) {
-                        if (response.data().size() == 1)
+                        if (response.data().size() == 1) {
                             response.targetUI().loadImage(response.data().get(0));
-                        else response.targetUI().loadImages(response.data());
+                        } else {
+                            response.targetUI().loadImages(response.data());
+                        }
                     }
                 });
     }
@@ -146,7 +150,8 @@ public class SampleFragment extends Fragment implements Testable {
         return code == Activity.RESULT_OK;
     }
 
-    private void loadImage(String filePath) {
+    private void loadImage(FileData fileData) {
+        String filePath = fileData.getFile().getAbsolutePath();
         filesPaths.clear();
         filesPaths.add(filePath);
         imageView.setVisibility(View.VISIBLE);
@@ -154,11 +159,16 @@ public class SampleFragment extends Fragment implements Testable {
         File imageFile = new File(filePath);
 
         Picasso.with(getActivity()).setLoggingEnabled(true);
-        Picasso.with(getActivity()).invalidate(new File(filePath));
+        Picasso.with(getActivity()).invalidate(filePath);
         Picasso.with(getActivity()).load(imageFile).into(imageView);
     }
 
-    private void loadImages(List<String> filesPaths) {
+    private void loadImages(List<FileData> fileDataList) {
+        List<String> filesPaths = new ArrayList<>();
+        for (FileData fileData : fileDataList) {
+            filesPaths.add(fileData.getFile().getAbsolutePath());
+        }
+
         this.filesPaths = filesPaths;
         imageView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);

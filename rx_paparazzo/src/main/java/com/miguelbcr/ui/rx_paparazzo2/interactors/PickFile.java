@@ -83,7 +83,10 @@ public class PickFile extends UseCase<Uri> {
                   .subscribeOn(Schedulers.io())
                   .map(new Function<FileData, FileData>() {
                     @Override public FileData apply(FileData fileData) throws Exception {
-                      intent.setData(Uri.fromFile(fileData.getFile()));
+                      Uri data = Uri.fromFile(fileData.getFile());
+                      intent.setData(data);
+                      PermissionUtil.addReadWritePermission(intent);
+
                       return fileData;
                     }
                   });

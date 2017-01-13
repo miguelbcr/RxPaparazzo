@@ -30,7 +30,7 @@ import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImages;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 
 import java.util.List;
 
@@ -44,19 +44,19 @@ public final class Gallery extends Worker {
   private final PickImage pickImage;
   private final GetPath getPath;
   private final CropImage cropImage;
-  private final SaveImage saveImage;
+  private final SaveFile saveFile;
   private final TargetUi targetUi;
   private final Config config;
 
   public Gallery(GrantPermissions grantPermissions, PickImages pickImages, PickImage pickImage,
-                 GetPath getPath, CropImage cropImage, SaveImage saveImage, TargetUi targetUi, Config config) {
+                 GetPath getPath, CropImage cropImage, SaveFile saveFile, TargetUi targetUi, Config config) {
     super(targetUi);
     this.grantPermissions = grantPermissions;
     this.pickImages = pickImages;
     this.pickImage = pickImage;
     this.getPath = getPath;
     this.cropImage = cropImage;
-    this.saveImage = saveImage;
+    this.saveFile = saveFile;
     this.targetUi = targetUi;
     this.config = config;
   }
@@ -98,7 +98,7 @@ public final class Gallery extends Worker {
                   public ObservableSource<FileData> apply(FileData cropped) throws Exception {
                     FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
 
-                    return saveImage.with(destination).react();
+                    return saveFile.with(destination).react();
                   }
                 });
               }

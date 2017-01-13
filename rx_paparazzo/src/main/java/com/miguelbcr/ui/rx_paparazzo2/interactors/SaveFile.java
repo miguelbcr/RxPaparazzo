@@ -68,9 +68,8 @@ public final class SaveFile extends UseCase<FileData> {
   private File getOutputFile() {
     String fileName = fileData.getFilename();
     String extension = imageUtils.getFileExtension(fileName);
-    File outputFile = imageUtils.getOutputFile(extension);
 
-    return outputFile;
+    return imageUtils.getOutputFile(extension);
   }
 
 }

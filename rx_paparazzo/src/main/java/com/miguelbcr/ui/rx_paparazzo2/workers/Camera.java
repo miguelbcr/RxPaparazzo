@@ -30,7 +30,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
 
 import io.reactivex.Observable;
@@ -40,19 +40,19 @@ import io.reactivex.functions.Function;
 public final class Camera extends Worker {
   private final TakePhoto takePhoto;
   private final CropImage cropImage;
-  private final SaveImage saveImage;
+  private final SaveFile saveFile;
   private final GrantPermissions grantPermissions;
   private final TargetUi targetUi;
   private final Config config;
   private final GetPath getPath;
 
-  public Camera(TakePhoto takePhoto, GetPath getPath, CropImage cropImage, SaveImage saveImage,
+  public Camera(TakePhoto takePhoto, GetPath getPath, CropImage cropImage, SaveFile saveFile,
       GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
     super(targetUi);
     this.takePhoto = takePhoto;
     this.getPath = getPath;
     this.cropImage = cropImage;
-    this.saveImage = saveImage;
+    this.saveFile = saveFile;
     this.grantPermissions = grantPermissions;
     this.targetUi = targetUi;
     this.config = config;
@@ -79,7 +79,7 @@ public final class Camera extends Worker {
         })
         .flatMap(new Function<FileData, ObservableSource<FileData>>() {
           @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
-            return saveImage.with(fileData).react();
+            return saveFile.with(fileData).react();
           }
         })
         .map(new Function<FileData, Response<T, FileData>>() {
@@ -100,7 +100,7 @@ public final class Camera extends Worker {
                   public ObservableSource<FileData> apply(FileData cropped) throws Exception {
                     FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
 
-                    return saveImage.with(destination).react();
+                    return saveFile.with(destination).react();
                   }
                 });
               }

@@ -11,7 +11,7 @@ import com.miguelbcr.ui.rx_paparazzo2.interactors.ImageUtils;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImages;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.StartIntent;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Camera;
@@ -26,7 +26,6 @@ class ApplicationComponentImpl extends ApplicationComponent {
   private final GetDimens getDimens;
   private final TakePhoto takePhoto;
   private final CropImage cropImage;
-  private final SaveImage saveImage;
   private final SaveFile saveFile;
   private final GrantPermissions grantPermissions;
   private final PickImages pickImages;
@@ -43,13 +42,12 @@ class ApplicationComponentImpl extends ApplicationComponent {
     takePhoto = new TakePhoto(startIntent, ui, imageUtils);
     getDimens = new GetDimens(ui, config);
     cropImage = new CropImage(ui, config, startIntent, imageUtils);
-    saveImage = new SaveImage(ui, getDimens, imageUtils);
     saveFile = new SaveFile(getDimens, imageUtils);
     grantPermissions = new GrantPermissions(ui);
     pickImages = new PickImages(startIntent);
     pickImage = new PickImage(startIntent, getPath);
-    camera = new Camera(takePhoto, getPath, cropImage, saveImage, grantPermissions, ui, config);
-    gallery = new Gallery(grantPermissions, pickImages, pickImage, getPath, cropImage, saveImage, ui, config);
+    camera = new Camera(takePhoto, getPath, cropImage, saveFile, grantPermissions, ui, config);
+    gallery = new Gallery(grantPermissions, pickImages, pickImage, getPath, cropImage, saveFile, ui, config);
     files = new Files(grantPermissions, startIntent, getPath, cropImage, saveFile, ui, config);
   }
 

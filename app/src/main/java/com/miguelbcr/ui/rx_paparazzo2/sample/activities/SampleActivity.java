@@ -12,6 +12,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
@@ -162,20 +163,25 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         return code == RESULT_OK;
     }
 
-    private void loadImage(String filePath) {
+    private void loadImage(FileData fileData) {
         filesPaths.clear();
-        filesPaths.add(filePath);
+        filesPaths.add(fileData.getFile().getAbsolutePath());
         imageView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
         recyclerView.setAdapter(null);
 
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-        Picasso.with(getApplicationContext()).invalidate("file://" + filePath);
-        Picasso.with(getApplicationContext()).load("file://" + filePath).into(imageView);
+        Picasso.with(getApplicationContext()).invalidate("file://" + fileData);
+        Picasso.with(getApplicationContext()).load("file://" + fileData).into(imageView);
     }
 
-    private void loadImages(List<String> filesPaths) {
+    private void loadImages(List<FileData> fileDataList) {
+        List<String> filesPaths = new ArrayList<>();
+        for (FileData fileData : fileDataList) {
+            filesPaths.add(fileData.getFile().getAbsolutePath());
+        }
+
         this.filesPaths = filesPaths;
         imageView.setVisibility(View.GONE);
         recyclerView.setVisibility(View.VISIBLE);

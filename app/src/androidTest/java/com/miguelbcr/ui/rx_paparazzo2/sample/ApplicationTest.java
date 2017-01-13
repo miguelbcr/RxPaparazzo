@@ -18,6 +18,7 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.DownloadImage;
@@ -210,7 +211,11 @@ public class ApplicationTest {
                 assertNotNull(filePath);
                 assertNotEquals(filePath, "");
 
-                getDimens(size).with(Uri.fromFile(new File(filePath))).react()
+                File file = new File(filePath);
+                String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
+                FileData fileData = new FileData(file, fileName);
+
+                getDimens(size).with(fileData).react()
                         .subscribe(dimens -> {
                             int[] dimensPortrait = getDimensionsPortrait(dimens[0], dimens[1]);
                             int[] imageDimensPortrait = getDimensionsPortrait(imageDimens[0], imageDimens[1]);
@@ -231,10 +236,8 @@ public class ApplicationTest {
         Config config = new Config();
         config.setSize(size);
         TargetUi targetUi = new TargetUi(activityRule.getActivity());
-        ImageUtils imageUtils = new ImageUtils(targetUi, config);
-        DownloadImage downloadImage = new DownloadImage(targetUi, imageUtils);
-        GetPath getPath = new GetPath(targetUi, downloadImage);
-        return new GetDimens(targetUi, config, getPath);
+
+        return new GetDimens(targetUi, config);
     }
 
     private void cancelUserAction() {
