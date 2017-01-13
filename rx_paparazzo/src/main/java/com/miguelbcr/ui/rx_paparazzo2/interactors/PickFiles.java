@@ -43,7 +43,7 @@ public class PickFiles extends UseCase<List<Uri>> {
   }
 
   public PickFiles(StartIntent startIntent) {
-    this(DEFAULT_MIME_TYPE, startIntent, false);
+    this(DEFAULT_MIME_TYPE, startIntent, true);
   }
 
   @Override public Observable<List<Uri>> react() {

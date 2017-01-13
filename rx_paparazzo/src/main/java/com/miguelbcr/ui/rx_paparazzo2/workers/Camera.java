@@ -30,8 +30,11 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PermissionUtil;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
+
+import java.util.Arrays;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -108,31 +111,31 @@ public final class Camera extends Worker {
   }
 
   private String[] permissions() {
-    if (config.useInternalStorage()) {
-      if (hasCameraPermissionInManifest()) {
-        return new String[] { Manifest.permission.CAMERA };
-      } else {
-        return new String[] {};
-      }
-    } else {
-      if (hasCameraPermissionInManifest()) {
-        return new String[] {
-            Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-      } else {
-        return new String[] {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-      }
+    String[] storagePermission = PermissionUtil.getReadAndWriteStoragePermissions(config.useInternalStorage());
+    String[] cameraPermission = getCameraPermission();
+
+    return concat(storagePermission, cameraPermission);
+  }
+
+  private String[] getCameraPermission() {
+    if (hasCameraPermissionInManifest()) {
+      return new String[] { Manifest.permission.CAMERA };
     }
+
+    return new String[] {};
+  }
+
+  private static <T> T[] concat(T[] first, T[] second) {
+    T[] result = Arrays.copyOf(first, first.length + second.length);
+    System.arraycopy(second, 0, result, first.length, second.length);
+
+    return result;
   }
 
   private boolean hasCameraPermissionInManifest() {
     final String packageName = targetUi.getContext().getPackageName();
     try {
-      final PackageInfo packageInfo = targetUi.getContext()
-          .getPackageManager()
+      final PackageInfo packageInfo = targetUi.getContext().getPackageManager()
           .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
       final String[] declaredPermissions = packageInfo.requestedPermissions;
       if (declaredPermissions != null && declaredPermissions.length > 0) {

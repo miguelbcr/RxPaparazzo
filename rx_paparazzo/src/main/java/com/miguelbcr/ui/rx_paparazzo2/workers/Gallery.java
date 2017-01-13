@@ -28,6 +28,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PermissionUtil;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickImages;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
@@ -140,13 +141,8 @@ public final class Gallery extends Worker {
         .compose(this.<Response<T, List<FileData>>>applyOnError());
   }
 
-  private String[] permissions() {
-    if (config.useInternalStorage()) {
-      return new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
-    } else {
-      return new String[] {
-          Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
-      };
+    private String[] permissions() {
+        return PermissionUtil.getReadAndWriteStoragePermissions(config.useInternalStorage());
     }
-  }
+
 }

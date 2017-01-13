@@ -21,7 +21,7 @@ public final class PickImage extends PickFile {
   public static final String IMAGE_MIME_TYPE = "image/*";
 
   public PickImage(StartIntent startIntent, GetPath getPath) {
-    super(IMAGE_MIME_TYPE, startIntent, getPath, false);
+    super(IMAGE_MIME_TYPE, startIntent, getPath, true);
   }
 
 }

@@ -1,5 +1,6 @@
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
+import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -60,5 +61,15 @@ public class PermissionUtil {
                 return uri;
             }
         };
+    }
+
+    public static String[] getReadAndWriteStoragePermissions(boolean internal) {
+        if (internal) {
+            return new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
+        } else {
+            return new String[] {
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
+            };
+        }
     }
 }

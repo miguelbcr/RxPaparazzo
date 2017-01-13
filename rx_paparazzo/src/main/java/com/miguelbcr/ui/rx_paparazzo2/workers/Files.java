@@ -28,6 +28,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PermissionUtil;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PickFiles;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
@@ -164,12 +165,6 @@ public final class Files extends Worker {
   }
 
   private String[] permissions() {
-    if (config.useInternalStorage()) {
-      return new String[] { Manifest.permission.READ_EXTERNAL_STORAGE };
-    } else {
-      return new String[] {
-          Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
-      };
-    }
+    return PermissionUtil.getReadAndWriteStoragePermissions(config.useInternalStorage());
   }
 }
