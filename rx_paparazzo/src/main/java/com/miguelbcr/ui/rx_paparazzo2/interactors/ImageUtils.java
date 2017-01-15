@@ -41,6 +41,7 @@ import java.util.Locale;
 
 public final class ImageUtils {
 
+  // TODO: what should happen here - default file extension???
   private static final String DEFAULT_EXTENSION = ""; // ".jpg";
 
   private final TargetUi targetUi;

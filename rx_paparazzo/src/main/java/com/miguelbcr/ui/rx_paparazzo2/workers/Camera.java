@@ -80,11 +80,6 @@ public final class Camera extends Worker {
             return handleSavingFile(fileData);
           }
         })
-        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
-          @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
-            return saveFile.with(fileData).react();
-          }
-        })
         .map(new Function<FileData, Response<T, FileData>>() {
           @Override public Response<T, FileData> apply(FileData fileData) throws Exception {
             return new Response<>((T) targetUi.ui(), fileData, Activity.RESULT_OK);
