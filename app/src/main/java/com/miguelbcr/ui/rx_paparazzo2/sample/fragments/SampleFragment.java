@@ -68,7 +68,7 @@ public class SampleFragment extends Fragment implements Testable {
 
     private void captureImage() {
         size = new SmallSize();
-        RxPaparazzo.takeImage(this)
+        RxPaparazzo.single(this)
                 .size(size)
                 .usingCamera()
                 .subscribeOn(Schedulers.io())
@@ -86,7 +86,7 @@ public class SampleFragment extends Fragment implements Testable {
         options.setAspectRatio(25, 75);
 
         size = new OriginalSize();
-        RxPaparazzo.takeImage(this)
+        RxPaparazzo.single(this)
                 .size(size)
                 .crop(options)
                 .usingCamera()
@@ -104,7 +104,7 @@ public class SampleFragment extends Fragment implements Testable {
         options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
 
         size = new SmallSize();
-        RxPaparazzo.takeImage(this)
+        RxPaparazzo.single(this)
                 .useInternalStorage()
                 .crop(options)
                 .size(size)
@@ -120,7 +120,7 @@ public class SampleFragment extends Fragment implements Testable {
 
     private void pickupImages() {
         size = new SmallSize();
-        RxPaparazzo.takeImages(this)
+        RxPaparazzo.multiple(this)
                 .useInternalStorage()
                 .crop()
                 .size(size)

@@ -72,7 +72,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
     private void captureImage() {
         size = new CustomMaxSize(512);
-        RxPaparazzo.takeImage(SampleActivity.this)
+        RxPaparazzo.single(SampleActivity.this)
                 .size(size)
                 .usingCamera()
                 .subscribeOn(Schedulers.io())
@@ -92,7 +92,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
 
         size = new OriginalSize();
-        RxPaparazzo.takeImage(SampleActivity.this)
+        RxPaparazzo.single(SampleActivity.this)
                 .size(size)
                 .crop(options)
                 .usingCamera()
@@ -113,7 +113,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorPrimaryDark));
 
         size = new CustomMaxSize(500);
-        RxPaparazzo.takeImage(SampleActivity.this)
+        RxPaparazzo.single(SampleActivity.this)
                 .useInternalStorage()
                 .crop(options)
                 .size(size)
@@ -132,7 +132,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
     private void pickupImages() {
         size = new SmallSize();
-        RxPaparazzo.takeImages(SampleActivity.this)
+        RxPaparazzo.multiple(SampleActivity.this)
                 .useInternalStorage()
                 .crop()
                 .size(size)

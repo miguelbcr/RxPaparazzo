@@ -41,25 +41,25 @@ public final class RxPaparazzo {
     RxActivityResult.register(application);
   }
 
-  public static <T extends Activity> BuilderImage<T> takeImage(T activity) {
+  public static <T extends Activity> BuilderImage<T> single(T activity) {
     return new BuilderImage<T>(activity);
   }
 
-  /**
-   * Prior to API 18, only one image will be retrieved.
-   */
-  public static <T extends Activity> BuilderImages<T> takeImages(T activity) {
-    return new BuilderImages<T>(activity);
-  }
-
-  public static <T extends Fragment> BuilderImage<T> takeImage(T fragment) {
+  public static <T extends Fragment> BuilderImage<T> single(T fragment) {
     return new BuilderImage<T>(fragment);
   }
 
   /**
    * Prior to API 18, only one image will be retrieved.
    */
-  public static <T extends Fragment> BuilderImages<T> takeImages(T fragment) {
+  public static <T extends Activity> BuilderImages<T> multiple(T activity) {
+    return new BuilderImages<T>(activity);
+  }
+
+  /**
+   * Prior to API 18, only one image will be retrieved.
+   */
+  public static <T extends Fragment> BuilderImages<T> multiple(T fragment) {
     return new BuilderImages<T>(fragment);
   }
 
@@ -121,7 +121,6 @@ public final class RxPaparazzo {
      * Use gallery to retrieve the image.
      */
     public Observable<Response<T, FileData>> usingGallery() {
-      // TODO: maintain file name from gallery???
       return applicationComponent.gallery().pickImage();
     }
 
