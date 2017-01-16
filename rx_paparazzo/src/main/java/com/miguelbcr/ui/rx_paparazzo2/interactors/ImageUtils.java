@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import io.reactivex.exceptions.Exceptions;
@@ -43,6 +44,8 @@ public final class ImageUtils {
 
   public static final String JPG_FILE_EXTENSION = ".jpg";
   private static final String DEFAULT_EXTENSION = "";
+  public static final String MIME_TYPE_JPEG = "image/jpeg";
+  public static final String MIME_TYPE_PNG = "image/png";
 
   private final TargetUi targetUi;
   private final Config config;
@@ -169,14 +172,7 @@ public final class ImageUtils {
   }
 
   String getFileExtension(Uri uri) {
-    String mimeType;
-
-    if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-      mimeType = targetUi.getContext().getContentResolver().getType(uri);
-    } else {
-      String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-      mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
-    }
+    String mimeType = getMimeType(targetUi.getContext(), uri);
 
     if (TextUtils.isEmpty(mimeType)) {
       return getFileExtension(uri.getLastPathSegment());
@@ -185,22 +181,53 @@ public final class ImageUtils {
     }
   }
 
-  File scaleImage(File input, File destination, int[] dimens) {
+  public static String getMimeType(Context context, Uri uri) {
+    String mimeType;
+
+    if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
+      mimeType = context.getContentResolver().getType(uri);
+    } else {
+      String path = uri.toString();
+      mimeType = getMimeType(path);
+    }
+    return mimeType;
+  }
+
+  public static String getMimeType(String path) {
+    String mimeType;
+    String fileExtension = MimeTypeMap.getFileExtensionFromUrl(path);
+    mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+    return mimeType;
+  }
+
+  FileData scaleImage(FileData inputData, File destination, int[] dimens) {
+    File input = inputData.getFile();
+    String mimeType;
+
     if (config.getSize() instanceof OriginalSize) {
       copyFileAndExifTags(input, destination, dimens);
-      return destination;
+      mimeType = inputData.getMimeType();
+    } else {
+      Bitmap bitmap = handleBitmapSampling(input, dimens[0], dimens[1]);
+      if (bitmap == null) {
+        copyFileAndExifTags(input, destination, dimens);
+        mimeType = inputData.getMimeType();
+      } else {
+        Bitmap.CompressFormat compressFormat = getCompressFormat(destination.getName());
+        if (Bitmap.CompressFormat.JPEG == compressFormat) {
+          mimeType = MIME_TYPE_JPEG;
+        } else if (Bitmap.CompressFormat.PNG == compressFormat) {
+          mimeType = MIME_TYPE_PNG;
+        } else {
+          throw new IllegalStateException(String.format("Received unexpected compression format '%s'", compressFormat));
+        }
+
+        bitmap2file(bitmap, destination, compressFormat);
+        copyExifTags(input, destination, dimens);
+      }
     }
 
-    Bitmap bitmap = handleBitmapSampling(input, dimens[0], dimens[1]);
-    if (bitmap == null) {
-      copyFileAndExifTags(input, destination, dimens);
-      return destination;
-    }
-
-    bitmap2file(bitmap, destination, getCompressFormat(destination.getName()));
-    copyExifTags(input, destination, dimens);
-
-    return destination;
+    return new FileData(inputData, destination, mimeType);
   }
 
   private Bitmap.CompressFormat getCompressFormat(String filePath) {
@@ -320,10 +347,14 @@ public final class ImageUtils {
   }
 
   private Bitmap handleBitmapSampling(File input, int maxWidth, int maxHeight) {
+    String filePath = input.getAbsolutePath();
+
     BitmapFactory.Options options = new BitmapFactory.Options();
     options.inJustDecodeBounds = true;
-    String filePath = input.getAbsolutePath();
+
+    // load dimensions
     BitmapFactory.decodeFile(filePath, options);
+
     options.inSampleSize =
         (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
 

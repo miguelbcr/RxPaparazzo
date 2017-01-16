@@ -20,10 +20,7 @@ import android.net.Uri;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.schedulers.Schedulers;
+
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -31,7 +28,13 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.schedulers.Schedulers;
+
 public final class DownloadImage extends UseCase<FileData> {
+
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private Uri uri;
@@ -56,7 +59,7 @@ public final class DownloadImage extends UseCase<FileData> {
         if (!subscriber.isDisposed()) {
           try {
             if ("content".equalsIgnoreCase(uri.getScheme())) {
-              subscriber.onNext(getContent());
+              subscriber.onNext(getUsingContentResolver());
             } else {
               subscriber.onNext(downloadFile());
             }
@@ -71,26 +74,28 @@ public final class DownloadImage extends UseCase<FileData> {
   }
 
   private FileData downloadFile() throws Exception {
+    String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
+    String filename = getFilename(uri) + imageUtils.getFileExtension(uri);
+    File destination = imageUtils.getPrivateFile(filename);
+
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
     connection.connect();
     InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-    String filename = getFilename(uri);
-    filename += imageUtils.getFileExtension(uri);
-    File file = imageUtils.getPrivateFile(filename);
-    imageUtils.copy(inputStream, file);
+    imageUtils.copy(inputStream, destination);
 
-    return new FileData(file, filename);
+    return new FileData(destination, filename, mimeType);
   }
 
-  private FileData getContent() throws FileNotFoundException {
-    InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
-    String filename = getFilename(uri);
-    filename += imageUtils.getFileExtension(uri);
+  private FileData getUsingContentResolver() throws FileNotFoundException {
+    String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
+    String filename = getFilename(uri) + imageUtils.getFileExtension(uri);
     File file = imageUtils.getPrivateFile(filename);
+
+    InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     imageUtils.copy(inputStream, file);
 
-    return new FileData(file, filename);
+    return new FileData(file, filename, mimeType);
   }
 
   private String getFilename(Uri uri) {

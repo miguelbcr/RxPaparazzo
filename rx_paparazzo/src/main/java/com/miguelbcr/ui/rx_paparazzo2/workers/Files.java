@@ -107,7 +107,7 @@ public final class Files extends Worker {
                 return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
                   @Override
                   public ObservableSource<FileData> apply(FileData cropped) throws Exception {
-                    FileData destination = new FileData(cropped.getFile(), sourceFileData.getFilename());
+                    FileData destination = new FileData(sourceFileData, cropped.getFile(), cropped.getMimeType());
 
                     return saveFile.with(destination).react();
                   }

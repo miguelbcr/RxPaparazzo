@@ -42,7 +42,7 @@ class ApplicationComponentImpl extends ApplicationComponent {
     takePhoto = new TakePhoto(startIntent, ui, imageUtils);
     getDimens = new GetDimens(ui, config);
     cropImage = new CropImage(ui, config, startIntent, imageUtils);
-    saveFile = new SaveFile(getDimens, imageUtils);
+    saveFile = new SaveFile(ui, config, getDimens, imageUtils);
     grantPermissions = new GrantPermissions(ui);
     pickImages = new PickImages(config, startIntent);
     pickImage = new PickImage(config, startIntent, getPath);

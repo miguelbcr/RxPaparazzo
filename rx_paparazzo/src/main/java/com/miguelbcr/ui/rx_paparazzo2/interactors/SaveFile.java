@@ -45,22 +45,18 @@ public final class SaveFile extends UseCase<FileData> {
     return getDimens.with(fileData).react().flatMap(new Function<int[], ObservableSource<FileData>>() {
       @Override
       public ObservableSource<FileData> apply(int[] dimens) throws Exception {
-        File output = getOutputFile();
-        File scaled = imageUtils.scaleImage(fileData.getFile(), output, dimens);
+        FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
 
-//      TODO: why deleting source file?
-        fileData.getFile().delete();
-
-//                TODO: detecting if it is an image could be return from scaleImage
-//                ScalingResult(File, boolean)
-//                String[] mimeTypes = {"image/*"};
+        // remove source file - assumes it is a temporary file which is no longer needed
+        File source = fileData.getFile();
+        source.delete();
 
 //                TODO: why even scan this?
 //                String[] mimeTypes = null;
 //                MediaScannerConnection.scanFile(targetUi.getContext(),
 //                    new String[] { filePathOutput }, mimeTypes, null);
 
-        return Observable.just(new FileData(scaled, fileData.getFilename()));
+        return Observable.just(scaled);
       }
     });
   }

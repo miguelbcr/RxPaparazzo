@@ -100,6 +100,9 @@ public final class RxPaparazzo {
       return this;
     }
 
+    /**
+     * Sets the mime type of the picker.
+     */
     public BuilderImage<T> setMimeType(String mimeType) {
       this.config.setMimeType(mimeType);
       return this;

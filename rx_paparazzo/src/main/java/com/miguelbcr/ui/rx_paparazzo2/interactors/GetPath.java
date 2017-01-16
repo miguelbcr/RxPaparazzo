@@ -75,6 +75,7 @@ public final class GetPath extends UseCase<FileData> {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && DocumentsContract.isDocumentUri(context, uri)) {
       if (isExternalStorageDocument(uri)) {
         Document document = getDocument(uri);
+
         if ("primary".equalsIgnoreCase(document.type)) {
           return getPrimaryExternalDocument(document);
         }
@@ -88,18 +89,19 @@ public final class GetPath extends UseCase<FileData> {
     } else if ("file".equalsIgnoreCase(uri.getScheme())) {
       File file = new File(uri.getPath());
       String fileName = ImageUtils.getFileName(uri.getPath());
+      String mimeType = ImageUtils.getMimeType(targetUi.getContext(), uri);
 
-      return new FileData(file, fileName);
+      return new FileData(file, fileName, mimeType);
     }
 
     return null;
   }
 
-  @NonNull
   private FileData getPrimaryExternalDocument(Document document) {
     String filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
+    String mimeType = ImageUtils.getMimeType(document.id);
 
-    return new FileData(new File(filePath), document.id);
+    return new FileData(new File(filePath), document.id, mimeType);
   }
 
   private FileData getDownloadsDocument(Context context) {
@@ -145,21 +147,21 @@ public final class GetPath extends UseCase<FileData> {
     Cursor cursor = null;
     String dataColumn = MediaStore.Images.Media.DATA;
     String nameColumn = MediaStore.Images.Media.DISPLAY_NAME;
+    String mimeTypeColumn = MediaStore.Images.Media.MIME_TYPE;
+    String titleColumn = MediaStore.Images.Media.TITLE;
 
-//    TODO: ***** this title is useful, add to FileData??? ********
-//    String nameColumn = MediaStore.Images.Media.TITLE;
-
-    String[] projection = { dataColumn, nameColumn };
+    String[] projection = { dataColumn, nameColumn, mimeTypeColumn, titleColumn };
 
     try {
       cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
       cursor.moveToFirst();
       String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
       String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
+      String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
+      String title = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
 
-      return new FileData(new File(fileData), fileName);
+      return new FileData(new File(fileData), fileName, mimeType, title);
     } catch (Exception e) {
-      //            throw Exceptions.propagate(e);
       return null;
     } finally {
       if (cursor != null) {
