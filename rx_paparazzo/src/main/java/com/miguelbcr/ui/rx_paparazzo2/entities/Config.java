@@ -28,6 +28,7 @@ public class Config {
 
   private String mimeType;
   private boolean pickOpenableOnly;
+  private boolean sendToMediaScanner;
 
   public Config() {
     this.size = new ScreenSize();
@@ -35,6 +36,7 @@ public class Config {
     this.useInternalStorage = false;
     this.pickOpenableOnly = false;
     this.mimeType = null;
+    this.sendToMediaScanner = false;
   }
 
   public Size getSize() {
@@ -89,5 +91,13 @@ public class Config {
 
   public boolean isPickOpenableOnly() {
     return pickOpenableOnly;
+  }
+
+  public void setSendToMediaScanner(boolean sendToMediaScanner) {
+    this.sendToMediaScanner = sendToMediaScanner;
+  }
+
+  public boolean isSendToMediaScanner() {
+    return sendToMediaScanner;
   }
 }

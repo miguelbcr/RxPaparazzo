@@ -16,7 +16,11 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
+import android.media.MediaScannerConnection;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
+import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import java.io.File;
 
@@ -25,12 +29,16 @@ import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public final class SaveFile extends UseCase<FileData> {
+  private final TargetUi targetUi;
+  private final Config config;
   private final GetDimens getDimens;
   private final ImageUtils imageUtils;
 
   private FileData fileData;
 
-  public SaveFile(GetDimens getDimens, ImageUtils imageUtils) {
+  public SaveFile(TargetUi targetUi, Config config, GetDimens getDimens, ImageUtils imageUtils) {
+    this.targetUi = targetUi;
+    this.config = config;
     this.getDimens = getDimens;
     this.imageUtils = imageUtils;
   }
@@ -51,14 +59,20 @@ public final class SaveFile extends UseCase<FileData> {
         File source = fileData.getFile();
         source.delete();
 
-//                TODO: why even scan this?
-//                String[] mimeTypes = null;
-//                MediaScannerConnection.scanFile(targetUi.getContext(),
-//                    new String[] { filePathOutput }, mimeTypes, null);
+        if (config.isSendToMediaScanner()) {
+          sendToMediaScanner();
+        }
 
         return Observable.just(scaled);
       }
     });
+  }
+
+  private void sendToMediaScanner() {
+    String[] mimeTypes = { fileData.getMimeType() };
+    String[] files = { fileData.getFile().getAbsolutePath() };
+
+    MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
   }
 
   private File getOutputFile() {

@@ -117,6 +117,22 @@ public final class RxPaparazzo {
     }
 
     /**
+     * Send result to media scanner
+     */
+    public BuilderImage<T> sendToMediaScanner() {
+      this.config.setSendToMediaScanner(true);
+      return this;
+    }
+
+    /**
+     * Send result to media scanner
+     */
+    public BuilderImage<T> doNotSendToMediaScanner() {
+      this.config.setSendToMediaScanner(false);
+      return this;
+    }
+
+    /**
      * Call it when crop option is required as such as configuring the options of the cropping
      * action.
      */
