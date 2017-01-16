@@ -21,6 +21,8 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -32,18 +34,16 @@ public class PickFiles extends UseCase<List<Uri>> {
 
   public static final String DEFAULT_MIME_TYPE = "*/*";
 
-  private final String mimeType;
+  private final Config config;
   private final StartIntent startIntent;
-  private final boolean openableOnly;
 
-  public PickFiles(String mimeType, StartIntent startIntent, boolean openableOnly) {
-    this.mimeType = mimeType;
+  public PickFiles(Config config, StartIntent startIntent) {
+    this.config = config;
     this.startIntent = startIntent;
-    this.openableOnly = openableOnly;
   }
 
-  public PickFiles(StartIntent startIntent) {
-    this(DEFAULT_MIME_TYPE, startIntent, true);
+  public String getDefaultMimeType() {
+    return DEFAULT_MIME_TYPE;
   }
 
   @Override public Observable<List<Uri>> react() {
@@ -74,11 +74,12 @@ public class PickFiles extends UseCase<List<Uri>> {
   }
 
   private Intent getFileChooserIntent() {
+    String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
     intent.setType(mimeType);
     intent.setAction(Intent.ACTION_GET_CONTENT);
 
-    if (openableOnly) {
+    if (config.isPickOpenableOnly()) {
       intent.addCategory(Intent.CATEGORY_OPENABLE);
     }
 

@@ -26,10 +26,15 @@ public class Config {
   private UCrop.Options options;
   private boolean useInternalStorage;
 
+  private String mimeType;
+  private boolean pickOpenableOnly;
+
   public Config() {
     this.size = new ScreenSize();
     this.doCrop = false;
     this.useInternalStorage = false;
+    this.pickOpenableOnly = false;
+    this.mimeType = null;
   }
 
   public Size getSize() {
@@ -64,5 +69,25 @@ public class Config {
 
   public void setUseInternalStorage() {
     this.useInternalStorage = true;
+  }
+
+  public void setMimeType(String mimeType) {
+    this.mimeType = mimeType;
+  }
+
+  public String getMimeType(String defaultMimeType) {
+    if (this.mimeType == null) {
+      return defaultMimeType;
+    }
+
+    return mimeType;
+  }
+
+  public void setPickOpenableOnly(boolean pickOpenableOnly) {
+    this.pickOpenableOnly = pickOpenableOnly;
+  }
+
+  public boolean isPickOpenableOnly() {
+    return pickOpenableOnly;
   }
 }

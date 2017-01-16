@@ -21,6 +21,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 
 import java.io.File;
@@ -34,20 +35,18 @@ public class PickFile extends UseCase<Uri> {
 
   public static final String DEFAULT_MIME_TYPE = "*/*";
 
+  private final Config config;
   private final StartIntent startIntent;
   private final GetPath getPath;
-  private final String mimeType;
-  private final boolean openableOnly;
 
-  public PickFile(StartIntent startIntent, GetPath getPath) {
-    this(DEFAULT_MIME_TYPE, startIntent, getPath, true);
-  }
-
-  public PickFile(String mimeType, StartIntent startIntent, GetPath getPath, boolean openableOnly) {
-    this.mimeType = mimeType;
+  public PickFile(Config config, StartIntent startIntent, GetPath getPath) {
+    this.config = config;
     this.startIntent = startIntent;
     this.getPath = getPath;
-    this.openableOnly = openableOnly;
+  }
+
+  public String getDefaultMimeType() {
+    return DEFAULT_MIME_TYPE;
   }
 
   @Override
@@ -62,11 +61,12 @@ public class PickFile extends UseCase<Uri> {
   }
 
   private Intent getFileChooserIntent() {
+    String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
     intent.setType(mimeType);
     intent.setAction(Intent.ACTION_GET_CONTENT);
 
-    if (openableOnly) {
+    if (config.isPickOpenableOnly()) {
       intent.addCategory(Intent.CATEGORY_OPENABLE);
     }
 

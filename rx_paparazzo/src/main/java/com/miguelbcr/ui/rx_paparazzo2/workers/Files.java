@@ -16,7 +16,6 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.workers;
 
-import android.Manifest;
 import android.app.Activity;
 import android.net.Uri;
 
@@ -62,25 +61,13 @@ public final class Files extends Worker {
   }
 
   public <T> Observable<Response<T, FileData>> pickFile() {
-    PickFile pickFile = new PickFile(startIntent, getPath);
-
-    return pickFile(pickFile);
-  }
-
-  public <T> Observable<Response<T, FileData>> pickFile(String mimeType, boolean openableOnly) {
-    PickFile pickFile = new PickFile(mimeType, startIntent, getPath, openableOnly);
+    PickFile pickFile = new PickFile(config, startIntent, getPath);
 
     return pickFile(pickFile);
   }
 
   public <T> Observable<Response<T, List<FileData>>> pickFiles() {
-    PickFiles pickFiles = new PickFiles(startIntent);
-
-    return pickFiles(pickFiles);
-  }
-
-  public <T> Observable<Response<T, List<FileData>>> pickFiles(String mimeType, boolean openableOnly) {
-    PickFiles pickFiles = new PickFiles(mimeType, startIntent, openableOnly);
+    PickFiles pickFiles = new PickFiles(config, startIntent);
 
     return pickFiles(pickFiles);
   }

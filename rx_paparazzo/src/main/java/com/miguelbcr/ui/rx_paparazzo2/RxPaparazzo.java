@@ -100,6 +100,11 @@ public final class RxPaparazzo {
       return this;
     }
 
+    public BuilderImage<T> setMimeType(String mimeType) {
+      this.config.setMimeType(mimeType);
+      return this;
+    }
+
     /**
      * Call it when crop option is required.
      */

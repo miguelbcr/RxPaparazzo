@@ -16,12 +16,18 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+
 public final class PickImage extends PickFile {
 
   public static final String IMAGE_MIME_TYPE = "image/*";
 
-  public PickImage(StartIntent startIntent, GetPath getPath) {
-    super(IMAGE_MIME_TYPE, startIntent, getPath, true);
+  public PickImage(Config config, StartIntent startIntent, GetPath getPath) {
+    super(config, startIntent, getPath);
+  }
+
+  public String getDefaultMimeType() {
+    return IMAGE_MIME_TYPE;
   }
 
 }
