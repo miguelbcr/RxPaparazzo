@@ -60,7 +60,7 @@ public final class CropImage extends UseCase<Uri> {
             @Override public Uri apply(Intent intentResult) throws Exception {
               return UCrop.getOutput(intentResult);
             }
-          });
+          }).onErrorReturnItem(getInputUri());
         }
       });
     }
