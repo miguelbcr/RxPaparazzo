@@ -24,6 +24,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.ImageUtils;
 import com.miguelbcr.ui.rx_paparazzo2.internal.di.ApplicationComponent;
 import com.miguelbcr.ui.rx_paparazzo2.internal.di.ApplicationModule;
 import com.yalantis.ucrop.UCrop;
@@ -141,11 +142,13 @@ public final class RxPaparazzo {
       return this;
     }
 
-    /**
-     * Use gallery to retrieve the image.
+    /*
+     * Use file picker to retrieve only images.
      */
     public Observable<Response<T, FileData>> usingGallery() {
-      return applicationComponent.gallery().pickImage();
+      this.config.setMimeType(ImageUtils.IMAGE_MIME_TYPE);
+
+      return usingFiles();
     }
 
     /**
@@ -164,7 +167,7 @@ public final class RxPaparazzo {
   }
 
   /**
-   * Call it when multiple images are required to retrieve from gallery.
+   * Call it when multiple images are required.
    */
   public static class MultipleSelectionBuilder<T> extends Builder<T> {
 
@@ -232,10 +235,12 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Call it when crop option is required.
+     * Use file picker to retrieve only images.
      */
     public Observable<Response<T, List<FileData>>> usingGallery() {
-      return applicationComponent.gallery().pickImages();
+      this.config.setMimeType(ImageUtils.IMAGE_MIME_TYPE);
+
+      return usingFiles();
     }
 
     /**

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
 import android.os.RemoteException;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.espresso.contrib.RecyclerViewActions;
@@ -17,18 +16,16 @@ import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.DownloadImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetDimens;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.ImageUtils;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.StartActivity;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.Testable;
-import java.io.File;
-import java.util.List;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
@@ -37,6 +34,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+
+import java.io.File;
+import java.util.List;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -213,7 +213,9 @@ public class ApplicationTest {
 
                 File file = new File(filePath);
                 String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
-                FileData fileData = new FileData(file, fileName);
+                String mimeType = ImageUtils.getMimeType(filePath);
+
+                FileData fileData = new FileData(file, fileName, mimeType);
 
                 getDimens(size).with(fileData).react()
                         .subscribe(dimens -> {

@@ -46,6 +46,7 @@ public final class ImageUtils {
   private static final String DEFAULT_EXTENSION = "";
   public static final String MIME_TYPE_JPEG = "image/jpeg";
   public static final String MIME_TYPE_PNG = "image/png";
+  public static final String IMAGE_MIME_TYPE = "image/*";
 
   private final TargetUi targetUi;
   private final Config config;

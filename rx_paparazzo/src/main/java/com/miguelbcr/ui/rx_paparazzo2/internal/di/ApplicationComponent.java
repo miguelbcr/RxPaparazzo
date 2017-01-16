@@ -19,13 +19,10 @@ package com.miguelbcr.ui.rx_paparazzo2.internal.di;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Camera;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Files;
-import com.miguelbcr.ui.rx_paparazzo2.workers.Gallery;
 
 public abstract class ApplicationComponent {
 
   public abstract Camera camera();
-
-  public abstract Gallery gallery();
 
   public abstract Files files();
 

@@ -83,13 +83,14 @@ public final class Files extends Worker {
         .flatMap(new Function<Uri, ObservableSource<FileData>>() {
           @Override
           public ObservableSource<FileData> apply(final Uri uri) throws Exception {
-            return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
-              @Override
-              public ObservableSource<FileData> apply(FileData fileData) throws Exception {
-                return handleSavingFile(fileData);
-              }
-            });
+            return getPath.with(uri).react();
           }
+        })
+        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+            @Override
+            public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+              return handleSavingFile(fileData);
+            }
         })
         .map(new Function<FileData, Response<T, FileData>>() {
           @Override public Response<T, FileData> apply(FileData file) throws Exception {
