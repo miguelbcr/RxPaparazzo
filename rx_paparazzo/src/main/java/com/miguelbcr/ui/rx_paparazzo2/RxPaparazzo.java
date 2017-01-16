@@ -41,26 +41,26 @@ public final class RxPaparazzo {
     RxActivityResult.register(application);
   }
 
-  public static <T extends Activity> BuilderImage<T> single(T activity) {
-    return new BuilderImage<T>(activity);
+  public static <T extends Activity> SingleSelectionBuilder<T> single(T activity) {
+    return new SingleSelectionBuilder<T>(activity);
   }
 
-  public static <T extends Fragment> BuilderImage<T> single(T fragment) {
-    return new BuilderImage<T>(fragment);
-  }
-
-  /**
-   * Prior to API 18, only one image will be retrieved.
-   */
-  public static <T extends Activity> BuilderImages<T> multiple(T activity) {
-    return new BuilderImages<T>(activity);
+  public static <T extends Fragment> SingleSelectionBuilder<T> single(T fragment) {
+    return new SingleSelectionBuilder<T>(fragment);
   }
 
   /**
    * Prior to API 18, only one image will be retrieved.
    */
-  public static <T extends Fragment> BuilderImages<T> multiple(T fragment) {
-    return new BuilderImages<T>(fragment);
+  public static <T extends Activity> MultipleSelectionBuilder<T> multiple(T activity) {
+    return new MultipleSelectionBuilder<T>(activity);
+  }
+
+  /**
+   * Prior to API 18, only one image will be retrieved.
+   */
+  public static <T extends Fragment> MultipleSelectionBuilder<T> multiple(T fragment) {
+    return new MultipleSelectionBuilder<T>(fragment);
   }
 
   private abstract static class Builder<T> {
@@ -76,16 +76,16 @@ public final class RxPaparazzo {
   /**
    * Call it when just one image is required to retrieve.
    */
-  public static class BuilderImage<T> extends Builder<T> {
+  public static class SingleSelectionBuilder<T> extends Builder<T> {
 
-    public BuilderImage(T ui) {
+    public SingleSelectionBuilder(T ui) {
       super(ui);
     }
 
     /**
      * Calling it the images will be saved in internal storage, otherwise in public storage
      */
-    public BuilderImage<T> useInternalStorage() {
+    public SingleSelectionBuilder<T> useInternalStorage() {
       this.config.setUseInternalStorage();
       return this;
     }
@@ -95,7 +95,7 @@ public final class RxPaparazzo {
      *
      * @see Size
      */
-    public BuilderImage<T> size(Size size) {
+    public SingleSelectionBuilder<T> size(Size size) {
       this.config.setSize(size);
       return this;
     }
@@ -103,7 +103,7 @@ public final class RxPaparazzo {
     /**
      * Sets the mime type of the picker.
      */
-    public BuilderImage<T> setMimeType(String mimeType) {
+    public SingleSelectionBuilder<T> setMimeType(String mimeType) {
       this.config.setMimeType(mimeType);
       return this;
     }
@@ -111,7 +111,7 @@ public final class RxPaparazzo {
     /**
      * Call it when crop option is required.
      */
-    public BuilderImage<T> crop() {
+    public SingleSelectionBuilder<T> crop() {
       this.config.setCrop();
       return this;
     }
@@ -119,7 +119,7 @@ public final class RxPaparazzo {
     /**
      * Send result to media scanner
      */
-    public BuilderImage<T> sendToMediaScanner() {
+    public SingleSelectionBuilder<T> sendToMediaScanner() {
       this.config.setSendToMediaScanner(true);
       return this;
     }
@@ -127,7 +127,7 @@ public final class RxPaparazzo {
     /**
      * Send result to media scanner
      */
-    public BuilderImage<T> doNotSendToMediaScanner() {
+    public SingleSelectionBuilder<T> doNotSendToMediaScanner() {
       this.config.setSendToMediaScanner(false);
       return this;
     }
@@ -136,7 +136,7 @@ public final class RxPaparazzo {
      * Call it when crop option is required as such as configuring the options of the cropping
      * action.
      */
-    public <O extends UCrop.Options> BuilderImage<T> crop(O options) {
+    public <O extends UCrop.Options> SingleSelectionBuilder<T> crop(O options) {
       this.config.setCrop(options);
       return this;
     }
@@ -166,17 +166,25 @@ public final class RxPaparazzo {
   /**
    * Call it when multiple images are required to retrieve from gallery.
    */
-  public static class BuilderImages<T> extends Builder<T> {
+  public static class MultipleSelectionBuilder<T> extends Builder<T> {
 
-    public BuilderImages(T ui) {
+    public MultipleSelectionBuilder(T ui) {
       super(ui);
     }
 
     /**
      * Calling it the images will be saved in internal storage, otherwise in public storage
      */
-    public BuilderImages<T> useInternalStorage() {
+    public MultipleSelectionBuilder<T> useInternalStorage() {
       this.config.setUseInternalStorage();
+      return this;
+    }
+
+    /**
+     * Sets the mime type of the picker.
+     */
+    public MultipleSelectionBuilder<T> setMimeType(String mimeType) {
+      this.config.setMimeType(mimeType);
       return this;
     }
 
@@ -185,15 +193,31 @@ public final class RxPaparazzo {
      *
      * @see Size
      */
-    public BuilderImages<T> size(Size size) {
+    public MultipleSelectionBuilder<T> size(Size size) {
       this.config.setSize(size);
+      return this;
+    }
+
+    /**
+     * Send result to media scanner
+     */
+    public MultipleSelectionBuilder<T> sendToMediaScanner() {
+      this.config.setSendToMediaScanner(true);
+      return this;
+    }
+
+    /**
+     * Send result to media scanner
+     */
+    public MultipleSelectionBuilder<T> doNotSendToMediaScanner() {
+      this.config.setSendToMediaScanner(false);
       return this;
     }
 
     /**
      * Call it when crop option is required.
      */
-    public BuilderImages<T> crop() {
+    public MultipleSelectionBuilder<T> crop() {
       this.config.setCrop();
       return this;
     }
@@ -202,7 +226,7 @@ public final class RxPaparazzo {
      * Call it when crop option is required as such as configuring the options of the cropping
      * action.
      */
-    public <O extends UCrop.Options> BuilderImages<T> crop(O options) {
+    public <O extends UCrop.Options> MultipleSelectionBuilder<T> crop(O options) {
       this.config.setCrop(options);
       return this;
     }
