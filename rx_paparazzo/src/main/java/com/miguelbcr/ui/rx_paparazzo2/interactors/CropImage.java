@@ -105,7 +105,7 @@ public final class CropImage extends UseCase<Uri> {
 
   private Uri getOutputUriCrop() {
     String destination = fileData.getFile().getAbsolutePath();
-    String extension = imageUtils.getFileExtension(destination);
+    String extension = imageUtils.getFileExtension(destination, ImageUtils.JPG_FILE_EXTENSION);
     String filename = Constants.CROP_APPEND + extension;
     File file = imageUtils.getPrivateFile(filename);
 

@@ -41,8 +41,8 @@ import java.util.Locale;
 
 public final class ImageUtils {
 
-  // TODO: what should happen here - default file extension???
-  private static final String DEFAULT_EXTENSION = ""; // ".jpg";
+  public static final String JPG_FILE_EXTENSION = ".jpg";
+  private static final String DEFAULT_EXTENSION = "";
 
   private final TargetUi targetUi;
   private final Config config;
@@ -154,6 +154,10 @@ public final class ImageUtils {
   }
 
   public String getFileExtension(String filepath) {
+    return getFileExtension(filepath, DEFAULT_EXTENSION);
+  }
+
+  public String getFileExtension(String filepath, String defaultExtension) {
     String extension = "";
 
     if (filepath != null) {
@@ -161,7 +165,7 @@ public final class ImageUtils {
       extension = i > 0 ? filepath.substring(i) : "";
     }
 
-    return (TextUtils.isEmpty(extension)) ? DEFAULT_EXTENSION : extension;
+    return (TextUtils.isEmpty(extension)) ? defaultExtension : extension;
   }
 
   String getFileExtension(Uri uri) {
@@ -174,8 +178,11 @@ public final class ImageUtils {
       mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
     }
 
-    return (TextUtils.isEmpty(mimeType)) ? getFileExtension(uri.getLastPathSegment())
-        : "." + mimeType.split("/")[1];
+    if (TextUtils.isEmpty(mimeType)) {
+      return getFileExtension(uri.getLastPathSegment());
+    } else {
+      return mimeType.split("/")[1];
+    }
   }
 
   File scaleImage(File input, File destination, int[] dimens) {
