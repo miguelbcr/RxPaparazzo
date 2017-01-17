@@ -48,7 +48,7 @@ public final class GrantPermissions extends UseCase<Ignore> {
       return Observable.just(Ignore.Get);
     }
 
-    return RxPermissions.getInstance(targetUi.activity())
+    return new RxPermissions(targetUi.activity())
         .requestEach(permissions)
         .buffer(permissions.length)
         .flatMapIterable(new Function<List<Permission>, Iterable<Permission>>() {
