@@ -75,7 +75,7 @@ public final class DownloadImage extends UseCase<FileData> {
 
   private FileData downloadFile() throws Exception {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
-    String filename = getFilename(uri) + imageUtils.getFileExtension(uri);
+    String filename = getFilename(uri) + "." + imageUtils.getFileExtension(uri);
     File destination = imageUtils.getPrivateFile(filename);
 
     URL url = new URL(uri.toString());
@@ -89,7 +89,7 @@ public final class DownloadImage extends UseCase<FileData> {
 
   private FileData getUsingContentResolver() throws FileNotFoundException {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
-    String filename = getFilename(uri) + imageUtils.getFileExtension(uri);
+    String filename = getFilename(uri) + "." + imageUtils.getFileExtension(uri);
     File file = imageUtils.getPrivateFile(filename);
 
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
