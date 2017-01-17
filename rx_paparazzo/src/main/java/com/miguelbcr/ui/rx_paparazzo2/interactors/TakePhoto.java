@@ -43,10 +43,21 @@ public final class TakePhoto extends UseCase<Uri> {
   }
 
   @Override public Observable<Uri> react() {
-    final Uri uri = getUri();
-    Function<Intent, Uri> revoke = PermissionUtil.createRevokeFileReadWritePermissionsFunction(targetUi, uri);
+    Uri uri = getUri();
 
-    return startIntent.with(getIntentCamera(uri)).react().map(revoke);
+    return startIntent.with(getIntentCamera(uri))
+            .react()
+            .map(revokeFileReadWritePermissions(targetUi, uri));
+  }
+
+  private Function<Intent, Uri> revokeFileReadWritePermissions(final TargetUi targetUi, final Uri uri) {
+    return new Function<Intent, Uri>() {
+      @Override public Uri apply(Intent data) throws Exception {
+        PermissionUtil.revokeFileReadWritePermissions(targetUi, uri);
+
+        return uri;
+      }
+    };
   }
 
   private Uri getUri() {

@@ -49,10 +49,12 @@ public class PickFiles extends UseCase<List<Uri>> {
   @Override public Observable<List<Uri>> react() {
     return startIntent.with(getFileChooserIntent()).react().map(new Function<Intent, List<Uri>>() {
       @Override public List<Uri> apply(Intent intent) throws Exception {
+        intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
+
         if (intent.getData() != null) {
           return Arrays.asList(intent.getData());
         } else {
-          return PickFiles.this.getUris(intent);
+          return getUris(intent);
         }
       }
     });
@@ -77,7 +79,12 @@ public class PickFiles extends UseCase<List<Uri>> {
     String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
     intent.setType(mimeType);
-    intent.setAction(Intent.ACTION_GET_CONTENT);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+      intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+    } else {
+      intent.setAction(Intent.ACTION_GET_CONTENT);
+    }
 
     if (config.isPickOpenableOnly()) {
       intent.addCategory(Intent.CATEGORY_OPENABLE);

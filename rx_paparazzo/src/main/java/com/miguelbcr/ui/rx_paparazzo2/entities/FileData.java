@@ -13,11 +13,11 @@ public class FileData {
         this(file, mimeType, source.getFilename(), source.getTitle());
     }
 
-    public FileData(File file, String mimeType, String filename) {
-        this(file, mimeType, filename, null);
+    public FileData(File file, String filename, String mimeType) {
+        this(file, filename, mimeType, null);
     }
 
-    public FileData(File file, String mimeType, String filename, String title) {
+    public FileData(File file, String filename, String mimeType, String title) {
         this.filename = filename;
         this.mimeType = mimeType;
         this.file = file;

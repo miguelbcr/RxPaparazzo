@@ -19,6 +19,7 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
@@ -64,7 +65,12 @@ public class PickFile extends UseCase<Uri> {
     String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
     intent.setType(mimeType);
-    intent.setAction(Intent.ACTION_GET_CONTENT);
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+      intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+    } else {
+      intent.setAction(Intent.ACTION_GET_CONTENT);
+    }
 
     if (config.isPickOpenableOnly()) {
       intent.addCategory(Intent.CATEGORY_OPENABLE);
@@ -76,20 +82,11 @@ public class PickFile extends UseCase<Uri> {
   private OnPreResult getOnPreResultProcessing() {
     return new OnPreResult() {
       @Override
-      public Observable<FileData> response(int responseCode, @Nullable final Intent intent) {
+      public Observable<Uri> response(int responseCode, @Nullable final Intent intent) {
         if (responseCode == Activity.RESULT_OK) {
-          return getPath.with(intent.getData())
-                  .react()
-                  .subscribeOn(Schedulers.io())
-                  .map(new Function<FileData, FileData>() {
-                    @Override public FileData apply(FileData fileData) throws Exception {
-                      Uri data = Uri.fromFile(fileData.getFile());
-                      intent.setData(data);
-                      PermissionUtil.addReadWritePermission(intent);
+          intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
 
-                      return fileData;
-                    }
-                  });
+          return Observable.just(intent.getData());
         } else {
           return Observable.just(null);
         }
