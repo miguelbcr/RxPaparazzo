@@ -57,7 +57,7 @@ public final class GrantPermissions extends UseCase<Ignore> {
             return permissions;
           }
         })
-        .flatMap(new Function<Permission, ObservableSource<Integer>>() {
+        .concatMap(new Function<Permission, ObservableSource<Integer>>() {
           @Override public ObservableSource<Integer> apply(Permission permission) throws Exception {
             if (permission.granted) {
               return Observable.just(Activity.RESULT_OK);

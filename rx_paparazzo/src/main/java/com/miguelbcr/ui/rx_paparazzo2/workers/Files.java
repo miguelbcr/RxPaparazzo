@@ -130,13 +130,13 @@ public final class Files extends Worker {
             return uris;
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+        .concatMap(new Function<Uri, ObservableSource<FileData>>() {
           @Override
           public ObservableSource<FileData> apply(final Uri uri) throws Exception {
             return getPath.with(uri).react();
           }
         })
-        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+        .concatMap(new Function<FileData, ObservableSource<FileData>>() {
           @Override
           public ObservableSource<FileData> apply(FileData fileData) throws Exception {
             return handleSavingFile(fileData);
