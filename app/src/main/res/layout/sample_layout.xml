@@ -78,6 +78,32 @@
             android:padding="10dp"
             android:text="Pick up images and crop"
             android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/fab_pickup_file"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:layout_marginTop="10dp"
+            android:drawableLeft="@drawable/ic_image_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Pick up file and crop if image"
+            android:textColor="@android:color/white" />
+
+        <TextView
+            android:id="@+id/fab_pickup_files"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@color/colorAccent"
+            android:layout_marginTop="10dp"
+            android:drawableLeft="@drawable/ic_collections_black_24dp"
+            android:drawablePadding="10dp"
+            android:gravity="center"
+            android:padding="10dp"
+            android:text="Pick up files and crop if image"
+            android:textColor="@android:color/white" />
     </LinearLayout>
 
     <ImageView
