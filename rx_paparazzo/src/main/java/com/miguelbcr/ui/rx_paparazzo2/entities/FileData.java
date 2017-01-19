@@ -4,13 +4,16 @@ import java.io.File;
 
 public class FileData {
 
+    public static final String FILENAME_MIMETYPE = "%s (%s)";
+    public static final String FILENAME_MIMETYPE_TITLE = "%s (%s) - %s";
+
     private File file;
     private String filename;
     private String mimeType;
     private String title;
 
     public FileData(FileData source, File file, String mimeType) {
-        this(file, mimeType, source.getFilename(), source.getTitle());
+        this(file, source.getFilename(), mimeType, source.getTitle());
     }
 
     public FileData(File file, String filename, String mimeType) {
@@ -38,5 +41,14 @@ public class FileData {
 
     public String getTitle() {
         return title;
+    }
+
+    @Override
+    public String toString() {
+        if (title == null) {
+            return String.format(FILENAME_MIMETYPE, filename, mimeType);
+        }
+
+        return String.format(FILENAME_MIMETYPE_TITLE, filename, mimeType, title);
     }
 }

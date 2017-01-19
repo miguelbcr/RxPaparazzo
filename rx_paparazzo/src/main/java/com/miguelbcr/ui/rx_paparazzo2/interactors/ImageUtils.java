@@ -362,11 +362,9 @@ public final class ImageUtils {
   }
 
   public boolean isImage(File input) {
-    String filePath = input.getAbsolutePath();
-
     BitmapFactory.Options options = sampleSize(input, 0, 0);
 
-    return options.inSampleSize != 1;
+    return options.outWidth > 0 && options.outHeight > 0;
   }
 
   private BitmapFactory.Options sampleSize(File input, int maxWidth, int maxHeight) {
@@ -377,8 +375,12 @@ public final class ImageUtils {
     String filePath = input.getAbsolutePath();
     BitmapFactory.decodeFile(filePath, options);
 
-    options.inSampleSize =
-        (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
+    if (maxWidth <= 0 || maxHeight <= 0) {
+      options.inSampleSize = 1;
+    } else {
+      options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight);
+    }
+
     return options;
   }
 

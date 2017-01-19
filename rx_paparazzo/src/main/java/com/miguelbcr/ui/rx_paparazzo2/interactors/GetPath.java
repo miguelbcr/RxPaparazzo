@@ -157,7 +157,7 @@ public final class GetPath extends UseCase<FileData> {
       String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
       String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
       String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
-      String title = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
+      String title = cursor.getString(cursor.getColumnIndexOrThrow(titleColumn));
 
       return new FileData(new File(fileData), fileName, mimeType, title);
     } catch (Exception e) {

@@ -9,6 +9,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
@@ -34,8 +35,9 @@ import io.reactivex.schedulers.Schedulers;
 public class SampleActivity extends AppCompatActivity implements Testable {
     private Toolbar toolbar;
     private ImageView imageView;
+    private TextView filenameView;
     private RecyclerView recyclerView;
-    private List<String> filesPaths;
+    private List<FileData> fileDataList;
     private Size size;
 
     @Override
@@ -44,7 +46,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         setContentView(R.layout.sample_layout);
         configureToolbar();
         initViews();
-        filesPaths = new ArrayList<>();
+        fileDataList = new ArrayList<>();
     }
 
     @Override
@@ -60,11 +62,12 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
     private void initViews() {
         imageView = (ImageView) findViewById(R.id.iv_image);
-        recyclerView = (RecyclerView) findViewById(R.id.rv_images);
+        filenameView = (TextView) findViewById(R.id.iv_filename);
 
-        recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView = (RecyclerView) findViewById(R.id.rv_images);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
         findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
@@ -185,36 +188,43 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void loadImage(FileData fileData) {
-        String filePath = fileData.getFile().getAbsolutePath();
-        filesPaths.clear();
-        filesPaths.add(filePath);
+        fileDataList.clear();
+        fileDataList.add(fileData);
+
         imageView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
+
+        recyclerView.setVisibility(View.GONE);
         recyclerView.setAdapter(null);
 
+        filenameView.setVisibility(View.VISIBLE);
+        filenameView.setText(fileData.toString());
+
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-        Picasso.with(getApplicationContext()).invalidate("file://" + filePath);
-        Picasso.with(getApplicationContext()).load("file://" + filePath)
+        Picasso.with(getApplicationContext()).invalidate(fileData.getFile());
+        Picasso.with(getApplicationContext()).load(fileData.getFile())
                 .error(R.drawable.ic_description_black_48px)
                 .into(imageView);
     }
 
     private void loadImages(List<FileData> fileDataList) {
-        List<String> filesPaths = new ArrayList<>();
-        for (FileData fileData : fileDataList) {
-            filesPaths.add(fileData.getFile().getAbsolutePath());
-        }
+        this.fileDataList = fileDataList;
 
-        this.filesPaths = filesPaths;
         imageView.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
         imageView.setImageDrawable(null);
-        recyclerView.setAdapter(new ImagesAdapter(filesPaths));
+
+        filenameView.setVisibility(View.GONE);
+
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView.setAdapter(new ImagesAdapter(fileDataList));
     }
 
     @Override
     public List<String> getFilePaths() {
+        List<String> filesPaths = new ArrayList<>();
+        for (FileData fileData : fileDataList) {
+            filesPaths.add(fileData.getFile().getAbsolutePath());
+        }
         return filesPaths;
     }
 

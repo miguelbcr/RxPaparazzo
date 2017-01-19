@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
@@ -25,7 +26,6 @@ import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,8 +36,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SampleFragment extends Fragment implements Testable {
     private ImageView imageView;
+    private TextView filenameView;
     private RecyclerView recyclerView;
-    private List<String> filesPaths;
+    private List<FileData> fileDataList;
     private Size size;
 
     @Override
@@ -50,25 +51,28 @@ public class SampleFragment extends Fragment implements Testable {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         initViews();
-        filesPaths = new ArrayList<>();
+        fileDataList = new ArrayList<>();
         size = new OriginalSize();
     }
 
     private void initViews() {
-        imageView = (ImageView) getView().findViewById(R.id.iv_image);
-        recyclerView = (RecyclerView) getView().findViewById(R.id.rv_images);
+        View view = getView();
 
-        recyclerView.setHasFixedSize(true);
+        imageView = (ImageView) view.findViewById(R.id.iv_image);
+        filenameView = (TextView) view.findViewById(R.id.iv_filename);
+
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView = (RecyclerView) view.findViewById(R.id.rv_images);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        getView().findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
-        getView().findViewById(R.id.fab_camera_crop).setOnClickListener(v -> captureImageWithCrop());
-        getView().findViewById(R.id.fab_pickup_image).setOnClickListener(v -> pickupImage());
-        getView().findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
-        getView().findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
-        getView().findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+        view.findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
+        view.findViewById(R.id.fab_camera_crop).setOnClickListener(v -> captureImageWithCrop());
+        view.findViewById(R.id.fab_pickup_image).setOnClickListener(v -> pickupImage());
+        view.findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
+        view.findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
+        view.findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
     }
 
     private void captureImage() {
@@ -183,34 +187,44 @@ public class SampleFragment extends Fragment implements Testable {
 
 
     private void loadImage(FileData fileData) {
-        String filePath = fileData.getFile().getAbsolutePath();
-        filesPaths.clear();
-        filesPaths.add(filePath);
+        fileDataList.clear();
+        fileDataList.add(fileData);
+
         imageView.setVisibility(View.VISIBLE);
+        imageView.setImageDrawable(null);
+
+        filenameView.setVisibility(View.VISIBLE);
+        filenameView.setText(fileData.getFilename());
+
         recyclerView.setVisibility(View.GONE);
-        File imageFile = new File(filePath);
+        recyclerView.setAdapter(null);
 
         Picasso.with(getActivity()).setLoggingEnabled(true);
-        Picasso.with(getActivity()).invalidate(filePath);
-        Picasso.with(getActivity()).load(imageFile)
+        Picasso.with(getActivity()).invalidate(fileData.getFile());
+        Picasso.with(getActivity()).load(fileData.getFile())
                 .error(R.drawable.ic_description_black_48px)
                 .into(imageView);
     }
 
     private void loadImages(List<FileData> fileDataList) {
+        this.fileDataList = fileDataList;
+
+        imageView.setVisibility(View.GONE);
+        imageView.setImageDrawable(null);
+
+        filenameView.setVisibility(View.GONE);
+
+        recyclerView.setVisibility(View.VISIBLE);
+        recyclerView.setAdapter(new ImagesAdapter(fileDataList));
+    }
+
+    @Override
+    public List<String> getFilePaths() {
         List<String> filesPaths = new ArrayList<>();
         for (FileData fileData : fileDataList) {
             filesPaths.add(fileData.getFile().getAbsolutePath());
         }
 
-        this.filesPaths = filesPaths;
-        imageView.setVisibility(View.GONE);
-        recyclerView.setVisibility(View.VISIBLE);
-        recyclerView.setAdapter(new ImagesAdapter(filesPaths));
-    }
-
-    @Override
-    public List<String> getFilePaths() {
         return filesPaths;
     }
 
