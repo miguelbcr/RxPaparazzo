@@ -164,16 +164,17 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void loadImage(FileData fileData) {
+        String filePath = fileData.getFile().getAbsolutePath();
         filesPaths.clear();
-        filesPaths.add(fileData.getFile().getAbsolutePath());
+        filesPaths.add(filePath);
         imageView.setVisibility(View.VISIBLE);
         recyclerView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
         recyclerView.setAdapter(null);
 
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-        Picasso.with(getApplicationContext()).invalidate("file://" + fileData);
-        Picasso.with(getApplicationContext()).load("file://" + fileData).into(imageView);
+        Picasso.with(getApplicationContext()).invalidate("file://" + filePath);
+        Picasso.with(getApplicationContext()).load("file://" + filePath).into(imageView);
     }
 
     private void loadImages(List<FileData> fileDataList) {
