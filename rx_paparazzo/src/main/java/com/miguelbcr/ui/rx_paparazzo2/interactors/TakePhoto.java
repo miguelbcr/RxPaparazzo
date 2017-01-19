@@ -18,18 +18,16 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
-import android.support.annotation.NonNull;
 import android.support.v4.content.FileProvider;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
+
+import java.io.File;
+
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import java.io.File;
-import java.util.List;
 
 public final class TakePhoto extends UseCase<Uri> {
   private final StartIntent startIntent;

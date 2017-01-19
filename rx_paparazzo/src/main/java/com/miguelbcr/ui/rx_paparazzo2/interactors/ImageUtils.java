@@ -23,6 +23,7 @@ import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
@@ -42,11 +43,11 @@ import java.util.Locale;
 
 public final class ImageUtils {
 
-  public static final String JPG_FILE_EXTENSION = ".jpg";
   private static final String DEFAULT_EXTENSION = "";
-  public static final String MIME_TYPE_JPEG = "image/jpeg";
-  public static final String MIME_TYPE_PNG = "image/png";
+  private static final String MIME_TYPE_JPEG = "image/jpeg";
+  private static final String MIME_TYPE_PNG = "image/png";
   public static final String IMAGE_MIME_TYPE = "image/*";
+  public static final String JPG_FILE_EXTENSION = ".jpg";
 
   private final TargetUi targetUi;
   private final Config config;
@@ -209,7 +210,7 @@ public final class ImageUtils {
       copyFileAndExifTags(input, destination, dimens);
       mimeType = inputData.getMimeType();
     } else {
-      Bitmap bitmap = handleBitmapSampling(input, dimens[0], dimens[1]);
+      Bitmap bitmap = sampleBitmap(input, dimens[0], dimens[1]);
       if (bitmap == null) {
         copyFileAndExifTags(input, destination, dimens);
         mimeType = inputData.getMimeType();
@@ -347,24 +348,38 @@ public final class ImageUtils {
     };
   }
 
-  private Bitmap handleBitmapSampling(File input, int maxWidth, int maxHeight) {
-    String filePath = input.getAbsolutePath();
-
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inJustDecodeBounds = true;
-
-    // load dimensions
-    BitmapFactory.decodeFile(filePath, options);
-
-    options.inSampleSize =
-        (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
-
+  private Bitmap sampleBitmap(File input, int maxWidth, int maxHeight) {
+    BitmapFactory.Options options = sampleSize(input, maxWidth, maxHeight);
     if (options.inSampleSize == 1) {
       return null;
     }
 
     options.inJustDecodeBounds = false;
+
+    String filePath = input.getAbsolutePath();
+
     return BitmapFactory.decodeFile(filePath, options);
+  }
+
+  public boolean isImage(File input) {
+    String filePath = input.getAbsolutePath();
+
+    BitmapFactory.Options options = sampleSize(input, 0, 0);
+
+    return options.inSampleSize != 1;
+  }
+
+  private BitmapFactory.Options sampleSize(File input, int maxWidth, int maxHeight) {
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true;
+
+    // load dimensions
+    String filePath = input.getAbsolutePath();
+    BitmapFactory.decodeFile(filePath, options);
+
+    options.inSampleSize =
+        (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
+    return options;
   }
 
   private int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {

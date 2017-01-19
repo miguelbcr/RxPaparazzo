@@ -38,12 +38,10 @@ public class PickFile extends UseCase<Uri> {
 
   private final Config config;
   private final StartIntent startIntent;
-  private final GetPath getPath;
 
-  public PickFile(Config config, StartIntent startIntent, GetPath getPath) {
+  public PickFile(Config config, StartIntent startIntent) {
     this.config = config;
     this.startIntent = startIntent;
-    this.getPath = getPath;
   }
 
   public String getDefaultMimeType() {

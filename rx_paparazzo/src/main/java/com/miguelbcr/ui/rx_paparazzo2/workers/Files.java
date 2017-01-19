@@ -61,7 +61,7 @@ public final class Files extends Worker {
   }
 
   public <T> Observable<Response<T, FileData>> pickFile() {
-    PickFile pickFile = new PickFile(config, startIntent, getPath);
+    PickFile pickFile = new PickFile(config, startIntent);
 
     return pickFile(pickFile);
   }

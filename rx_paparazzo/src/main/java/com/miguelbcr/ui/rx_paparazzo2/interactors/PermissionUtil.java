@@ -11,8 +11,6 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import java.util.List;
 
-import io.reactivex.functions.Function;
-
 public class PermissionUtil {
 
     public static final int READ_WRITE_PERMISSIONS = Intent.FLAG_GRANT_READ_URI_PERMISSION
