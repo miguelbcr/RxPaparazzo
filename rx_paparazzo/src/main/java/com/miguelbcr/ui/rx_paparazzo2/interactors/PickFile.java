@@ -88,7 +88,7 @@ public class PickFile extends UseCase<Uri> {
 
           return Observable.just(intent.getData());
         } else {
-          return Observable.just(null);
+          return Observable.empty();
         }
       }
     };
