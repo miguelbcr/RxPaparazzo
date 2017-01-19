@@ -93,7 +93,7 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
+                    if (response.targetUI().checkResultCode(response.resultCode())) {
                         response.targetUI().loadImage(response.data());
                     }
                 });
@@ -112,7 +112,7 @@ public class SampleFragment extends Fragment implements Testable {
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
+                    if (response.targetUI().checkResultCode(response.resultCode())) {
                         response.targetUI().loadImage(response.data());
                     }
                 });
