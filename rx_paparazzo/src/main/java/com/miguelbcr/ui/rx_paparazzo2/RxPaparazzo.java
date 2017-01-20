@@ -105,7 +105,7 @@ public final class RxPaparazzo {
      * Sets the mime type of the picker.
      */
     public SingleSelectionBuilder<T> setMimeType(String mimeType) {
-      this.config.setMimeType(mimeType);
+      this.config.setPickMimeType(mimeType);
       return this;
     }
 
@@ -146,7 +146,8 @@ public final class RxPaparazzo {
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, FileData>> usingGallery() {
-      this.config.setMimeType(ImageUtils.IMAGE_MIME_TYPE);
+      this.config.setPickMimeType(ImageUtils.IMAGE_MIME_TYPE);
+      this.config.failCropIfNotImage();
 
       return usingFiles();
     }
@@ -155,6 +156,8 @@ public final class RxPaparazzo {
      * Use camera to retrieve the image.
      */
     public Observable<Response<T, FileData>> usingCamera() {
+      this.config.failCropIfNotImage();
+
       return applicationComponent.camera().takePhoto();
     }
 
@@ -187,7 +190,7 @@ public final class RxPaparazzo {
      * Sets the mime type of the picker.
      */
     public MultipleSelectionBuilder<T> setMimeType(String mimeType) {
-      this.config.setMimeType(mimeType);
+      this.config.setPickMimeType(mimeType);
       return this;
     }
 
@@ -238,7 +241,7 @@ public final class RxPaparazzo {
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, List<FileData>>> usingGallery() {
-      this.config.setMimeType(ImageUtils.IMAGE_MIME_TYPE);
+      this.config.setPickMimeType(ImageUtils.IMAGE_MIME_TYPE);
 
       return usingFiles();
     }

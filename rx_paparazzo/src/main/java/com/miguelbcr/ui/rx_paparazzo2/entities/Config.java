@@ -21,12 +21,14 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.yalantis.ucrop.UCrop;
 
 public class Config {
+  private UCrop.Options options;
+
   private Size size;
   private boolean doCrop;
-  private UCrop.Options options;
+  private boolean failCropIfNotImage;
   private boolean useInternalStorage;
 
-  private String mimeType;
+  private String pickMimeType;
   private boolean pickOpenableOnly;
   private boolean sendToMediaScanner;
 
@@ -35,16 +37,12 @@ public class Config {
     this.doCrop = false;
     this.useInternalStorage = false;
     this.pickOpenableOnly = false;
-    this.mimeType = null;
+    this.pickMimeType = null;
     this.sendToMediaScanner = false;
   }
 
   public Size getSize() {
     return size;
-  }
-
-  public boolean doCrop() {
-    return doCrop;
   }
 
   public void setCrop(UCrop.Options options) {
@@ -73,16 +71,16 @@ public class Config {
     this.useInternalStorage = true;
   }
 
-  public void setMimeType(String mimeType) {
-    this.mimeType = mimeType;
+  public void setPickMimeType(String pickMimeType) {
+    this.pickMimeType = pickMimeType;
   }
 
   public String getMimeType(String defaultMimeType) {
-    if (this.mimeType == null) {
+    if (this.pickMimeType == null) {
       return defaultMimeType;
     }
 
-    return mimeType;
+    return pickMimeType;
   }
 
   public void setPickOpenableOnly(boolean pickOpenableOnly) {
@@ -100,4 +98,21 @@ public class Config {
   public boolean isSendToMediaScanner() {
     return sendToMediaScanner;
   }
+
+  public void failCropIfNotImage() {
+    this.failCropIfNotImage = true;
+  }
+
+  public void doNotFailCropIfNotImage() {
+    this.failCropIfNotImage = false;
+  }
+
+  public boolean isFailCropIfNotImage() {
+    return failCropIfNotImage;
+  }
+
+  public boolean isDoCrop() {
+    return doCrop;
+  }
+
 }

@@ -51,7 +51,7 @@ public final class CropImage extends UseCase<Uri> {
   }
 
   @Override public Observable<Uri> react() {
-    if (config.doCrop() && isImage()) {
+    if (config.isDoCrop() && (!config.isFailCropIfNotImage() || isImage())) {
       Observable<Intent> intent = Observable.just(getIntent());
       return intent.flatMap(new Function<Intent, ObservableSource<Uri>>() {
         @Override public ObservableSource<Uri> apply(Intent intent) throws Exception {
