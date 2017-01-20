@@ -35,13 +35,19 @@ import java.io.File;
 import io.reactivex.Observable;
 
 public final class GetPath extends UseCase<FileData> {
+
+  private static class Document {
+    String type;
+    String id;
+  }
+
   private final TargetUi targetUi;
-  private final DownloadImage downloadImage;
+  private final DownloadFile downloadFile;
   private Uri uri;
 
-  public GetPath(TargetUi targetUi, DownloadImage downloadImage) {
+  public GetPath(TargetUi targetUi, DownloadFile downloadFile) {
     this.targetUi = targetUi;
-    this.downloadImage = downloadImage;
+    this.downloadFile = downloadFile;
   }
 
   public GetPath with(Uri uri) {
@@ -49,11 +55,13 @@ public final class GetPath extends UseCase<FileData> {
     return this;
   }
 
-  @Override public Observable<FileData> react() {
+  @Override
+  public Observable<FileData> react() {
     return getFileData();
   }
 
-  @SuppressLint("NewApi") private Observable<FileData> getFileData() {
+  @SuppressLint("NewApi")
+  private Observable<FileData> getFileData() {
     Context context = targetUi.activity();
 
     if (uri == null) {
@@ -66,7 +74,7 @@ public final class GetPath extends UseCase<FileData> {
       return Observable.just(fileData);
     }
 
-    return downloadImage.with(uri).react();
+    return downloadFile.with(uri).react();
   }
 
   @Nullable
@@ -115,7 +123,7 @@ public final class GetPath extends UseCase<FileData> {
   }
 
   private FileData getMediaDocument(Context context) {
-    FileData fileData;Document document = getDocument(uri);
+    Document document = getDocument(uri);
     Uri contentUri = null;
     if ("image".equals(document.type)) {
       contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
@@ -128,17 +136,14 @@ public final class GetPath extends UseCase<FileData> {
     return getDataColumn(context, contentUri, MediaStore.Images.Media._ID + "=?", new String[] { document.id });
   }
 
-  private class Document {
-    String type;
-    String id;
-  }
-
-  @SuppressLint("NewApi") private Document getDocument(Uri uri) {
+  @SuppressLint("NewApi")
+  private Document getDocument(Uri uri) {
     Document document = new Document();
     String docId = DocumentsContract.getDocumentId(uri);
     String[] docArray = docId.split(":");
     document.type = docArray[0];
     document.id = docArray[1];
+
     return document;
   }
 

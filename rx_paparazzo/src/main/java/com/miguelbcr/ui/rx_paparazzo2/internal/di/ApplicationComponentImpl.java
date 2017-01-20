@@ -3,7 +3,7 @@ package com.miguelbcr.ui.rx_paparazzo2.internal.di;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.DownloadImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.DownloadFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetDimens;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
@@ -16,7 +16,7 @@ import com.miguelbcr.ui.rx_paparazzo2.workers.Files;
 
 class ApplicationComponentImpl extends ApplicationComponent {
   private final ImageUtils imageUtils;
-  private final DownloadImage downloadImage;
+  private final DownloadFile downloadFile;
   private final StartIntent startIntent;
   private final GetPath getPath;
   private final GetDimens getDimens;
@@ -30,8 +30,8 @@ class ApplicationComponentImpl extends ApplicationComponent {
   public ApplicationComponentImpl(TargetUi ui, Config config) {
     startIntent = new StartIntent(ui);
     imageUtils = new ImageUtils(ui, config);
-    downloadImage = new DownloadImage(ui, imageUtils);
-    getPath = new GetPath(ui, downloadImage);
+    downloadFile = new DownloadFile(ui, imageUtils);
+    getPath = new GetPath(ui, downloadFile);
     takePhoto = new TakePhoto(startIntent, ui, imageUtils);
     getDimens = new GetDimens(ui, config);
     cropImage = new CropImage(ui, config, startIntent, imageUtils);

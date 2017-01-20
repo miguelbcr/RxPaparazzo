@@ -33,13 +33,13 @@ import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 
-public final class DownloadImage extends UseCase<FileData> {
+public final class DownloadFile extends UseCase<FileData> {
 
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private Uri uri;
 
-  public DownloadImage(TargetUi targetUi, ImageUtils imageUtils) {
+  public DownloadFile(TargetUi targetUi, ImageUtils imageUtils) {
     this.targetUi = targetUi;
     this.imageUtils = imageUtils;
   }
@@ -48,7 +48,7 @@ public final class DownloadImage extends UseCase<FileData> {
     return getObservableDownloadFile();
   }
 
-  public DownloadImage with(Uri uri) {
+  public DownloadFile with(Uri uri) {
     this.uri = uri;
     return this;
   }
