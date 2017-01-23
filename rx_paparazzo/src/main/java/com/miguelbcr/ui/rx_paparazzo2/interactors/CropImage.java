@@ -50,22 +50,41 @@ public final class CropImage extends UseCase<Uri> {
     return this;
   }
 
-  @Override public Observable<Uri> react() {
-    if (config.isDoCrop() && (!config.isFailCropIfNotImage() || isImage())) {
-      Observable<Intent> intent = Observable.just(getIntent());
-      return intent.flatMap(new Function<Intent, ObservableSource<Uri>>() {
-        @Override public ObservableSource<Uri> apply(Intent intent) throws Exception {
-          intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-          return startIntent.with(intent).react().map(new Function<Intent, Uri>() {
-            @Override public Uri apply(Intent intentResult) throws Exception {
-              return UCrop.getOutput(intentResult);
-            }
-          });
+  @Override
+  public Observable<Uri> react() {
+    if (config.isDoCrop()) {
+
+      // bypass cropping if not image
+      if (!isImage()) {
+        if (config.isFailCropIfNotImage()) {
+          throw new IllegalArgumentException("Expected an image file, cannot perform image crop");
+        } else {
+          return Observable.just(getOutputUriNoCrop());
         }
-      });
+      }
+
+      return cropImage();
     }
 
     return Observable.just(getOutputUriNoCrop());
+  }
+
+  private Observable<Uri> cropImage() {
+    Observable<Intent> intent = Observable.just(getIntent());
+
+    return intent.flatMap(new Function<Intent, ObservableSource<Uri>>() {
+      @Override
+      public ObservableSource<Uri> apply(Intent intent) throws Exception {
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        return startIntent.with(intent).react().map(new Function<Intent, Uri>() {
+          @Override
+          public Uri apply(Intent intentResult) throws Exception {
+            return UCrop.getOutput(intentResult);
+          }
+        });
+      }
+    });
   }
 
   private boolean isImage() {

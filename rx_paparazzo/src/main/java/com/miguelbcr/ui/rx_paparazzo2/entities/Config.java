@@ -39,6 +39,7 @@ public class Config {
     this.pickOpenableOnly = false;
     this.pickMimeType = null;
     this.sendToMediaScanner = false;
+    this.failCropIfNotImage = false;
   }
 
   public Size getSize() {
