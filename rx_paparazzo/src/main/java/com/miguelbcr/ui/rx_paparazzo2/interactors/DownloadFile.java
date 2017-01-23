@@ -16,7 +16,10 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
+import android.content.ContentResolver;
 import android.net.Uri;
+import android.os.Build;
+import android.support.v4.provider.DocumentFile;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
@@ -75,7 +78,7 @@ public final class DownloadFile extends UseCase<FileData> {
 
   private FileData downloadFile() throws Exception {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
-    String filename = getFilename(uri) + "." + imageUtils.getFileExtension(uri);
+    String filename = getFilename(uri);
     File destination = imageUtils.getPrivateFile(filename);
 
     URL url = new URL(uri.toString());
@@ -89,7 +92,7 @@ public final class DownloadFile extends UseCase<FileData> {
 
   private FileData getUsingContentResolver() throws FileNotFoundException {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
-    String filename = getFilename(uri) + "." + imageUtils.getFileExtension(uri);
+    String filename = getFilename(uri);
     File file = imageUtils.getPrivateFile(filename);
 
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
@@ -99,7 +102,17 @@ public final class DownloadFile extends UseCase<FileData> {
   }
 
   private String getFilename(Uri uri) {
+    if (Build.VERSION.SDK_INT >= 19) {
+      DocumentFile file = DocumentFile.fromSingleUri(targetUi.getContext(), uri);
+      if (file != null) {
+        String fileName = file.getName();
+        if (fileName != null) {
+          return fileName;
+        }
+      }
+    }
+
     // Remove non alphanumeric characters
-    return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "");
+    return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "") + "." + imageUtils.getFileExtension(uri);
   }
 }
