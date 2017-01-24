@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import java.io.File;
@@ -32,11 +33,13 @@ import io.reactivex.functions.Function;
 public final class TakePhoto extends UseCase<Uri> {
   private static final String PHOTO_FILE_PREFIX = "PHOTO-";
 
+  private final Config config;
   private final StartIntent startIntent;
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
 
-  public TakePhoto(StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
+  public TakePhoto(Config config, StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
+    this.config = config;
     this.startIntent = startIntent;
     this.targetUi = targetUi;
     this.imageUtils = imageUtils;
@@ -63,10 +66,11 @@ public final class TakePhoto extends UseCase<Uri> {
 
   private Uri getUri() {
     String filename = ImageUtils.createDefaultFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
-    File file = imageUtils.getPrivateFile(filename);
+    String directory = config.getFileProviderDirectory();
+    File file = imageUtils.getPrivateFile(directory, filename);
 
     Context context = targetUi.getContext();
-    String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+    String authority = config.getFileProviderAuthority(context);
 
     return FileProvider.getUriForFile(context, authority, file);
   }

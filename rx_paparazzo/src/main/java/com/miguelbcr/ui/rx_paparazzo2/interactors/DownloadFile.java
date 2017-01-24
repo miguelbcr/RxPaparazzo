@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.support.v4.provider.DocumentFile;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
@@ -37,14 +38,16 @@ import io.reactivex.schedulers.Schedulers;
 
 public final class DownloadFile extends UseCase<FileData> {
 
-  public static final String DOWNLOADED_FILENAME_PREFIX = "DOWNLOAD-";
+  private static final String DOWNLOADED_FILENAME_PREFIX = "DOWNLOAD-";
   private final TargetUi targetUi;
+  private final Config config;
   private final ImageUtils imageUtils;
   private Uri uri;
   private FileData fileData;
 
-  public DownloadFile(TargetUi targetUi, ImageUtils imageUtils) {
+  public DownloadFile(TargetUi targetUi, Config config, ImageUtils imageUtils) {
     this.targetUi = targetUi;
+    this.config = config;
     this.imageUtils = imageUtils;
   }
 
@@ -82,7 +85,8 @@ public final class DownloadFile extends UseCase<FileData> {
   private FileData downloadFile() throws Exception {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
     String filename = getFilename(uri);
-    File file = imageUtils.getPrivateFile(filename);
+    String directory = config.getFileProviderDirectory();
+    File file = imageUtils.getPrivateFile(directory, filename);
 
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
@@ -111,7 +115,8 @@ public final class DownloadFile extends UseCase<FileData> {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
     String uriFilename = getFilename(uri);
     String downloadFilename = DOWNLOADED_FILENAME_PREFIX + uriFilename;
-    File file = imageUtils.getPrivateFile(downloadFilename);
+    String directory = config.getFileProviderDirectory();
+    File file = imageUtils.getPrivateFile(directory, downloadFilename);
 
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     imageUtils.copy(inputStream, file);

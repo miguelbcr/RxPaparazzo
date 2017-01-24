@@ -27,6 +27,7 @@ import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
@@ -52,11 +53,13 @@ public final class GetPath extends UseCase<FileData> {
     String id;
   }
 
+  private final Config config;
   private final TargetUi targetUi;
   private final DownloadFile downloadFile;
   private Uri uri;
 
-  public GetPath(TargetUi targetUi, DownloadFile downloadFile) {
+  public GetPath(Config config, TargetUi targetUi, DownloadFile downloadFile) {
+    this.config = config;
     this.targetUi = targetUi;
     this.downloadFile = downloadFile;
   }
@@ -119,7 +122,7 @@ public final class GetPath extends UseCase<FileData> {
 
   private boolean isRxPaparazzoFileProvider() {
     Context context = targetUi.getContext();
-    String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+    String authority = config.getFileProviderAuthority(context);
 
     return uri.getPath().startsWith(authority);
   }

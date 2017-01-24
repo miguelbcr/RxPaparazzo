@@ -32,6 +32,9 @@ import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public final class CropImage extends UseCase<Uri> {
+  private static final String CROP_APPEND = "cropped.";
+  private static final String NO_CROP_APPEND = "no_cropped.";
+
   private final Config config;
   private final StartIntent startIntent;
   private final TargetUi targetUi;
@@ -113,12 +116,13 @@ public final class CropImage extends UseCase<Uri> {
 
   private Intent getIntentWithOptions(Options options, Uri outputUri) {
     Uri uri = Uri.fromFile(fileData.getFile());
-    UCrop uCrop = UCrop.of(uri, outputUri);
 
-    uCrop = uCrop.withOptions(options);
-    if (options.getX() != 0) uCrop = uCrop.withAspectRatio(options.getX(), options.getY());
+    UCrop uCrop = UCrop.of(uri, outputUri).withOptions(options);
+    if (options.getX() != 0) {
+      uCrop.withAspectRatio(options.getX(), options.getY());
+    }
     if (options.getWidth() != 0) {
-      uCrop = uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
+      uCrop.withMaxResultSize(options.getWidth(), options.getHeight());
     }
 
     return uCrop.getIntent(targetUi.getContext());
@@ -131,8 +135,9 @@ public final class CropImage extends UseCase<Uri> {
   private Uri getOutputUriCrop() {
     String destination = fileData.getFile().getAbsolutePath();
     String extension = imageUtils.getFileExtension(destination, ImageUtils.JPG_FILE_EXTENSION);
-    String filename = Constants.CROP_APPEND + extension;
-    File file = imageUtils.getPrivateFile(filename);
+    String filename = CROP_APPEND + extension;
+    String directory = config.getFileProviderDirectory();
+    File file = imageUtils.getPrivateFile(directory, filename);
 
     return Uri.fromFile(file);
   }
@@ -140,8 +145,9 @@ public final class CropImage extends UseCase<Uri> {
   private Uri getOutputUriNoCrop() {
     String destination = fileData.getFile().getAbsolutePath();
     String extension = imageUtils.getFileExtension(destination);
-    String filename = Constants.NO_CROP_APPEND + extension;
-    File file = imageUtils.getPrivateFile(filename);
+    String filename = NO_CROP_APPEND + extension;
+    String directory = config.getFileProviderDirectory();
+    File file = imageUtils.getPrivateFile(directory, filename);
     File source = new File(destination);
 
     imageUtils.copy(source, file);

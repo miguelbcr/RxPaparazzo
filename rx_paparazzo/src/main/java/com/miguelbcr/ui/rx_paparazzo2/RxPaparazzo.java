@@ -146,7 +146,7 @@ public final class RxPaparazzo {
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, FileData>> usingGallery() {
-      this.config.setPickMimeType(ImageUtils.IMAGE_MIME_TYPE);
+      this.config.setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
       this.config.failCropIfNotImage();
 
       return usingFiles();
@@ -241,7 +241,7 @@ public final class RxPaparazzo {
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, List<FileData>>> usingGallery() {
-      this.config.setPickMimeType(ImageUtils.IMAGE_MIME_TYPE);
+      this.config.setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
 
       return usingFiles();
     }

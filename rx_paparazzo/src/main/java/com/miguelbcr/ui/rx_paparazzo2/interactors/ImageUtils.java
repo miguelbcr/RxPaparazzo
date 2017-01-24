@@ -46,10 +46,15 @@ import io.reactivex.exceptions.Exceptions;
 public final class ImageUtils {
 
   private static final String DEFAULT_EXTENSION = "";
+  public static final String JPG_FILE_EXTENSION = "jpg";
+  private static final String PNG_FILE_EXTENSION = "png";
+
+  public static final String MIME_TYPE_IMAGE_WILDCARD = "image/*";
   private static final String MIME_TYPE_JPEG = "image/jpeg";
   private static final String MIME_TYPE_PNG = "image/png";
-  public static final String IMAGE_MIME_TYPE = "image/*";
-  public static final String JPG_FILE_EXTENSION = ".jpg";
+
+  private static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";
+  private static final String LOCALE_EN = "en";
 
   private final TargetUi targetUi;
   private final Config config;
@@ -78,14 +83,18 @@ public final class ImageUtils {
   }
 
   public static String createDefaultFilename(String prefix, String extension) {
-    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
     String datetime = simpleDateFormat.format(new Date());
+
+    if (!TextUtils.isEmpty(extension) && !extension.startsWith(".")) {
+      extension = "." + extension;
+    }
 
     return prefix + datetime + extension;
   }
 
-  File getPrivateFile(String filename) {
-    File dir = new File(targetUi.getContext().getFilesDir(), Constants.SUBDIR);
+  public File getPrivateFile(String directory, String filename) {
+    File dir = new File(targetUi.getContext().getFilesDir(), directory);
     dir.mkdirs();
 
     return new File(dir, filename);
@@ -162,10 +171,18 @@ public final class ImageUtils {
 
     if (filepath != null) {
       int i = filepath.lastIndexOf('.');
-      extension = i > 0 ? filepath.substring(i) : "";
+      if (i > 0) {
+        extension = filepath.substring(i);
+      } else {
+        extension = "";
+      }
     }
 
-    return (TextUtils.isEmpty(extension)) ? defaultExtension : extension;
+    if (TextUtils.isEmpty(extension) && !TextUtils.isEmpty(defaultExtension)) {
+      extension = defaultExtension;
+    }
+
+    return extension;
   }
 
   String getFileExtension(Uri uri) {
@@ -231,7 +248,7 @@ public final class ImageUtils {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
     final String extension = getFileExtension(filePath);
 
-    if (extension.toLowerCase().contains(Constants.EXT_PNG)) {
+    if (extension.toLowerCase().contains(PNG_FILE_EXTENSION)) {
       compressFormat = Bitmap.CompressFormat.PNG;
     }
 

@@ -16,11 +16,17 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.entities;
 
+import android.content.Context;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.yalantis.ucrop.UCrop;
 
 public class Config {
+
+  private static final String DEFAULT_FILE_PROVIDER_DIRECTORY = "RxPaparazzo";
+  private static final String DEFAULT_FILE_PROVIDER = "file_provider";
+
   private UCrop.Options options;
 
   private Size size;
@@ -32,6 +38,9 @@ public class Config {
   private boolean pickOpenableOnly;
   private boolean sendToMediaScanner;
 
+  private String fileProviderAuthority;
+  private String fileProviderDirectory;
+
   public Config() {
     this.size = new ScreenSize();
     this.doCrop = false;
@@ -40,6 +49,8 @@ public class Config {
     this.pickMimeType = null;
     this.sendToMediaScanner = false;
     this.failCropIfNotImage = false;
+    this.fileProviderAuthority = null;
+    this.fileProviderDirectory = null;
   }
 
   public Size getSize() {
@@ -114,6 +125,30 @@ public class Config {
 
   public boolean isDoCrop() {
     return doCrop;
+  }
+
+  public void setFileProviderAuthority(String fileProviderAuthority) {
+    this.fileProviderAuthority = fileProviderAuthority;
+  }
+
+  public String getFileProviderAuthority(Context context) {
+    if (fileProviderAuthority == null) {
+      return context.getPackageName() + "." + DEFAULT_FILE_PROVIDER;
+    }
+
+    return fileProviderAuthority;
+  }
+
+  public void setFileProviderDirectory(String fileProviderDirectory) {
+    this.fileProviderDirectory = fileProviderDirectory;
+  }
+
+  public String getFileProviderDirectory() {
+    if (fileProviderDirectory == null) {
+      return DEFAULT_FILE_PROVIDER_DIRECTORY;
+    }
+
+    return fileProviderDirectory;
   }
 
 }
