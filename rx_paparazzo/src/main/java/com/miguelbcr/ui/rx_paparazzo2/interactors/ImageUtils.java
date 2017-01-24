@@ -46,7 +46,6 @@ import io.reactivex.exceptions.Exceptions;
 public final class ImageUtils {
 
   private static final String DEFAULT_EXTENSION = "";
-  private static final String DEFAULT_IMAGE_PREFIX = "IMG-";
   private static final String MIME_TYPE_JPEG = "image/jpeg";
   private static final String MIME_TYPE_PNG = "image/png";
   public static final String IMAGE_MIME_TYPE = "image/*";
@@ -60,29 +59,29 @@ public final class ImageUtils {
     this.config = config;
   }
 
-  public File getOutputFile(String extension) {
+  public File getOutputFile(String prefix, String extension) {
     String dirname = getApplicationName(targetUi.getContext());
     File dir = getDir(null, dirname);
 
-    return createNewFile(dir, extension);
+    return createNewFile(dir, prefix, extension);
   }
 
-  private File createNewFile(File dir, String extension) {
-    File file = new File(dir.getAbsolutePath(), createDefaultFilename(extension));
+  private File createNewFile(File dir, String prefix, String extension) {
+    File file = new File(dir.getAbsolutePath(), createDefaultFilename(prefix, extension));
 
     while (file.exists()) {
-      String filename = createDefaultFilename(extension);
+      String filename = createDefaultFilename(prefix, extension);
       file = new File(dir.getAbsolutePath(), filename);
     }
 
     return file;
   }
 
-  public static String createDefaultFilename(String extension) {
+  public static String createDefaultFilename(String prefix, String extension) {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
     String datetime = simpleDateFormat.format(new Date());
 
-    return DEFAULT_IMAGE_PREFIX + datetime + extension;
+    return prefix + datetime + extension;
   }
 
   File getPrivateFile(String filename) {

@@ -37,6 +37,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public final class DownloadFile extends UseCase<FileData> {
 
+  public static final String DOWNLOADED_FILENAME_PREFIX = "DOWNLOAD-";
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private Uri uri;
@@ -108,13 +109,14 @@ public final class DownloadFile extends UseCase<FileData> {
 
   private FileData getUsingContentResolver() throws FileNotFoundException {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
-    String filename = getFilename(uri);
-    File file = imageUtils.getPrivateFile(filename);
+    String uriFilename = getFilename(uri);
+    String downloadFilename = DOWNLOADED_FILENAME_PREFIX + uriFilename;
+    File file = imageUtils.getPrivateFile(downloadFilename);
 
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     imageUtils.copy(inputStream, file);
 
-    return toFileData(mimeType, filename, file);
+    return toFileData(mimeType, uriFilename, file);
   }
 
   private String getFilename(Uri uri) {

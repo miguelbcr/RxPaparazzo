@@ -36,6 +36,18 @@ import io.reactivex.Observable;
 
 public final class GetPath extends UseCase<FileData> {
 
+  private static final String URI_SCHEME_CONTENT = "content";
+  private static final String URI_SCHEME_FILE = "file";
+  private static final String PUBLIC_DOWNLOADS_URI = "content://downloads/public_downloads";
+  private static final String DOCUMENT_AUTHORITY_EXTERNAL_STORAGE = "com.android.externalstorage.documents";
+  private static final String DOCUMENT_AUTHORITY_DOWNLOADS = "com.android.providers.downloads.documents";
+  private static final String DOCUMENT_AUTHORITY_MEDIA = "com.android.providers.media.documents";
+  private static final String DOCUMENT_TYPE_PRIMARY = "primary";
+  private static final String DOCUMENT_TYPE_IMAGE = "image";
+  private static final String DOCUMENT_TYPE_VIDEO = "video";
+  private static final String DOCUMENT_TYPE_AUDIO = "audio";
+  private static final String RX_PAPARAZZO2_SAMPLE_FILE_PROVIDER = "com.miguelbcr.ui.rx_paparazzo2.sample.file_provider";
+
   private static class Document {
     String type;
     String id;
@@ -83,7 +95,7 @@ public final class GetPath extends UseCase<FileData> {
       if (isExternalStorageDocument(uri)) {
         Document document = getDocument(uri);
 
-        if ("primary".equalsIgnoreCase(document.type)) {
+        if (DOCUMENT_TYPE_PRIMARY.equalsIgnoreCase(document.type)) {
           return getPrimaryExternalDocument(document);
         }
       } else if (isDownloadsDocument(uri)) {
@@ -91,9 +103,11 @@ public final class GetPath extends UseCase<FileData> {
       } else if (isMediaDocument(uri)) {
         return getMediaDocument(context);
       }
-    } else if ("content".equalsIgnoreCase(uri.getScheme())) {
-      return getDataColumn(context, uri, null, null);
-    } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+    } else if (URI_SCHEME_CONTENT.equalsIgnoreCase(uri.getScheme())) {
+      if (!isRxPaparazzoFileProvider()) {
+        return getDataColumn(context, uri, null, null);
+      }
+    } else if (URI_SCHEME_FILE.equalsIgnoreCase(uri.getScheme())) {
       File file = new File(uri.getPath());
       String fileName = ImageUtils.getFileName(uri.getPath());
       String mimeType = ImageUtils.getMimeType(targetUi.getContext(), uri);
@@ -102,6 +116,10 @@ public final class GetPath extends UseCase<FileData> {
     }
 
     return null;
+  }
+
+  private boolean isRxPaparazzoFileProvider() {
+    return uri.getPath().startsWith(RX_PAPARAZZO2_SAMPLE_FILE_PROVIDER);
   }
 
   private FileData getPrimaryExternalDocument(Document document) {
@@ -115,22 +133,22 @@ public final class GetPath extends UseCase<FileData> {
   private FileData getDownloadsDocument(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       String id = DocumentsContract.getDocumentId(uri);
-      Uri contentUri = ContentUris.withAppendedId(Uri.parse("content://downloads/public_downloads"), Long.valueOf(id));
+      Uri contentUri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_URI), Long.valueOf(id));
 
       return getDataColumn(context, contentUri, null, null);
     }
 
-    throw new IllegalStateException("Must be KitKat");
+    throw new IllegalStateException("Minimum Android API version must be be KitKat to use DocumentsContract API");
   }
 
   private FileData getMediaDocument(Context context) {
     Document document = getDocument(uri);
     Uri contentUri = null;
-    if ("image".equals(document.type)) {
+    if (DOCUMENT_TYPE_IMAGE.equals(document.type)) {
       contentUri = MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-    } else if ("video".equals(document.type)) {
+    } else if (DOCUMENT_TYPE_VIDEO.equals(document.type)) {
       contentUri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
-    } else if ("audio".equals(document.type)) {
+    } else if (DOCUMENT_TYPE_AUDIO.equals(document.type)) {
       contentUri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     }
 
@@ -186,14 +204,14 @@ public final class GetPath extends UseCase<FileData> {
   }
 
   private boolean isExternalStorageDocument(Uri uri) {
-    return "com.android.externalstorage.documents".equals(uri.getAuthority());
+    return DOCUMENT_AUTHORITY_EXTERNAL_STORAGE.equals(uri.getAuthority());
   }
 
   private boolean isDownloadsDocument(Uri uri) {
-    return "com.android.providers.downloads.documents".equals(uri.getAuthority());
+    return DOCUMENT_AUTHORITY_DOWNLOADS.equals(uri.getAuthority());
   }
 
   private boolean isMediaDocument(Uri uri) {
-    return "com.android.providers.media.documents".equals(uri.getAuthority());
+    return DOCUMENT_AUTHORITY_MEDIA.equals(uri.getAuthority());
   }
 }

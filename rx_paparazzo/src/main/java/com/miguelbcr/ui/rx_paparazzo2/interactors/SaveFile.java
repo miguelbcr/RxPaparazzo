@@ -29,6 +29,9 @@ import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public final class SaveFile extends UseCase<FileData> {
+
+  private static final String SAVED_FILE_PREFIX = "SAVED-";
+
   private final TargetUi targetUi;
   private final Config config;
   private final GetDimens getDimens;
@@ -79,7 +82,7 @@ public final class SaveFile extends UseCase<FileData> {
     String fileName = fileData.getFilename();
     String extension = imageUtils.getFileExtension(fileName);
 
-    return imageUtils.getOutputFile(extension);
+    return imageUtils.getOutputFile(SAVED_FILE_PREFIX, extension);
   }
 
 }

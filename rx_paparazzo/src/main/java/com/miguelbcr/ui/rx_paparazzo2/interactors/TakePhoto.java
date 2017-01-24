@@ -30,6 +30,8 @@ import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 
 public final class TakePhoto extends UseCase<Uri> {
+  private static final String PHOTO_FILE_PREFIX = "PHOTO-";
+
   private final StartIntent startIntent;
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
@@ -60,7 +62,7 @@ public final class TakePhoto extends UseCase<Uri> {
   }
 
   private Uri getUri() {
-    String filename = ImageUtils.createDefaultFilename(ImageUtils.JPG_FILE_EXTENSION);
+    String filename = ImageUtils.createDefaultFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
     File file = imageUtils.getPrivateFile(filename);
 
     Context context = targetUi.getContext();
