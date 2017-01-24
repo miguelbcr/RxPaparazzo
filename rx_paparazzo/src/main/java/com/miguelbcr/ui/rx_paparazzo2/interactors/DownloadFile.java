@@ -16,7 +16,6 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-import android.content.ContentResolver;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.provider.DocumentFile;
@@ -93,12 +92,11 @@ public final class DownloadFile extends UseCase<FileData> {
     return toFileData(mimeType, filename, file);
   }
 
-  @NonNull
   private FileData toFileData(String mimeType, String filename, File destination) {
-    if (fileData == null) {
+    if (fileData == null || fileData.getFilename() == null) {
       return new FileData(destination, filename, mimeType);
     } else {
-      // maintain existing mime-type unless missing
+      // maintain existing filename and mime-type unless missing
       String fileMimeType = fileData.getMimeType();
       if (fileMimeType == null) {
         fileMimeType = mimeType;

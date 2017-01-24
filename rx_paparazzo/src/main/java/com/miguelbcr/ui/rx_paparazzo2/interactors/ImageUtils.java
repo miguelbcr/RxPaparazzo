@@ -23,14 +23,14 @@ import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.webkit.MimeTypeMap;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
-import io.reactivex.exceptions.Exceptions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,9 +41,12 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import io.reactivex.exceptions.Exceptions;
+
 public final class ImageUtils {
 
   private static final String DEFAULT_EXTENSION = "";
+  private static final String DEFAULT_IMAGE_PREFIX = "IMG-";
   private static final String MIME_TYPE_JPEG = "image/jpeg";
   private static final String MIME_TYPE_PNG = "image/png";
   public static final String IMAGE_MIME_TYPE = "image/*";
@@ -57,36 +60,35 @@ public final class ImageUtils {
     this.config = config;
   }
 
-  public File getOutputDirectory() {
-    String dirname = getApplicationName(targetUi.getContext());
-
-    return getDir(null, dirname);
-  }
-
-  File getOutputFile(String extension) {
+  public File getOutputFile(String extension) {
     String dirname = getApplicationName(targetUi.getContext());
     File dir = getDir(null, dirname);
 
     return createNewFile(dir, extension);
   }
 
-  public File createNewFile(File dir, String extension) {
-    SimpleDateFormat simpleDateFormat =
-        new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
-    String datetime = simpleDateFormat.format(new Date());
-    File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
+  private File createNewFile(File dir, String extension) {
+    File file = new File(dir.getAbsolutePath(), createDefaultFilename(extension));
 
     while (file.exists()) {
-      datetime = simpleDateFormat.format(new Date());
-      file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
+      String filename = createDefaultFilename(extension);
+      file = new File(dir.getAbsolutePath(), filename);
     }
 
     return file;
   }
 
+  public static String createDefaultFilename(String extension) {
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
+    String datetime = simpleDateFormat.format(new Date());
+
+    return DEFAULT_IMAGE_PREFIX + datetime + extension;
+  }
+
   File getPrivateFile(String filename) {
     File dir = new File(targetUi.getContext().getFilesDir(), Constants.SUBDIR);
     dir.mkdirs();
+
     return new File(dir, filename);
   }
 
@@ -150,20 +152,6 @@ public final class ImageUtils {
     } else {
       return fileName.substring(lastSlash + 1);
     }
-  }
-
-  public String getFileNameWithoutExtension(String filepath) {
-    File file = new File(filepath);
-
-    String fileName = file.getName();
-    String extension = getFileExtension(fileName);
-
-    int extensionIndex = fileName.indexOf(extension);
-    if (extensionIndex == -1) {
-      return fileName;
-    }
-
-    return fileName.substring(0, extensionIndex);
   }
 
   public String getFileExtension(String filepath) {

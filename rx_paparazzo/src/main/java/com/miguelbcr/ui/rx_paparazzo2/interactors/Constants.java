@@ -18,12 +18,11 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 class Constants {
   static final String SUBDIR = "RxPaparazzo";
-  static final String SHOOT_APPEND = "shoot.jpg";
   static final String CROP_APPEND = "cropped";
   static final String NO_CROP_APPEND = "no_cropped";
   static final String EXT_PNG = "png";
   /**
-   * The same name that is placed on the manifest on <code>provivder</code> tag
+   * The same name that is placed on the manifest on <code>provider</code> tag
    */
   static final String FILE_PROVIDER = "file_provider";
   static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";

@@ -59,8 +59,10 @@ public final class TakePhoto extends UseCase<Uri> {
   }
 
   private Uri getUri() {
+    String filename = ImageUtils.createDefaultFilename(ImageUtils.JPG_FILE_EXTENSION);
+    File file = imageUtils.getPrivateFile(filename);
+
     Context context = targetUi.getContext();
-    File file = imageUtils.getPrivateFile(Constants.SHOOT_APPEND);
     String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
 
     return FileProvider.getUriForFile(context, authority, file);
