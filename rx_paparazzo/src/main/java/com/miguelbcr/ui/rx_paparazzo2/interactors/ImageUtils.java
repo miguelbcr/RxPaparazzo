@@ -143,6 +143,14 @@ public final class ImageUtils {
     return file.getName();
   }
 
+  public static String stripPathFromFilename(String fileName) {
+    int lastSlash = fileName.lastIndexOf("/");
+    if (lastSlash == -1) {
+      return fileName;
+    } else {
+      return fileName.substring(lastSlash + 1);
+    }
+  }
 
   public String getFileNameWithoutExtension(String filepath) {
     File file = new File(filepath);

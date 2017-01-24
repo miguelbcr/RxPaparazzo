@@ -107,8 +107,9 @@ public final class GetPath extends UseCase<FileData> {
   private FileData getPrimaryExternalDocument(Document document) {
     String filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
     String mimeType = ImageUtils.getMimeType(document.id);
+    String fileName = ImageUtils.stripPathFromFilename(document.id);
 
-    return new FileData(new File(filePath), document.id, mimeType);
+    return new FileData(new File(filePath), fileName, mimeType);
   }
 
   private FileData getDownloadsDocument(Context context) {

@@ -107,7 +107,7 @@ public final class DownloadFile extends UseCase<FileData> {
       if (file != null) {
         String fileName = file.getName();
         if (fileName != null) {
-          return fileName;
+          return ImageUtils.stripPathFromFilename(fileName);
         }
       }
     }
@@ -115,4 +115,5 @@ public final class DownloadFile extends UseCase<FileData> {
     // Remove non alphanumeric characters
     return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "") + "." + imageUtils.getFileExtension(uri);
   }
+
 }
