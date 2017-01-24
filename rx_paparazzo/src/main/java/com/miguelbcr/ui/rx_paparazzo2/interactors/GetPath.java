@@ -46,7 +46,6 @@ public final class GetPath extends UseCase<FileData> {
   private static final String DOCUMENT_TYPE_IMAGE = "image";
   private static final String DOCUMENT_TYPE_VIDEO = "video";
   private static final String DOCUMENT_TYPE_AUDIO = "audio";
-  private static final String RX_PAPARAZZO2_SAMPLE_FILE_PROVIDER = "com.miguelbcr.ui.rx_paparazzo2.sample.file_provider";
 
   private static class Document {
     String type;
@@ -119,7 +118,10 @@ public final class GetPath extends UseCase<FileData> {
   }
 
   private boolean isRxPaparazzoFileProvider() {
-    return uri.getPath().startsWith(RX_PAPARAZZO2_SAMPLE_FILE_PROVIDER);
+    Context context = targetUi.getContext();
+    String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+
+    return uri.getPath().startsWith(authority);
   }
 
   private FileData getPrimaryExternalDocument(Document document) {
