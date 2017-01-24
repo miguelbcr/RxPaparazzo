@@ -159,20 +159,23 @@ public final class GetPath extends UseCase<FileData> {
 
     try {
       cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-      cursor.moveToFirst();
-      String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
-      String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
-      String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
-      String title = cursor.getString(cursor.getColumnIndexOrThrow(titleColumn));
+      if (cursor.moveToFirst()) {
+        String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
+        String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
+        String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(titleColumn));
 
-      File file;
-      if (fileData != null) {
-        file = new File(fileData);
+        File file;
+        if (fileData != null) {
+          file = new File(fileData);
+        } else {
+          file = null;
+        }
+
+        return new FileData(file, fileName, mimeType, title);
       } else {
-        file = null;
+        return null;
       }
-
-      return new FileData(file, fileName, mimeType, title);
     } catch (Exception e) {
       return null;
     } finally {

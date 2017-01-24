@@ -40,7 +40,8 @@ public final class TakePhoto extends UseCase<Uri> {
     this.imageUtils = imageUtils;
   }
 
-  @Override public Observable<Uri> react() {
+  @Override
+  public Observable<Uri> react() {
     Uri uri = getUri();
 
     return startIntent.with(getIntentCamera(uri))

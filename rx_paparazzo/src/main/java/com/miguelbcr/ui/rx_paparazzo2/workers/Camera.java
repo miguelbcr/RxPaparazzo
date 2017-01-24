@@ -128,11 +128,11 @@ public final class Camera extends Worker {
   }
 
   private boolean hasCameraPermissionInManifest() {
-    final String packageName = targetUi.getContext().getPackageName();
     try {
-      final PackageInfo packageInfo = targetUi.getContext().getPackageManager()
-          .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
-      final String[] declaredPermissions = packageInfo.requestedPermissions;
+      String packageName = targetUi.getContext().getPackageName();
+      PackageManager pm = targetUi.getContext().getPackageManager();
+      PackageInfo packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+      String[] declaredPermissions = packageInfo.requestedPermissions;
       if (declaredPermissions != null && declaredPermissions.length > 0) {
         for (String p : declaredPermissions) {
           if (p.equals(Manifest.permission.CAMERA)) {
