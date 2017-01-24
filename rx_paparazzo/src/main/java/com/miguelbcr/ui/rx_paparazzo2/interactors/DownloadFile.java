@@ -41,6 +41,7 @@ public final class DownloadFile extends UseCase<FileData> {
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private Uri uri;
+  private FileData fileData;
 
   public DownloadFile(TargetUi targetUi, ImageUtils imageUtils) {
     this.targetUi = targetUi;
@@ -51,8 +52,10 @@ public final class DownloadFile extends UseCase<FileData> {
     return getObservableDownloadFile();
   }
 
-  public DownloadFile with(Uri uri) {
+  public DownloadFile with(Uri uri, FileData fileData) {
     this.uri = uri;
+    this.fileData = fileData;
+
     return this;
   }
 
@@ -79,15 +82,30 @@ public final class DownloadFile extends UseCase<FileData> {
   private FileData downloadFile() throws Exception {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
     String filename = getFilename(uri);
-    File destination = imageUtils.getPrivateFile(filename);
+    File file = imageUtils.getPrivateFile(filename);
 
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
     connection.connect();
     InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
-    imageUtils.copy(inputStream, destination);
+    imageUtils.copy(inputStream, file);
 
-    return new FileData(destination, filename, mimeType);
+    return toFileData(mimeType, filename, file);
+  }
+
+  @NonNull
+  private FileData toFileData(String mimeType, String filename, File destination) {
+    if (fileData == null) {
+      return new FileData(destination, filename, mimeType);
+    } else {
+      // maintain existing mime-type unless missing
+      String fileMimeType = fileData.getMimeType();
+      if (fileMimeType == null) {
+        fileMimeType = mimeType;
+      }
+
+      return new FileData(fileData, destination, fileMimeType);
+    }
   }
 
   private FileData getUsingContentResolver() throws FileNotFoundException {
@@ -98,7 +116,7 @@ public final class DownloadFile extends UseCase<FileData> {
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     imageUtils.copy(inputStream, file);
 
-    return new FileData(file, filename, mimeType);
+    return toFileData(mimeType, filename, file);
   }
 
   private String getFilename(Uri uri) {

@@ -70,11 +70,11 @@ public final class GetPath extends UseCase<FileData> {
 
     FileData fileData = getFileData(context);
 
-    if (fileData != null) {
+    if (fileData != null && fileData.getFile() != null) {
       return Observable.just(fileData);
     }
 
-    return downloadFile.with(uri).react();
+    return downloadFile.with(uri, fileData).react();
   }
 
   @Nullable
@@ -165,7 +165,14 @@ public final class GetPath extends UseCase<FileData> {
       String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
       String title = cursor.getString(cursor.getColumnIndexOrThrow(titleColumn));
 
-      return new FileData(new File(fileData), fileName, mimeType, title);
+      File file;
+      if (fileData != null) {
+        file = new File(fileData);
+      } else {
+        file = null;
+      }
+
+      return new FileData(file, fileName, mimeType, title);
     } catch (Exception e) {
       return null;
     } finally {
