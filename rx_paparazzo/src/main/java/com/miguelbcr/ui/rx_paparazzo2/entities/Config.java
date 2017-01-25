@@ -75,12 +75,12 @@ public class Config {
     this.size = size;
   }
 
-  public boolean useInternalStorage() {
+  public boolean isUseInternalStorage() {
     return useInternalStorage;
   }
 
-  public void setUseInternalStorage() {
-    this.useInternalStorage = true;
+  public void setUseInternalStorage(boolean useInternalStorage) {
+    this.useInternalStorage = useInternalStorage;
   }
 
   public void setPickMimeType(String pickMimeType) {
@@ -111,12 +111,8 @@ public class Config {
     return sendToMediaScanner;
   }
 
-  public void failCropIfNotImage() {
-    this.failCropIfNotImage = true;
-  }
-
-  public void doNotFailCropIfNotImage() {
-    this.failCropIfNotImage = false;
+  public void setFailCropIfNotImage(boolean failCropIfNotImage) {
+    this.failCropIfNotImage = failCropIfNotImage;
   }
 
   public boolean isFailCropIfNotImage() {

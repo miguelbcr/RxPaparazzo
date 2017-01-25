@@ -108,7 +108,7 @@ public final class ImageUtils {
   private File getDir(String dirRoot, String dirname) {
     File storageDir = null;
 
-    if (!config.useInternalStorage()) {
+    if (!config.isUseInternalStorage()) {
       storageDir = getPublicDir(dirRoot, dirname);
     }
 

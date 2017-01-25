@@ -106,7 +106,7 @@ public final class Camera extends Worker {
   }
 
   private String[] permissions() {
-    String[] storagePermission = PermissionUtil.getReadAndWriteStoragePermissions(config.useInternalStorage());
+    String[] storagePermission = PermissionUtil.getReadAndWriteStoragePermissions(config.isUseInternalStorage());
     String[] cameraPermission = getCameraPermission();
 
     return concat(storagePermission, cameraPermission);

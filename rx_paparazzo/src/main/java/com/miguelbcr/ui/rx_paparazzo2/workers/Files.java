@@ -153,6 +153,6 @@ public final class Files extends Worker {
   }
 
   private String[] permissions() {
-    return PermissionUtil.getReadAndWriteStoragePermissions(config.useInternalStorage());
+    return PermissionUtil.getReadAndWriteStoragePermissions(config.isUseInternalStorage());
   }
 }

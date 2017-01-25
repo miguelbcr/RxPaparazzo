@@ -64,90 +64,126 @@ public final class RxPaparazzo {
     return new MultipleSelectionBuilder<T>(fragment);
   }
 
-  private abstract static class Builder<T> {
-    protected final Config config;
-    protected final ApplicationComponent applicationComponent;
+  private abstract static class Builder<T, B extends Builder<T, B>> {
+    private final Config config;
+    private final ApplicationComponent applicationComponent;
+    private final B self;
 
-    public Builder(T ui) {
+    Builder(T ui) {
+      this.self = (B)this;
       this.config = new Config();
       this.applicationComponent = ApplicationComponent.create(new ApplicationModule(config, ui));
     }
-  }
 
-  /**
-   * Call it when just one image is required to retrieve.
-   */
-  public static class SingleSelectionBuilder<T> extends Builder<T> {
+    ApplicationComponent getApplicationComponent() {
+      return applicationComponent;
+    }
 
-    public SingleSelectionBuilder(T ui) {
-      super(ui);
+    Config getConfig() {
+      return config;
+    }
+
+    /**
+     * Sets this to the value of name attribute of {@link android.support.v4.content.FileProvider} in AndroidManifest.xml
+     */
+    public B setFileProviderAuthority(String authority) {
+      this.config.setFileProviderAuthority(authority);
+      return self;
+    }
+
+    /**
+     * Sets this to the directory which is use in the {@link android.support.v4.content.FileProvider} xml file
+     */
+    public B setFileProviderDirectory(String authority) {
+      this.config.setFileProviderDirectory(authority);
+      return self;
+    }
+
+    /**
+     * Limits the file which can be selected to those obey {@link android.content.Intent}.CATEGORY_OPENABLE.
+     */
+    public B limitPickerToOpenableFilesOnly() {
+      this.config.setPickOpenableOnly(true);
+      return self;
     }
 
     /**
      * Calling it the images will be saved in internal storage, otherwise in public storage
      */
-    public SingleSelectionBuilder<T> useInternalStorage() {
-      this.config.setUseInternalStorage();
-      return this;
+    public B useInternalStorage() {
+      this.config.setUseInternalStorage(true);
+      return self;
     }
 
     /**
-     * Sets the size for the retrieved image.
+     * Sets the image dimensions for the retrieved image.
      *
      * @see Size
      */
-    public SingleSelectionBuilder<T> size(Size size) {
+    public B size(Size size) {
       this.config.setSize(size);
-      return this;
+      return self;
     }
 
     /**
      * Sets the mime type of the picker.
      */
-    public SingleSelectionBuilder<T> setMimeType(String mimeType) {
+    public B setMimeType(String mimeType) {
       this.config.setPickMimeType(mimeType);
-      return this;
+      return self;
     }
 
     /**
-     * Call it when crop option is required.
+     * Enables cropping of images.
      */
-    public SingleSelectionBuilder<T> crop() {
+    public B crop() {
       this.config.setCrop();
-      return this;
+      return self;
     }
 
     /**
-     * Send result to media scanner
-     */
-    public SingleSelectionBuilder<T> sendToMediaScanner() {
-      this.config.setSendToMediaScanner(true);
-      return this;
-    }
-
-    /**
-     * Send result to media scanner
-     */
-    public SingleSelectionBuilder<T> doNotSendToMediaScanner() {
-      this.config.setSendToMediaScanner(false);
-      return this;
-    }
-
-    /**
-     * Call it when crop option is required as such as configuring the options of the cropping
+     * Sets crop option is required as such as configuring the options of the cropping
      * action.
      */
-    public <O extends UCrop.Options> SingleSelectionBuilder<T> crop(O options) {
+    public <O extends UCrop.Options> B crop(O options) {
       this.config.setCrop(options);
-      return this;
+      return self;
+    }
+
+    /**
+     * Send result to media scanner
+     */
+    public B sendToMediaScanner() {
+      this.config.setSendToMediaScanner(true);
+      return self;
+    }
+
+    /**
+     * Send result to media scanner
+     */
+    public B doNotSendToMediaScanner() {
+      this.config.setSendToMediaScanner(false);
+      return self;
+    }
+
+  }
+
+  /**
+   * Use when just one image is required.
+   */
+  public static class SingleSelectionBuilder<T> extends Builder<T, SingleSelectionBuilder<T>> {
+
+    SingleSelectionBuilder(T ui) {
+      super(ui);
     }
 
     /*
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, FileData>> usingGallery() {
-      this.config.setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
-      this.config.failCropIfNotImage();
+      Config config = getConfig();
+      config.setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
+      config.setFailCropIfNotImage(true);
 
       return usingFiles();
     }
@@ -156,101 +192,43 @@ public final class RxPaparazzo {
      * Use camera to retrieve the image.
      */
     public Observable<Response<T, FileData>> usingCamera() {
-      this.config.failCropIfNotImage();
+      getConfig().setFailCropIfNotImage(true);
 
-      return applicationComponent.camera().takePhoto();
+      return getApplicationComponent().camera().takePhoto();
     }
 
     /**
-     * Use file pickers to retrieve the files.
+     * Use file picker to retrieve the files.
      */
     public Observable<Response<T, FileData>> usingFiles() {
-      return applicationComponent.files().pickFile();
+      return getApplicationComponent().files().pickFile();
     }
   }
 
   /**
-   * Call it when multiple images are required.
+   * Use when multiple images are required.
    */
-  public static class MultipleSelectionBuilder<T> extends Builder<T> {
+  public static class MultipleSelectionBuilder<T> extends Builder<T, MultipleSelectionBuilder<T>> {
 
-    public MultipleSelectionBuilder(T ui) {
+    MultipleSelectionBuilder(T ui) {
       super(ui);
-    }
-
-    /**
-     * Calling it the images will be saved in internal storage, otherwise in public storage
-     */
-    public MultipleSelectionBuilder<T> useInternalStorage() {
-      this.config.setUseInternalStorage();
-      return this;
-    }
-
-    /**
-     * Sets the mime type of the picker.
-     */
-    public MultipleSelectionBuilder<T> setMimeType(String mimeType) {
-      this.config.setPickMimeType(mimeType);
-      return this;
-    }
-
-    /**
-     * Sets the size for the retrieved image.
-     *
-     * @see Size
-     */
-    public MultipleSelectionBuilder<T> size(Size size) {
-      this.config.setSize(size);
-      return this;
-    }
-
-    /**
-     * Send result to media scanner
-     */
-    public MultipleSelectionBuilder<T> sendToMediaScanner() {
-      this.config.setSendToMediaScanner(true);
-      return this;
-    }
-
-    /**
-     * Send result to media scanner
-     */
-    public MultipleSelectionBuilder<T> doNotSendToMediaScanner() {
-      this.config.setSendToMediaScanner(false);
-      return this;
-    }
-
-    /**
-     * Call it when crop option is required.
-     */
-    public MultipleSelectionBuilder<T> crop() {
-      this.config.setCrop();
-      return this;
-    }
-
-    /**
-     * Call it when crop option is required as such as configuring the options of the cropping
-     * action.
-     */
-    public <O extends UCrop.Options> MultipleSelectionBuilder<T> crop(O options) {
-      this.config.setCrop(options);
-      return this;
     }
 
     /**
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, List<FileData>>> usingGallery() {
-      this.config.setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
+      getConfig().setPickMimeType(ImageUtils.MIME_TYPE_IMAGE_WILDCARD);
 
       return usingFiles();
     }
 
     /**
-     * Use file pickers to retrieve the files.
+     * Use file picker to retrieve the files.
      */
     public Observable<Response<T, List<FileData>>> usingFiles() {
-      return applicationComponent.files().pickFiles();
+      return getApplicationComponent().files().pickFiles();
     }
+
   }
 }
