@@ -39,6 +39,8 @@ import io.reactivex.schedulers.Schedulers;
 public final class DownloadFile extends UseCase<FileData> {
 
   private static final String DOWNLOADED_FILENAME_PREFIX = "DOWNLOAD-";
+  private static final String MATCH_ANYTHING_NOT_A_LETTER_OR_NUMBER = "[^A-Za-z0-9 ]";
+
   private final TargetUi targetUi;
   private final Config config;
   private final ImageUtils imageUtils;
@@ -51,7 +53,8 @@ public final class DownloadFile extends UseCase<FileData> {
     this.imageUtils = imageUtils;
   }
 
-  @Override Observable<FileData> react() {
+  @Override
+  Observable<FileData> react() {
     return getObservableDownloadFile();
   }
 
@@ -91,7 +94,7 @@ public final class DownloadFile extends UseCase<FileData> {
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
     connection.connect();
-    InputStream inputStream = new BufferedInputStream(url.openStream(), 1024);
+    InputStream inputStream = new BufferedInputStream(url.openStream());
     imageUtils.copy(inputStream, file);
 
     return toFileData(mimeType, filename, file);
@@ -125,7 +128,7 @@ public final class DownloadFile extends UseCase<FileData> {
   }
 
   private String getFilename(Uri uri) {
-    if (Build.VERSION.SDK_INT >= 19) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       DocumentFile file = DocumentFile.fromSingleUri(targetUi.getContext(), uri);
       if (file != null) {
         String fileName = file.getName();
@@ -135,8 +138,10 @@ public final class DownloadFile extends UseCase<FileData> {
       }
     }
 
-    // Remove non alphanumeric characters
-    return uri.getLastPathSegment().replaceAll("[^A-Za-z0-9 ]", "") + "." + imageUtils.getFileExtension(uri);
+    String fileName = uri.getLastPathSegment();
+    String safeFilename = fileName.replaceAll(MATCH_ANYTHING_NOT_A_LETTER_OR_NUMBER, "");
+
+    return safeFilename + "." + imageUtils.getFileExtension(uri);
   }
 
 }
