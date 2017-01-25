@@ -20,6 +20,7 @@
         android:layout_marginRight="10dp"
         android:layout_marginLeft="10dp"
         android:adjustViewBounds="true"
+        android:layout_gravity="center_horizontal"
         android:src="@mipmap/ic_launcher" />
 
 </LinearLayout>

@@ -33,11 +33,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class SampleActivity extends AppCompatActivity implements Testable {
+    private static final String STATE_FILES = "FILES";
+
     private Toolbar toolbar;
     private ImageView imageView;
     private TextView filenameView;
     private RecyclerView recyclerView;
-    private List<FileData> fileDataList;
+    private ArrayList<FileData> fileDataList;
     private Size size;
 
     @Override
@@ -45,13 +47,28 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sample_layout);
         configureToolbar();
-        initViews();
+
         fileDataList = new ArrayList<>();
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(STATE_FILES)) {
+                List files = (List) savedInstanceState.getSerializable(STATE_FILES);
+                fileDataList.addAll(files);
+            }
+        }
+
+        initViews();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(STATE_FILES, fileDataList);
     }
 
     private void configureToolbar() {
@@ -76,6 +93,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
         findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
         findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+
+        loadImages();
     }
 
     private void captureImage() {
@@ -188,7 +207,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void loadImage(FileData fileData) {
-        fileDataList.clear();
+        this.fileDataList = new ArrayList<>(fileDataList);
         fileDataList.add(fileData);
 
         imageView.setVisibility(View.VISIBLE);
@@ -208,12 +227,20 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void loadImages(List<FileData> fileDataList) {
-        this.fileDataList = fileDataList;
+        this.fileDataList = new ArrayList<>(fileDataList);
 
+        loadImages();
+    }
+
+    private void loadImages() {
         imageView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
 
         filenameView.setVisibility(View.GONE);
+
+        if (fileDataList == null || fileDataList.isEmpty()) {
+            return;
+        }
 
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setAdapter(new ImagesAdapter(fileDataList));

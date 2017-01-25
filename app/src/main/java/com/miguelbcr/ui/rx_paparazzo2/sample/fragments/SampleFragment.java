@@ -35,10 +35,12 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 public class SampleFragment extends Fragment implements Testable {
+    private static final String STATE_FILES = "FILES";
+
     private ImageView imageView;
     private TextView filenameView;
     private RecyclerView recyclerView;
-    private List<FileData> fileDataList;
+    private ArrayList<FileData> fileDataList;
     private Size size;
 
     @Override
@@ -50,9 +52,25 @@ public class SampleFragment extends Fragment implements Testable {
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initViews();
+
         fileDataList = new ArrayList<>();
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(STATE_FILES)) {
+                List files = (List) savedInstanceState.getSerializable(STATE_FILES);
+                fileDataList.addAll(files);
+            }
+        }
+
         size = new OriginalSize();
+
+        initViews();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(STATE_FILES, fileDataList);
     }
 
     private void initViews() {
@@ -73,6 +91,8 @@ public class SampleFragment extends Fragment implements Testable {
         view.findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
         view.findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
         view.findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+
+        loadImages();
     }
 
     private void captureImage() {
@@ -206,13 +226,22 @@ public class SampleFragment extends Fragment implements Testable {
                 .into(imageView);
     }
 
+    private void loadImages() {
+        this.fileDataList = new ArrayList<>(fileDataList);
+
+        loadImages(fileDataList);
+    }
+
     private void loadImages(List<FileData> fileDataList) {
-        this.fileDataList = fileDataList;
 
         imageView.setVisibility(View.GONE);
         imageView.setImageDrawable(null);
 
         filenameView.setVisibility(View.GONE);
+
+        if (fileDataList == null || fileDataList.isEmpty()) {
+            return;
+        }
 
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setAdapter(new ImagesAdapter(fileDataList));

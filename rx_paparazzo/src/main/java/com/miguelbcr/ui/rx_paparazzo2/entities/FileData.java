@@ -1,8 +1,9 @@
 package com.miguelbcr.ui.rx_paparazzo2.entities;
 
 import java.io.File;
+import java.io.Serializable;
 
-public class FileData {
+public class FileData implements Serializable {
 
     public static final String FILENAME_MIMETYPE = "%s (%s)";
     public static final String FILENAME_MIMETYPE_TITLE = "%s (%s) - %s";
