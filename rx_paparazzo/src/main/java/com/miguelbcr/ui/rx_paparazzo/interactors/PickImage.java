@@ -22,6 +22,8 @@ import android.net.Uri;
 import android.support.annotation.Nullable;
 import java.io.File;
 import rx.Observable;
+import rx.exceptions.Exceptions;
+import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx_activity_result.OnPreResult;
@@ -65,6 +67,11 @@ public final class PickImage extends UseCase<Uri> {
                 @Override public String call(String filePath) {
                   intent.setData(Uri.fromFile(new File(filePath)));
                   return filePath;
+                }
+              })
+              .onErrorResumeNext(new Func1<Throwable, Observable<? extends String>>() {
+                @Override public Observable<? extends String> call(Throwable throwable) {
+                  return Observable.just("");
                 }
               });
         } else {
