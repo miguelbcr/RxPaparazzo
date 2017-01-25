@@ -172,7 +172,7 @@ public final class ImageUtils {
     if (filepath != null) {
       int i = filepath.lastIndexOf('.');
       if (i > 0) {
-        extension = filepath.substring(i);
+        extension = filepath.substring(i + 1);
       } else {
         extension = "";
       }
