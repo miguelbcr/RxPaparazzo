@@ -22,7 +22,10 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -52,23 +55,62 @@ public final class SaveFile extends UseCase<FileData> {
     return this;
   }
 
-  @Override public Observable<FileData> react() {
+  @Override
+  public Observable<FileData> react() {
     return getDimens.with(fileData).react().flatMap(new Function<int[], ObservableSource<FileData>>() {
       @Override
       public ObservableSource<FileData> apply(int[] dimens) throws Exception {
-        FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
-
-        // remove source file - assumes it is a temporary file which is no longer needed
-        File source = fileData.getFile();
-        source.delete();
-
-        if (config.isSendToMediaScanner()) {
-          sendToMediaScanner();
-        }
-
-        return Observable.just(scaled);
+        return saveAndSendToMediaScanner(dimens);
       }
     });
+  }
+
+  private ObservableSource<FileData> saveAndSendToMediaScanner(int[] dimens) throws Exception {
+    ObservableSource<FileData> saved = save(dimens);
+
+    if (config.isSendToMediaScanner()) {
+      sendToMediaScanner();
+    }
+
+    return saved;
+  }
+
+  private ObservableSource<FileData> save(int[] dimens) throws Exception {
+    if (imageUtils.isImage(fileData.getFile())) {
+      return saveImage(fileData, dimens);
+    } else {
+      return saveFile(fileData);
+    }
+  }
+
+  private ObservableSource<FileData> saveFile(FileData fileData) throws Exception {
+    File source = fileData.getFile();
+
+    InputStream inputStream = new BufferedInputStream(new FileInputStream(source));
+    File destination = getOutputFile();
+    imageUtils.copy(inputStream, destination);
+
+    deleteTemporaryFile(fileData);
+
+    FileData copied = new FileData(fileData, destination, fileData.getMimeType());
+
+    return Observable.just(copied);
+  }
+
+  private ObservableSource<FileData> saveImage(FileData fileData, int[] dimens) {
+    FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
+
+    deleteTemporaryFile(fileData);
+
+    return Observable.just(scaled);
+  }
+
+  private void deleteTemporaryFile(FileData fileData) {
+    // remove source file - assumes it is a temporary file which is no longer needed
+    File source = fileData.getFile();
+
+    // TODO: catch exception?
+    source.delete();
   }
 
   private void sendToMediaScanner() {
