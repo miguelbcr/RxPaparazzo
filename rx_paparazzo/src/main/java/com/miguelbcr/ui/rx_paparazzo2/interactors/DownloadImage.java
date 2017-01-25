@@ -24,6 +24,7 @@ import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
@@ -50,16 +51,18 @@ public final class DownloadImage extends UseCase<String> {
   private Observable<String> getObservableDownloadFile() {
     return Observable.create(new ObservableOnSubscribe<String>() {
       @Override public void subscribe(ObservableEmitter<String> subscriber) throws Exception {
-        try {
-          if ("content".equalsIgnoreCase(uri.getScheme())) {
-            subscriber.onNext(getContent());
-          } else {
-            subscriber.onNext(downloadFile());
-          }
+        if (!subscriber.isDisposed()) {
+          try {
+            if ("content".equalsIgnoreCase(uri.getScheme())) {
+              subscriber.onNext(getContent());
+            } else {
+              subscriber.onNext(downloadFile());
+            }
 
-          subscriber.onComplete();
-        } catch (Exception e) {
-          subscriber.onError(e);
+            subscriber.onComplete();
+          } catch (FileNotFoundException e) {
+            subscriber.onError(e);
+          }
         }
       }
     }).subscribeOn(Schedulers.io());
@@ -77,7 +80,7 @@ public final class DownloadImage extends UseCase<String> {
     return file.getAbsolutePath();
   }
 
-  private String getContent() throws Exception {
+  private String getContent() throws FileNotFoundException {
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     String filename = getFilename(uri);
     filename += imageUtils.getFileExtension(uri);

@@ -20,7 +20,11 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.text.TextUtils;
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
+import io.reactivex.exceptions.Exceptions;
+import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 import java.io.File;
@@ -66,7 +70,8 @@ public final class PickImage extends UseCase<Uri> {
                   intent.setData(Uri.fromFile(new File(filePath)));
                   return filePath;
                 }
-              });
+              })
+              .onErrorReturnItem("");
         } else {
           return Observable.just("");
         }
