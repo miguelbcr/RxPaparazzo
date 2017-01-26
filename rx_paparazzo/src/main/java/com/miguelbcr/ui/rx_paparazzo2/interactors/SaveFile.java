@@ -92,7 +92,7 @@ public final class SaveFile extends UseCase<FileData> {
 
     deleteTemporaryFile(fileData);
 
-    FileData copied = new FileData(fileData, destination, fileData.getMimeType());
+    FileData copied = FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
 
     return Observable.just(copied);
   }

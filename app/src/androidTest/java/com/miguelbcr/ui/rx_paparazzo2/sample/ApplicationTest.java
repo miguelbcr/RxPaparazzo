@@ -215,7 +215,7 @@ public class ApplicationTest {
                 String fileName = filePath.substring(filePath.lastIndexOf("/") + 1);
                 String mimeType = ImageUtils.getMimeType(filePath);
 
-                FileData fileData = new FileData(file, fileName, mimeType);
+                FileData fileData = new FileData(file, true, fileName, mimeType);
 
                 getDimens(size).with(fileData).react()
                         .subscribe(dimens -> {

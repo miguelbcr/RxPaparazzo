@@ -88,8 +88,8 @@ public final class DownloadFile extends UseCase<FileData> {
   private FileData downloadFile() throws Exception {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
     String filename = getFilename(uri);
-    String directory = config.getFileProviderDirectory();
-    File file = imageUtils.getPrivateFile(directory, filename);
+    String fileExtension = imageUtils.getFileExtension(uri);
+    File file = imageUtils.getOutputFile(DOWNLOADED_FILENAME_PREFIX, fileExtension);
 
     URL url = new URL(uri.toString());
     URLConnection connection = url.openConnection();
@@ -102,7 +102,7 @@ public final class DownloadFile extends UseCase<FileData> {
 
   private FileData toFileData(String mimeType, String filename, File destination) {
     if (fileData == null || fileData.getFilename() == null) {
-      return new FileData(destination, filename, mimeType);
+      return new FileData(destination, true, filename, mimeType);
     } else {
       // maintain existing filename and mime-type unless missing
       String fileMimeType = fileData.getMimeType();
@@ -110,16 +110,15 @@ public final class DownloadFile extends UseCase<FileData> {
         fileMimeType = mimeType;
       }
 
-      return new FileData(fileData, destination, fileMimeType);
+      return FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileMimeType);
     }
   }
 
   private FileData getUsingContentResolver() throws FileNotFoundException {
     String mimeType = imageUtils.getMimeType(targetUi.getContext(), uri);
     String uriFilename = getFilename(uri);
-    String downloadFilename = DOWNLOADED_FILENAME_PREFIX + uriFilename;
-    String directory = config.getFileProviderDirectory();
-    File file = imageUtils.getPrivateFile(directory, downloadFilename);
+    String fileExtension = imageUtils.getFileExtension(uri);
+    File file = imageUtils.getOutputFile(DOWNLOADED_FILENAME_PREFIX, fileExtension);
 
     InputStream inputStream = targetUi.getContext().getContentResolver().openInputStream(uri);
     imageUtils.copy(inputStream, file);

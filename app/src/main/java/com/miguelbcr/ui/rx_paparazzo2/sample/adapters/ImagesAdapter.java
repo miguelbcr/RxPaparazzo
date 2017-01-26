@@ -48,7 +48,7 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
         }
 
         void bind(FileData fileData) {
-            filenameView.setText(fileData.toString());
+            filenameView.setText(fileData.describe());
             Picasso.with(imageView.getContext())
                     .load(fileData.getFile())
                     .error(R.drawable.ic_description_black_48px)

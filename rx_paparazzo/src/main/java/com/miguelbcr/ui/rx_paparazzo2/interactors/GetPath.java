@@ -106,21 +106,25 @@ public final class GetPath extends UseCase<FileData> {
         return getMediaDocument(context);
       }
     } else if (URI_SCHEME_CONTENT.equalsIgnoreCase(uri.getScheme())) {
-      if (!isRxPaparazzoFileProvider()) {
+      if (!isFileProvider()) {
         return getDataColumn(context, uri, null, null);
       }
     } else if (URI_SCHEME_FILE.equalsIgnoreCase(uri.getScheme())) {
-      File file = new File(uri.getPath());
-      String fileName = ImageUtils.getFileName(uri.getPath());
-      String mimeType = ImageUtils.getMimeType(targetUi.getContext(), uri);
-
-      return new FileData(file, fileName, mimeType);
+      return getFile();
     }
 
     return null;
   }
 
-  private boolean isRxPaparazzoFileProvider() {
+  private FileData getFile() {
+    File file = new File(uri.getPath());
+    String fileName = ImageUtils.getFileName(uri.getPath());
+    String mimeType = ImageUtils.getMimeType(targetUi.getContext(), uri);
+
+    return new FileData(file, false, fileName, mimeType);
+  }
+
+  private boolean isFileProvider() {
     Context context = targetUi.getContext();
     String authority = config.getFileProviderAuthority(context);
 
@@ -128,11 +132,12 @@ public final class GetPath extends UseCase<FileData> {
   }
 
   private FileData getPrimaryExternalDocument(Document document) {
-    String filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
     String mimeType = ImageUtils.getMimeType(document.id);
     String fileName = ImageUtils.stripPathFromFilename(document.id);
+    String filePath = Environment.getExternalStorageDirectory() + "/" + document.id;
+    File file = new File(filePath);
 
-    return new FileData(new File(filePath), fileName, mimeType);
+    return new FileData(file, false, fileName, mimeType);
   }
 
   private FileData getDownloadsDocument(Context context) {
@@ -183,19 +188,19 @@ public final class GetPath extends UseCase<FileData> {
     try {
       cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
       if (cursor.moveToFirst()) {
-        String fileData = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
+        String filePath = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
         String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
         String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));
         String title = cursor.getString(cursor.getColumnIndexOrThrow(titleColumn));
 
         File file;
-        if (fileData != null) {
-          file = new File(fileData);
+        if (filePath != null) {
+          file = new File(filePath);
         } else {
           file = null;
         }
 
-        return new FileData(file, fileName, mimeType, title);
+        return new FileData(file, false, fileName, mimeType, title);
       } else {
         return null;
       }

@@ -241,7 +241,7 @@ public final class ImageUtils {
       }
     }
 
-    return new FileData(inputData, destination, mimeType);
+    return FileData.toFileDataDeleteSourceFileIfTransient(inputData, destination, true, mimeType);
   }
 
   private Bitmap.CompressFormat getCompressFormat(String filePath) {

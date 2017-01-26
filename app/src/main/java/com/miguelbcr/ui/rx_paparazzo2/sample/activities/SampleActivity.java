@@ -217,7 +217,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         recyclerView.setAdapter(null);
 
         filenameView.setVisibility(View.VISIBLE);
-        filenameView.setText(fileData.toString());
+        filenameView.setText(fileData.describe());
 
         Picasso.with(getApplicationContext()).setLoggingEnabled(true);
         Picasso.with(getApplicationContext()).invalidate(fileData.getFile());

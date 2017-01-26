@@ -96,7 +96,7 @@ public final class Camera extends Worker {
                 return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
                   @Override
                   public ObservableSource<FileData> apply(FileData cropped) throws Exception {
-                    FileData destination = new FileData(sourceFileData, cropped.getFile(), cropped.getMimeType());
+                    FileData destination = FileData.toFileDataDeleteSourceFileIfTransient(sourceFileData, cropped.getFile(), cropped.isTransientFile(), cropped.getMimeType());
 
                     return saveFile.with(destination).react();
                   }
