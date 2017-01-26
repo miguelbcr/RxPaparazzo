@@ -68,21 +68,21 @@ public final class ImageUtils {
     String dirname = getApplicationName(targetUi.getContext());
     File dir = getDir(null, dirname);
 
-    return createNewFile(dir, prefix, extension);
+    return createTimestampedFile(dir, prefix, extension);
   }
 
-  private File createNewFile(File dir, String prefix, String extension) {
-    File file = new File(dir.getAbsolutePath(), createDefaultFilename(prefix, extension));
+  private File createTimestampedFile(File dir, String prefix, String extension) {
+    File file = new File(dir.getAbsolutePath(), createTimestampedFilename(prefix, extension));
 
     while (file.exists()) {
-      String filename = createDefaultFilename(prefix, extension);
+      String filename = createTimestampedFilename(prefix, extension);
       file = new File(dir.getAbsolutePath(), filename);
     }
 
     return file;
   }
 
-  public String createDefaultFilename(String prefix, String extension) {
+  public String createTimestampedFilename(String prefix, String extension) {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
     String datetime = simpleDateFormat.format(new Date());
 

@@ -65,7 +65,7 @@ public final class TakePhoto extends UseCase<Uri> {
   }
 
   private Uri getUri() {
-    String filename = imageUtils.createDefaultFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
+    String filename = imageUtils.createTimestampedFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
     String directory = config.getFileProviderDirectory();
     File file = imageUtils.getPrivateFile(directory, filename);
 
