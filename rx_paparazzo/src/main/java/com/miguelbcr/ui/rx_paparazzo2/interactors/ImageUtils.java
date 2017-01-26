@@ -82,7 +82,7 @@ public final class ImageUtils {
     return file;
   }
 
-  public static String createDefaultFilename(String prefix, String extension) {
+  public String createDefaultFilename(String prefix, String extension) {
     SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
     String datetime = simpleDateFormat.format(new Date());
 

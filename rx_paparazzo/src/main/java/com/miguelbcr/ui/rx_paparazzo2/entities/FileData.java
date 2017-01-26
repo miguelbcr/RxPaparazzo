@@ -24,13 +24,15 @@ public class FileData implements Serializable {
     }
 
     public static void deleteSourceFile(FileData fileData) {
-        File file = fileData.getFile();
-        if (file != null && file.exists()) {
-            try {
-                Log.i(FileData.class.getSimpleName(), String.format("Removing source file '%s'", file.getAbsolutePath()));
-                file.delete();
-            } catch (Exception e) {
-                Log.i(FileData.class.getSimpleName(), String.format("Could not remove source file '%s'", file.getAbsolutePath()), e);
+        if (fileData.isTransientFile()) {
+            File file = fileData.getFile();
+            if (file != null && file.exists()) {
+                try {
+                    Log.i(FileData.class.getSimpleName(), String.format("Removing source file '%s'", file.getAbsolutePath()));
+                    file.delete();
+                } catch (Exception e) {
+                    Log.i(FileData.class.getSimpleName(), String.format("Could not remove source file '%s'", file.getAbsolutePath()), e);
+                }
             }
         }
     }

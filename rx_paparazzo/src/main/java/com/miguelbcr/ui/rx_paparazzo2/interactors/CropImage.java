@@ -32,8 +32,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public final class CropImage extends UseCase<FileData> {
-  private static final String CROP_APPEND = "cropped.";
-  private static final String NO_CROP_APPEND = "no_cropped.";
+  private static final String CROP_APPEND = "CROPPED-";
 
   private final Config config;
   private final GetPath getPath;
@@ -152,11 +151,11 @@ public final class CropImage extends UseCase<FileData> {
   private Uri getOutputUriCrop() {
     String destination = fileData.getFile().getAbsolutePath();
     String extension = imageUtils.getFileExtension(destination, ImageUtils.JPG_FILE_EXTENSION);
-    String filename = CROP_APPEND + extension;
     String directory = config.getFileProviderDirectory();
-    File file = imageUtils.getPrivateFile(directory, filename);
+    String outputFilename = imageUtils.createDefaultFilename(CROP_APPEND, extension);
+    File outputFile = imageUtils.getPrivateFile(directory, outputFilename);
 
-    return Uri.fromFile(file);
+    return Uri.fromFile(outputFile);
   }
 
 }
