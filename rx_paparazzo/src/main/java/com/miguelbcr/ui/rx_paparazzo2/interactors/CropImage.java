@@ -31,19 +31,21 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
-public final class CropImage extends UseCase<Uri> {
+public final class CropImage extends UseCase<FileData> {
   private static final String CROP_APPEND = "cropped.";
   private static final String NO_CROP_APPEND = "no_cropped.";
 
   private final Config config;
+  private final GetPath getPath;
   private final StartIntent startIntent;
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private FileData fileData;
 
-  public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, ImageUtils imageUtils) {
+  public CropImage(TargetUi targetUi, Config config, GetPath getPath, StartIntent startIntent, ImageUtils imageUtils) {
     this.targetUi = targetUi;
     this.config = config;
+    this.getPath = getPath;
     this.startIntent = startIntent;
     this.imageUtils = imageUtils;
   }
@@ -54,7 +56,7 @@ public final class CropImage extends UseCase<Uri> {
   }
 
   @Override
-  public Observable<Uri> react() {
+  public Observable<FileData> react() {
     if (config.isDoCrop()) {
 
       // bypass cropping if not image
@@ -62,30 +64,45 @@ public final class CropImage extends UseCase<Uri> {
         if (config.isFailCropIfNotImage()) {
           throw new IllegalArgumentException("Expected an image file, cannot perform image crop");
         } else {
-          return Observable.just(getOutputUriNoCrop());
+          return Observable.just(fileData);
         }
       }
 
       return cropImage();
     }
 
-    return Observable.just(getOutputUriNoCrop());
+    return Observable.just(fileData);
   }
 
-  private Observable<Uri> cropImage() {
+  private Observable<FileData> cropImage() {
     Observable<Intent> intent = Observable.just(getIntent());
 
-    return intent.flatMap(new Function<Intent, ObservableSource<Uri>>() {
+    return intent.flatMap(new Function<Intent, ObservableSource<FileData>>() {
       @Override
-      public ObservableSource<Uri> apply(Intent intent) throws Exception {
+      public ObservableSource<FileData> apply(Intent intent) throws Exception {
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
 
-        return startIntent.with(intent).react().map(new Function<Intent, Uri>() {
-          @Override
-          public Uri apply(Intent intentResult) throws Exception {
-            return UCrop.getOutput(intentResult);
-          }
-        });
+        return startIntent.with(intent).react()
+          .map(new Function<Intent, Uri>() {
+            @Override
+            public Uri apply(Intent intentResult) throws Exception {
+              return UCrop.getOutput(intentResult);
+            }
+          })
+          .flatMap(new Function<Uri, ObservableSource<FileData>>() {
+            @Override
+            public ObservableSource<FileData> apply(Uri uri) throws Exception {
+              return getPath.with(uri).react();
+            }
+          })
+          .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+            @Override
+            public ObservableSource<FileData> apply(FileData cropped) throws Exception {
+              FileData result = FileData.toFileDataDeleteSourceFileIfTransient(fileData, cropped.getFile(), true, cropped.getMimeType());
+
+              return Observable.just(result);
+            }
+          });
       }
     });
   }
@@ -142,16 +159,4 @@ public final class CropImage extends UseCase<Uri> {
     return Uri.fromFile(file);
   }
 
-  private Uri getOutputUriNoCrop() {
-    String destination = fileData.getFile().getAbsolutePath();
-    String extension = imageUtils.getFileExtension(destination);
-    String filename = NO_CROP_APPEND + extension;
-    String directory = config.getFileProviderDirectory();
-    File file = imageUtils.getPrivateFile(directory, filename);
-    File source = new File(destination);
-
-    imageUtils.copy(source, file);
-
-    return Uri.fromFile(file);
-  }
 }

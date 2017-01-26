@@ -77,40 +77,31 @@ public final class SaveFile extends UseCase<FileData> {
 
   private ObservableSource<FileData> save(int[] dimens) throws Exception {
     if (imageUtils.isImage(fileData.getFile())) {
-      return saveImage(fileData, dimens);
+      return saveImageAndDeleteSourceFile(fileData, dimens);
     } else {
-      return saveFile(fileData);
+      return saveToDestinationAndDeleteSourceFile(fileData);
     }
   }
 
-  private ObservableSource<FileData> saveFile(FileData fileData) throws Exception {
+  private ObservableSource<FileData> saveToDestinationAndDeleteSourceFile(FileData fileData) throws Exception {
+    // TODO: if transient can we just move the file instead?
     File source = fileData.getFile();
 
     InputStream inputStream = new BufferedInputStream(new FileInputStream(source));
     File destination = getOutputFile();
     imageUtils.copy(inputStream, destination);
 
-    deleteTemporaryFile(fileData);
-
     FileData copied = FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
 
     return Observable.just(copied);
   }
 
-  private ObservableSource<FileData> saveImage(FileData fileData, int[] dimens) {
+  private ObservableSource<FileData> saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
     FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
 
-    deleteTemporaryFile(fileData);
+    FileData.deleteSourceFile(fileData);
 
     return Observable.just(scaled);
-  }
-
-  private void deleteTemporaryFile(FileData fileData) {
-    // remove source file - assumes it is a temporary file which is no longer needed
-    File source = fileData.getFile();
-
-    // TODO: catch exception?
-    source.delete();
   }
 
   private void sendToMediaScanner() {

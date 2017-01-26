@@ -102,18 +102,11 @@ public final class Files extends Worker {
 
   private Observable<FileData> handleSavingFile(final FileData sourceFileData) {
     return cropImage.with(sourceFileData).react()
-            .flatMap(new Function<Uri, ObservableSource<FileData>>() {
-              @Override
-              public ObservableSource<FileData> apply(Uri uri) throws Exception {
-                return getPath.with(uri).react().flatMap(new Function<FileData, ObservableSource<FileData>>() {
+            .flatMap(new Function<FileData, ObservableSource<FileData>>() {
                   @Override
                   public ObservableSource<FileData> apply(FileData cropped) throws Exception {
-                    FileData destination = FileData.toFileDataDeleteSourceFileIfTransient(sourceFileData, cropped.getFile(), cropped.isTransientFile(), cropped.getMimeType());
-
-                    return saveFile.with(destination).react();
+                    return saveFile.with(cropped).react();
                   }
-                });
-              }
             });
   }
 

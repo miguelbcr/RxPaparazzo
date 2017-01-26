@@ -18,20 +18,24 @@ public class FileData implements Serializable {
     private boolean transientFile;
 
     public static FileData toFileDataDeleteSourceFileIfTransient(FileData source, File file, boolean transientFile, String mimeType) {
-        File sourceFile = source.getFile();
-        if (sourceFile != null && sourceFile.exists()) {
-            try {
-                Log.i(FileData.class.getSimpleName(), String.format("Removing source file '%s'", file.getAbsolutePath()));
-                sourceFile.delete();
-            } catch (Exception e) {
-                Log.i(FileData.class.getSimpleName(), String.format("Could not remove source file '%s'", file.getAbsolutePath()), e);
-            }
-        }
+        deleteSourceFile(source);
 
         return new FileData(source, file, transientFile, mimeType);
     }
 
-    private FileData(FileData source, File file, boolean transientFile, String mimeType) {
+    public static void deleteSourceFile(FileData fileData) {
+        File file = fileData.getFile();
+        if (file != null && file.exists()) {
+            try {
+                Log.i(FileData.class.getSimpleName(), String.format("Removing source file '%s'", file.getAbsolutePath()));
+                file.delete();
+            } catch (Exception e) {
+                Log.i(FileData.class.getSimpleName(), String.format("Could not remove source file '%s'", file.getAbsolutePath()), e);
+            }
+        }
+    }
+
+    public FileData(FileData source, File file, boolean transientFile, String mimeType) {
         this(file, transientFile, source.getFilename(), mimeType, source.getTitle());
     }
 
