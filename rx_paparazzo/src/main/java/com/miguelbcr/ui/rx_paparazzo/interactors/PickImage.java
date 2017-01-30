@@ -20,10 +20,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+
 import java.io.File;
+
 import rx.Observable;
-import rx.exceptions.Exceptions;
-import rx.functions.Action1;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 import rx_activity_result.OnPreResult;
@@ -59,7 +59,8 @@ public final class PickImage extends UseCase<Uri> {
     return new OnPreResult() {
       @Override
       public Observable<String> response(int responseCode, @Nullable final Intent intent) {
-        if (responseCode == Activity.RESULT_OK) {
+        final boolean dataExists = intent != null && intent.getData() != null;
+        if (responseCode == Activity.RESULT_OK && dataExists) {
           return getPath.with(intent.getData())
               .react()
               .subscribeOn(Schedulers.io())
