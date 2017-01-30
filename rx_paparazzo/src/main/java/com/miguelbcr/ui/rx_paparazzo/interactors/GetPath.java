@@ -52,6 +52,10 @@ public final class GetPath extends UseCase<String> {
     Context context = targetUi.activity();
     String filePath = null;
 
+    if (context == null) {
+      return Observable.just("");
+    }
+
     if (uri == null) {
       return null;
     }
