@@ -24,6 +24,12 @@ public class PermissionUtil {
         return intent;
     }
 
+    public static void grantReadPermissionToUri(TargetUi targetUi, Uri uri) {
+        String uiPackageName = targetUi.getContext().getPackageName();
+
+        targetUi.getContext().grantUriPermission(uiPackageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+    }
+
     /**
      * Workaround for Android bug.<br/>
      * See https://code.google.com/p/android/issues/detail?id=76683 <br/>

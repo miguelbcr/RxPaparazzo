@@ -36,6 +36,7 @@ public class Config {
 
   private String pickMimeType;
   private boolean pickOpenableOnly;
+  private boolean useDocumentPicker;
   private boolean sendToMediaScanner;
 
   private String fileProviderAuthority;
@@ -45,6 +46,7 @@ public class Config {
     this.size = new ScreenSize();
     this.doCrop = false;
     this.useInternalStorage = false;
+    this.useDocumentPicker = false;
     this.pickOpenableOnly = false;
     this.pickMimeType = null;
     this.sendToMediaScanner = false;
@@ -81,6 +83,14 @@ public class Config {
 
   public void setUseInternalStorage(boolean useInternalStorage) {
     this.useInternalStorage = useInternalStorage;
+  }
+
+  public void setUseDocumentPicker(boolean useDocumentPicker) {
+    this.useDocumentPicker = useDocumentPicker;
+  }
+
+  public boolean isUseDocumentPicker() {
+    return useDocumentPicker;
   }
 
   public void setPickMimeType(String pickMimeType) {

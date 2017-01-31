@@ -22,6 +22,7 @@ import android.net.Uri;
 import android.os.Build;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -34,10 +35,12 @@ public class PickFiles extends UseCase<List<Uri>> {
 
   public static final String DEFAULT_MIME_TYPE = "*/*";
 
+  private final TargetUi targetUi;
   private final Config config;
   private final StartIntent startIntent;
 
-  public PickFiles(Config config, StartIntent startIntent) {
+  public PickFiles(TargetUi targetUi, Config config, StartIntent startIntent) {
+    this.targetUi = targetUi;
     this.config = config;
     this.startIntent = startIntent;
   }
@@ -68,6 +71,9 @@ public class PickFiles extends UseCase<List<Uri>> {
       for (int i = 0; i < clipData.getItemCount(); i++) {
         ClipData.Item item = clipData.getItemAt(i);
         Uri uri = item.getUri();
+
+        PermissionUtil.grantReadPermissionToUri(targetUi, uri);
+
         uris.add(uri);
       }
     }
@@ -80,7 +86,7 @@ public class PickFiles extends UseCase<List<Uri>> {
     Intent intent = new Intent();
     intent.setType(mimeType);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+    if (config.isUseDocumentPicker() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
       intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
     } else {
       intent.setAction(Intent.ACTION_GET_CONTENT);

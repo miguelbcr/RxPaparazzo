@@ -159,9 +159,17 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Send result to media scanner
+     * Do not send result to media scanner
      */
     public B doNotSendToMediaScanner() {
+      this.config.setSendToMediaScanner(false);
+      return self;
+    }
+
+    /**
+     * Use Android Storage Access Framework document picker
+     */
+    public B useDocumentPicker() {
       this.config.setSendToMediaScanner(false);
       return self;
     }

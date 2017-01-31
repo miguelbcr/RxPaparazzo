@@ -23,13 +23,10 @@ import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
-import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
-
-import java.io.File;
+import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import io.reactivex.schedulers.Schedulers;
 import rx_activity_result2.OnPreResult;
 
 public class PickFile extends UseCase<Uri> {
@@ -38,8 +35,10 @@ public class PickFile extends UseCase<Uri> {
 
   private final Config config;
   private final StartIntent startIntent;
+  private final TargetUi targetUi;
 
-  public PickFile(Config config, StartIntent startIntent) {
+  public PickFile(TargetUi targetUi, Config config, StartIntent startIntent) {
+    this.targetUi = targetUi;
     this.config = config;
     this.startIntent = startIntent;
   }
@@ -64,7 +63,7 @@ public class PickFile extends UseCase<Uri> {
     Intent intent = new Intent();
     intent.setType(mimeType);
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+    if (config.isUseDocumentPicker() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
       intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
     } else {
       intent.setAction(Intent.ACTION_GET_CONTENT);
@@ -82,7 +81,9 @@ public class PickFile extends UseCase<Uri> {
       @Override
       public Observable<Uri> response(int responseCode, @Nullable final Intent intent) {
         if (responseCode == Activity.RESULT_OK) {
-          intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
+
+          Uri pickedUri = intent.getData();
+          PermissionUtil.grantReadPermissionToUri(targetUi, pickedUri);
 
           return Observable.just(intent.getData());
         } else {
