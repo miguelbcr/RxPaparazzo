@@ -66,16 +66,16 @@ public final class SaveFile extends UseCase<FileData> {
   }
 
   private ObservableSource<FileData> saveAndSendToMediaScanner(int[] dimens) throws Exception {
-    ObservableSource<FileData> saved = save(dimens);
+    FileData saved = save(dimens);
 
     if (config.isSendToMediaScanner()) {
-      sendToMediaScanner();
+      sendToMediaScanner(saved);
     }
 
-    return saved;
+    return Observable.just(saved);
   }
 
-  private ObservableSource<FileData> save(int[] dimens) throws Exception {
+  private FileData save(int[] dimens) throws Exception {
     if (imageUtils.isImage(fileData.getFile())) {
       return saveImageAndDeleteSourceFile(fileData, dimens);
     } else {
@@ -83,8 +83,7 @@ public final class SaveFile extends UseCase<FileData> {
     }
   }
 
-  private ObservableSource<FileData> saveToDestinationAndDeleteSourceFile(FileData fileData) throws Exception {
-    // TODO: if transient can we just move the file instead?
+  private FileData saveToDestinationAndDeleteSourceFile(FileData fileData) throws Exception {
     File source = fileData.getFile();
 
     InputStream inputStream = new BufferedInputStream(new FileInputStream(source));
@@ -93,22 +92,24 @@ public final class SaveFile extends UseCase<FileData> {
 
     FileData copied = FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
 
-    return Observable.just(copied);
+    return copied;
   }
 
-  private ObservableSource<FileData> saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
+  private FileData saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
     FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
 
     FileData.deleteSourceFile(fileData);
 
-    return Observable.just(scaled);
+    return scaled;
   }
 
-  private void sendToMediaScanner() {
-    String[] mimeTypes = { fileData.getMimeType() };
-    String[] files = { fileData.getFile().getAbsolutePath() };
+  private void sendToMediaScanner(FileData fileDataToScan) {
+    if (fileDataToScan.getFile().exists()) {
+      String[] mimeTypes = {fileDataToScan.getMimeType()};
+      String[] files = {fileDataToScan.getFile().getAbsolutePath()};
 
-    MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
+      MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
+    }
   }
 
   private File getOutputFile() {
