@@ -208,6 +208,10 @@ RxPaparazzo.takeImage(activityOrFragment)
     long consumerNode;
 }
 ```
+## Testing
+
+Testing has been done using GenyMotion - Nexus 5
+
 
 ## Credits
 * Runtime permissions: [RxPermissions](https://github.com/tbruyelle/RxPermissions)

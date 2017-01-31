@@ -42,7 +42,9 @@ import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
 import static android.support.test.espresso.assertion.ViewAssertions.matches;
 import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static android.support.test.espresso.matcher.ViewMatchers.withParent;
 import static com.miguelbcr.ui.rx_paparazzo2.sample.recyclerview.RecyclerViewUtils.withRecyclerView;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.core.CombinableMatcher.both;
@@ -59,7 +61,9 @@ import static org.junit.Assert.assertThat;
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ApplicationTest {
-    @Rule public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
+    @Rule
+    public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
+
     private UiDevice uiDevice;
     private int[] imageDimens = {0, 0};
 
@@ -142,7 +146,7 @@ public class ApplicationTest {
             clickTopRightScreen();
         }
 
-        onView(withId(R.id.iv_image)).check(matches(getImageViewMatcher()));
+        onView(withId(R.id.iv_image)).check(matches(getIsImageViewMatcher()));
 
         checkDimensions();
     }
@@ -170,21 +174,22 @@ public class ApplicationTest {
 
         waitTime();
 
-        if (onlyOne) onView(withId(R.id.iv_image)).check(matches(getImageViewMatcher()));
+        if (onlyOne) onView(withId(R.id.iv_image)).check(matches(getIsImageViewMatcher()));
         else {
             for (int i = 0; i < imagesToPick; i++) {
                 onView(withId(R.id.rv_images)).perform(RecyclerViewActions.scrollToPosition(i));
 
-                onView(withRecyclerView(R.id.rv_images)
-                        .atPositionOnView(i, R.id.iv_image))
-                        .check(matches(getImageViewMatcher()));
+                waitTime();
+
+                Matcher<View> itemAtPosition = withRecyclerView(R.id.rv_images).atPositionOnView(i, R.id.iv_image);
+                onView(itemAtPosition).check(matches(getIsImageViewMatcher()));
 
                 checkDimensions();
             }
         }
     }
 
-    private Matcher getImageViewMatcher() {
+    private Matcher<View> getIsImageViewMatcher() {
         return new BoundedMatcher<View, ImageView>(ImageView.class) {
             @Override
             public void describeTo(Description description) {
@@ -315,8 +320,9 @@ public class ApplicationTest {
 
             if (imagesToPick == 1) uiDevice.click(x, y);
             else uiDevice.swipe(x, y, x, y, 500);
+
+            waitTime();
         }
-        waitTime();
     }
 
     private int[] getScreenDimensions() {

@@ -96,8 +96,9 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     private void captureImage() {
-        Observable<Response<SampleFragment, FileData>> takeOnePhoto = RxPaparazzo.single(this)
-                .size(new SmallSize())
+        SmallSize size = new SmallSize();
+
+        Observable<Response<SampleFragment, FileData>> takeOnePhoto = pickSingle(null, size)
                 .usingCamera();
 
         processSingle(takeOnePhoto);
@@ -109,9 +110,9 @@ public class SampleFragment extends Fragment implements Testable {
         options.setToolbarTitle("Cropping single photo");
         options.withAspectRatio(25, 75);
 
-        Observable<Response<SampleFragment, FileData>> takePhotoAndCrop = RxPaparazzo.single(this)
-                .size(new OriginalSize())
-                .crop(options)
+        OriginalSize size = new OriginalSize();
+
+        Observable<Response<SampleFragment, FileData>> takePhotoAndCrop = pickSingle(options, size)
                 .usingCamera();
 
         processSingle(takePhotoAndCrop);
@@ -172,10 +173,16 @@ public class SampleFragment extends Fragment implements Testable {
     private RxPaparazzo.SingleSelectionBuilder<SampleFragment> pickSingle(UCrop.Options options, Size size) {
         this.size = size;
 
-        return RxPaparazzo.single(this)
+        RxPaparazzo.SingleSelectionBuilder<SampleFragment> resized = RxPaparazzo.single(this)
                 .useInternalStorage()
-                .crop(options)
+                .sendToMediaScanner()
                 .size(size);
+
+        if (options != null) {
+            resized.crop(options);
+        }
+
+        return resized;
     }
 
     private Disposable processMultiple(Observable<Response<SampleFragment, List<FileData>>> pickMultiple) {
@@ -201,6 +208,7 @@ public class SampleFragment extends Fragment implements Testable {
 
         return RxPaparazzo.multiple(this)
                 .useInternalStorage()
+                .sendToMediaScanner()
                 .crop()
                 .size(size);
     }

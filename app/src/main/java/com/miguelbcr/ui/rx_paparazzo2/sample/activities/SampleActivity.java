@@ -98,8 +98,9 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void captureImage() {
-        Observable<Response<SampleActivity, FileData>> takeOnePhoto = RxPaparazzo.single(SampleActivity.this)
-                .size(new CustomMaxSize(512))
+        CustomMaxSize size = new CustomMaxSize(512);
+
+        Observable<Response<SampleActivity, FileData>> takeOnePhoto = pickSingle(null, size)
                 .usingCamera();
 
         processSingle(takeOnePhoto);
@@ -110,9 +111,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         options.setToolbarColor(ContextCompat.getColor(SampleActivity.this, R.color.colorAccent));
         options.setToolbarTitle("Cropping single photo");
 
-        Observable<Response<SampleActivity, FileData>> takePhotoAndCrop = RxPaparazzo.single(SampleActivity.this)
-                .size(new OriginalSize())
-                .crop(options)
+        OriginalSize size = new OriginalSize();
+        Observable<Response<SampleActivity, FileData>> takePhotoAndCrop = pickSingle(options, size)
                 .usingCamera();
 
         processSingle(takePhotoAndCrop);
@@ -173,10 +173,16 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private RxPaparazzo.SingleSelectionBuilder<SampleActivity> pickSingle(UCrop.Options options, Size size) {
         this.size = size;
 
-        return RxPaparazzo.single(this)
+        RxPaparazzo.SingleSelectionBuilder<SampleActivity> resized = RxPaparazzo.single(this)
                 .useInternalStorage()
-                .crop(options)
-                .size(size);
+                .size(size)
+                .sendToMediaScanner();
+
+        if (options != null) {
+            resized.crop(options);
+        }
+
+        return resized;
     }
 
     private Disposable processMultiple(Observable<Response<SampleActivity, List<FileData>>> pickMultiple) {
@@ -203,6 +209,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         return RxPaparazzo.multiple(this)
                 .useInternalStorage()
                 .crop()
+                .sendToMediaScanner()
                 .size(size);
     }
 
