@@ -52,6 +52,10 @@ public class PickFiles extends UseCase<List<Uri>> {
   @Override public Observable<List<Uri>> react() {
     return startIntent.with(getFileChooserIntent()).react().map(new Function<Intent, List<Uri>>() {
       @Override public List<Uri> apply(Intent intent) throws Exception {
+        if (intent == null) {
+          return new ArrayList<>();
+        }
+
         intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
 
         if (intent.getData() != null) {
