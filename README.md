@@ -79,7 +79,7 @@ public class SampleApp extends Application {
 }
 ```
 
-You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to you `AndroidManifest.xml` and create a paths xml file in your src/main/res/xml directory.
+You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to your `AndroidManifest.xml` and create a paths xml file in your src/main/res/xml directory.
 
 ```xml
  <provider
@@ -93,6 +93,7 @@ You will need to also add a FileProvider named `android.support.v4.content.FileP
 </provider>
 ```
 
+Example: file_provider_paths.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
@@ -138,7 +139,7 @@ RxPaparazzo.single(activityOrFragment)
         });
 ```
 
-### Calling the file picker to retrieve an file.
+### Calling the file picker to retrieve a file.
 ```java
 RxPaparazzo.single(activityOrFragment)
         .usingFile()
@@ -305,6 +306,11 @@ Testing has been done using the following Genymotion devices:
 
 * <https://es.linkedin.com/in/miguelbcr>
 * <https://github.com/miguelbcr>
+
+**James McIntosh**
+
+* <https://www.linkedin.com/in/james-mcintosh>
+* <https://github.com/jamesmcintosh>
 
 
 ## Another author's libraries using RxJava:

@@ -159,18 +159,10 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Do not send result to media scanner
-     */
-    public B doNotSendToMediaScanner() {
-      this.config.setSendToMediaScanner(false);
-      return self;
-    }
-
-    /**
      * Use Android Storage Access Framework document picker
      */
     public B useDocumentPicker() {
-      this.config.setSendToMediaScanner(false);
+      this.config.setUseDocumentPicker(true);
       return self;
     }
 
@@ -185,7 +177,7 @@ public final class RxPaparazzo {
       super(ui);
     }
 
-    /*
+    /**
      * Use file picker to retrieve only images.
      */
     public Observable<Response<T, FileData>> usingGallery() {
