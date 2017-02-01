@@ -92,10 +92,10 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Sets this to the directory which is use in the {@link android.support.v4.content.FileProvider} xml file
+     * Sets this to the path to use in the {@link android.support.v4.content.FileProvider} xml file
      */
-    public B setFileProviderDirectory(String authority) {
-      this.config.setFileProviderDirectory(authority);
+    public B setFileProviderPath(String authority) {
+      this.config.setFileProviderPath(authority);
       return self;
     }
 

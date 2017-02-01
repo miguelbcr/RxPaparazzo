@@ -24,8 +24,8 @@ import com.yalantis.ucrop.UCrop;
 
 public class Config {
 
-  private static final String DEFAULT_FILE_PROVIDER_DIRECTORY = "RxPaparazzo";
-  private static final String DEFAULT_FILE_PROVIDER = "file_provider";
+  private static final String DEFAULT_FILE_PROVIDER_PATH = "RxPaparazzo";
+  private static final String DEFAULT_FILE_PROVIDER_AUTHORITIES_SUFFIX = "file_provider";
 
   private UCrop.Options options;
 
@@ -139,19 +139,19 @@ public class Config {
 
   public String getFileProviderAuthority(Context context) {
     if (fileProviderAuthority == null) {
-      return context.getPackageName() + "." + DEFAULT_FILE_PROVIDER;
+      return context.getPackageName() + "." + DEFAULT_FILE_PROVIDER_AUTHORITIES_SUFFIX;
     }
 
     return fileProviderAuthority;
   }
 
-  public void setFileProviderDirectory(String fileProviderDirectory) {
+  public void setFileProviderPath(String fileProviderDirectory) {
     this.fileProviderDirectory = fileProviderDirectory;
   }
 
   public String getFileProviderDirectory() {
     if (fileProviderDirectory == null) {
-      return DEFAULT_FILE_PROVIDER_DIRECTORY;
+      return DEFAULT_FILE_PROVIDER_PATH;
     }
 
     return fileProviderDirectory;
