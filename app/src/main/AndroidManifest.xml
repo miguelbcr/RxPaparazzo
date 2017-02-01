@@ -29,7 +29,8 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.SampleActivity"/>
+        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.SampleActivity"
+            android:configChanges="orientation" />
 
         <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.HostActivitySampleFragment"/>
 
