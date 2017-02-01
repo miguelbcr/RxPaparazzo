@@ -78,7 +78,7 @@ public final class GetPath extends UseCase<FileData> {
   private Observable<FileData> getFileData() {
     Context context = targetUi.activity();
 
-    if (uri == null) {
+    if (uri == null || context == null) {
       return null;
     }
 
@@ -106,26 +106,25 @@ public final class GetPath extends UseCase<FileData> {
         return getMediaDocument(context);
       }
     } else if (URI_SCHEME_CONTENT.equalsIgnoreCase(uri.getScheme())) {
-      if (!isFileProvider()) {
+      if (!isFileProvider(context)) {
         return getDataColumn(context, uri, null, null);
       }
     } else if (URI_SCHEME_FILE.equalsIgnoreCase(uri.getScheme())) {
-      return getFile();
+      return getFile(context);
     }
 
     return null;
   }
 
-  private FileData getFile() {
+  private FileData getFile(Context context) {
     File file = new File(uri.getPath());
     String fileName = ImageUtils.getFileName(uri.getPath());
-    String mimeType = ImageUtils.getMimeType(targetUi.getContext(), uri);
+    String mimeType = ImageUtils.getMimeType(context, uri);
 
     return new FileData(file, false, fileName, mimeType);
   }
 
-  private boolean isFileProvider() {
-    Context context = targetUi.getContext();
+  private boolean isFileProvider(Context context) {
     String authority = config.getFileProviderAuthority(context);
 
     return uri.getPath().startsWith(authority);
