@@ -58,8 +58,11 @@ public class PickFiles extends UseCase<List<Uri>> {
 
         intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
 
-        if (intent.getData() != null) {
-          return Arrays.asList(intent.getData());
+        Uri pickedUri = intent.getData();
+        if (pickedUri != null) {
+          PermissionUtil.grantReadPermissionToUri(targetUi, pickedUri);
+
+          return Arrays.asList(pickedUri);
         } else {
           return getUris(intent);
         }
