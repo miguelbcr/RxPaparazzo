@@ -15,31 +15,23 @@ import com.miguelbcr.ui.rx_paparazzo2.workers.Camera;
 import com.miguelbcr.ui.rx_paparazzo2.workers.Files;
 
 class ApplicationComponentImpl extends ApplicationComponent {
-  private final ImageUtils imageUtils;
-  private final DownloadFile downloadFile;
-  private final StartIntent startIntent;
   private final GetPath getPath;
-  private final GetDimens getDimens;
-  private final TakePhoto takePhoto;
-  private final CropImage cropImage;
-  private final SaveFile saveFile;
-  private final GrantPermissions grantPermissions;
   private final Camera camera;
   private final Files files;
 
   public ApplicationComponentImpl(TargetUi ui, Config config) {
-    startIntent = new StartIntent(ui);
-    imageUtils = new ImageUtils(ui, config);
-    downloadFile = new DownloadFile(ui, config, imageUtils);
-    getPath = new GetPath(config, ui, downloadFile);
-    takePhoto = new TakePhoto(config, startIntent, ui, imageUtils);
-    getDimens = new GetDimens(ui, config);
-    cropImage = new CropImage(ui, config, getPath, startIntent, imageUtils);
-    saveFile = new SaveFile(ui, config, getDimens, imageUtils);
-    grantPermissions = new GrantPermissions(ui);
+    StartIntent startIntent = new StartIntent(ui);
+    ImageUtils imageUtils = new ImageUtils(ui, config);
+    DownloadFile downloadFile = new DownloadFile(ui, config, imageUtils);
+    TakePhoto takePhoto = new TakePhoto(config, startIntent, ui, imageUtils);
+    GetDimens getDimens = new GetDimens(ui, config);
+    CropImage cropImage = new CropImage(ui, config, startIntent, imageUtils);
+    SaveFile saveFile = new SaveFile(ui, config, getDimens, imageUtils);
+    GrantPermissions grantPermissions = new GrantPermissions(ui);
 
-    camera = new Camera(takePhoto, getPath, cropImage, saveFile, grantPermissions, ui, config);
-    files = new Files(grantPermissions, startIntent, getPath, cropImage, saveFile, ui, config);
+    this.getPath = new GetPath(config, ui, downloadFile);
+    this.camera = new Camera(takePhoto, cropImage, saveFile, grantPermissions, ui, config);
+    this.files = new Files(grantPermissions, startIntent, this.getPath, cropImage, saveFile, ui, config);
   }
 
   @Override public Camera camera() {

@@ -29,7 +29,9 @@ public class FileData implements Serializable {
             if (file != null && file.exists()) {
                 try {
                     Log.i(FileData.class.getSimpleName(), String.format("Removing source file '%s'", file.getAbsolutePath()));
-                    file.delete();
+                    if (!file.delete()) {
+                        // silently fail delete
+                    }
                 } catch (Exception e) {
                     Log.i(FileData.class.getSimpleName(), String.format("Could not remove source file '%s'", file.getAbsolutePath()), e);
                 }

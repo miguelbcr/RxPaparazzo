@@ -26,6 +26,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.yalantis.ucrop.UCrop;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
@@ -35,16 +36,14 @@ public final class CropImage extends UseCase<FileData> {
   private static final String CROP_APPEND = "CROPPED-";
 
   private final Config config;
-  private final GetPath getPath;
   private final StartIntent startIntent;
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
   private FileData fileData;
 
-  public CropImage(TargetUi targetUi, Config config, GetPath getPath, StartIntent startIntent, ImageUtils imageUtils) {
+  public CropImage(TargetUi targetUi, Config config, StartIntent startIntent, ImageUtils imageUtils) {
     this.targetUi = targetUi;
     this.config = config;
-    this.getPath = getPath;
     this.startIntent = startIntent;
     this.imageUtils = imageUtils;
   }
@@ -74,7 +73,9 @@ public final class CropImage extends UseCase<FileData> {
   }
 
   private Observable<FileData> cropImage() {
-    Observable<Intent> intent = Observable.just(getIntent());
+    final File outputFile = getOutputFile();
+    Uri outputUri = Uri.fromFile(outputFile);
+    Observable<Intent> intent = Observable.just(getIntent(outputUri));
 
     return intent.flatMap(new Function<Intent, ObservableSource<FileData>>() {
       @Override
@@ -91,13 +92,11 @@ public final class CropImage extends UseCase<FileData> {
           .flatMap(new Function<Uri, ObservableSource<FileData>>() {
             @Override
             public ObservableSource<FileData> apply(Uri uri) throws Exception {
-              return getPath.with(uri).react();
-            }
-          })
-          .flatMap(new Function<FileData, ObservableSource<FileData>>() {
-            @Override
-            public ObservableSource<FileData> apply(FileData cropped) throws Exception {
-              FileData result = FileData.toFileDataDeleteSourceFileIfTransient(fileData, cropped.getFile(), true, cropped.getMimeType());
+              if (!outputFile.exists()) {
+                throw new FileNotFoundException(String.format("Cropped file not saved", outputFile.getAbsolutePath()));
+              }
+
+              FileData result = FileData.toFileDataDeleteSourceFileIfTransient(fileData, outputFile, true, ImageUtils.MIME_TYPE_JPEG);
 
               return Observable.just(result);
             }
@@ -112,9 +111,8 @@ public final class CropImage extends UseCase<FileData> {
     return imageUtils.isImage(file);
   }
 
-  private Intent getIntent() {
+  private Intent getIntent(Uri outputUri) {
       Uri inputUri = getInputUri();
-      Uri outputUri = getOutputUriCrop();
 
       UCrop.Options options = config.getOptions();
       if (options == null) {
@@ -148,14 +146,14 @@ public final class CropImage extends UseCase<FileData> {
     return Uri.fromFile(fileData.getFile());
   }
 
-  private Uri getOutputUriCrop() {
+  private File getOutputFile() {
     String destination = fileData.getFile().getAbsolutePath();
     String extension = imageUtils.getFileExtension(destination, ImageUtils.JPG_FILE_EXTENSION);
     String directory = config.getFileProviderDirectory();
     String outputFilename = imageUtils.createTimestampedFilename(CROP_APPEND, extension);
     File outputFile = imageUtils.getPrivateFile(directory, outputFilename);
 
-    return Uri.fromFile(outputFile);
+    return outputFile;
   }
 
 }

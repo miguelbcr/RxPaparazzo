@@ -187,7 +187,7 @@ public final class GetPath extends UseCase<FileData> {
 
     try {
       cursor = context.getContentResolver().query(uri, projection, selection, selectionArgs, null);
-      if (cursor.moveToFirst()) {
+      if (cursor != null && cursor.moveToFirst()) {
         String filePath = cursor.getString(cursor.getColumnIndexOrThrow(dataColumn));
         String fileName = cursor.getString(cursor.getColumnIndexOrThrow(nameColumn));
         String mimeType = cursor.getString(cursor.getColumnIndexOrThrow(mimeTypeColumn));

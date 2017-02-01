@@ -23,14 +23,16 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
 
-public final class TakePhoto extends UseCase<Uri> {
+public final class TakePhoto extends UseCase<FileData> {
   private static final String PHOTO_FILE_PREFIX = "PHOTO-";
 
   private final Config config;
@@ -46,12 +48,23 @@ public final class TakePhoto extends UseCase<Uri> {
   }
 
   @Override
-  public Observable<Uri> react() {
-    Uri uri = getUri();
+  public Observable<FileData> react() {
+    final File file = getOutputFile();
+    Uri uri = getUri(file);
 
     return startIntent.with(getIntentCamera(uri))
             .react()
-            .map(revokeFileReadWritePermissions(targetUi, uri));
+            .map(revokeFileReadWritePermissions(targetUi, uri))
+            .map(new Function<Uri, FileData>() {
+              @Override
+              public FileData apply(Uri uri) throws Exception {
+                if (!file.exists()) {
+                  throw new FileNotFoundException(String.format("Camera file not saved", file.getAbsolutePath()));
+                }
+
+                return new FileData(file, true, file.getName(), ImageUtils.MIME_TYPE_JPEG);
+              }
+            });
   }
 
   private Function<Intent, Uri> revokeFileReadWritePermissions(final TargetUi targetUi, final Uri uri) {
@@ -64,15 +77,17 @@ public final class TakePhoto extends UseCase<Uri> {
     };
   }
 
-  private Uri getUri() {
-    String filename = imageUtils.createTimestampedFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
-    String directory = config.getFileProviderDirectory();
-    File file = imageUtils.getPrivateFile(directory, filename);
-
+  private Uri getUri(File file) {
     Context context = targetUi.getContext();
     String authority = config.getFileProviderAuthority(context);
 
     return FileProvider.getUriForFile(context, authority, file);
+  }
+
+  private File getOutputFile() {
+    String filename = imageUtils.createTimestampedFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
+    String directory = config.getFileProviderDirectory();
+    return imageUtils.getPrivateFile(directory, filename);
   }
 
   private Intent getIntentCamera(Uri uri) {

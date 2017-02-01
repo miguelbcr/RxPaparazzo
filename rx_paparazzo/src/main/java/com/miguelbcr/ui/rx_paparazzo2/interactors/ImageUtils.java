@@ -50,7 +50,7 @@ public final class ImageUtils {
   private static final String PNG_FILE_EXTENSION = "png";
 
   public static final String MIME_TYPE_IMAGE_WILDCARD = "image/*";
-  private static final String MIME_TYPE_JPEG = "image/jpeg";
+  public static final String MIME_TYPE_JPEG = "image/jpeg";
   private static final String MIME_TYPE_PNG = "image/png";
 
   private static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";

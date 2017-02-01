@@ -20,7 +20,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
@@ -28,7 +27,6 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.Ignore;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.PermissionUtil;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
@@ -47,13 +45,11 @@ public final class Camera extends Worker {
   private final GrantPermissions grantPermissions;
   private final TargetUi targetUi;
   private final Config config;
-  private final GetPath getPath;
 
-  public Camera(TakePhoto takePhoto, GetPath getPath, CropImage cropImage, SaveFile saveFile,
+  public Camera(TakePhoto takePhoto, CropImage cropImage, SaveFile saveFile,
       GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
     super(targetUi);
     this.takePhoto = takePhoto;
-    this.getPath = getPath;
     this.cropImage = cropImage;
     this.saveFile = saveFile;
     this.grantPermissions = grantPermissions;
@@ -64,15 +60,9 @@ public final class Camera extends Worker {
   public <T> Observable<Response<T, FileData>> takePhoto() {
     return grantPermissions.with(permissions())
         .react()
-        .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Ignore ignore) throws Exception {
+        .flatMap(new Function<Ignore, ObservableSource<FileData>>() {
+          @Override public ObservableSource<FileData> apply(Ignore ignore) throws Exception {
             return takePhoto.react();
-          }
-        })
-        .flatMap(new Function<Uri, ObservableSource<FileData>>() {
-          @Override
-          public ObservableSource<FileData> apply(final Uri uri) throws Exception {
-            return getPath.with(uri).react();
           }
         })
         .flatMap(new Function<FileData, ObservableSource<FileData>>() {
