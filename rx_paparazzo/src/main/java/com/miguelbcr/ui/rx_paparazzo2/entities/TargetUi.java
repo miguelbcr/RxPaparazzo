@@ -32,7 +32,8 @@ public class TargetUi {
     return fragment() != null ? fragment().getActivity() : (Activity) ui;
   }
 
-  @Nullable public Fragment fragment() {
+  @Nullable
+  public Fragment fragment() {
     if (ui instanceof Fragment) {
       return (Fragment) ui;
     }

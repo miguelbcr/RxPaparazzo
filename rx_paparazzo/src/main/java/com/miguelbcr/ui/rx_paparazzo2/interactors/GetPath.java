@@ -76,7 +76,7 @@ public final class GetPath extends UseCase<FileData> {
 
   @SuppressLint("NewApi")
   private Observable<FileData> getFileData() {
-    Context context = targetUi.activity();
+    Context context = targetUi.getContext();
 
     if (uri == null || context == null) {
       return null;
