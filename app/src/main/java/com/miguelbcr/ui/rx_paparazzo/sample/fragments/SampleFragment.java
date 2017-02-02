@@ -75,6 +75,9 @@ public class SampleFragment extends Fragment implements Testable {
                     if (checkResultCode(response.resultCode())) {
                         response.targetUI().loadImage(response.data());
                     }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -94,6 +97,9 @@ public class SampleFragment extends Fragment implements Testable {
                     if (checkResultCode(response.resultCode())) {
                         response.targetUI().loadImage(response.data());
                     }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -113,6 +119,9 @@ public class SampleFragment extends Fragment implements Testable {
                     if (checkResultCode(response.resultCode())) {
                         response.targetUI().loadImage(response.data());
                     }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
@@ -131,6 +140,9 @@ public class SampleFragment extends Fragment implements Testable {
                             response.targetUI().loadImage(response.data().get(0));
                         else response.targetUI().loadImages(response.data());
                     }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 

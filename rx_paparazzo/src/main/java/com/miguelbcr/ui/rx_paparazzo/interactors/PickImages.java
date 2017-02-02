@@ -20,6 +20,7 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
+import com.miguelbcr.ui.rx_paparazzo.entities.TargetUi;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,19 +28,34 @@ import rx.Observable;
 import rx.functions.Func1;
 
 public final class PickImages extends UseCase<List<Uri>> {
+  private static final int READ_WRITE_PERMISSIONS =
+      Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
   private final StartIntent startIntent;
+  private final GetPath getPath;
+  private TargetUi targetUi;
 
-  public PickImages(StartIntent startIntent) {
+  public PickImages(StartIntent startIntent, GetPath getPath, TargetUi targetUi) {
     this.startIntent = startIntent;
+    this.getPath = getPath;
+    this.targetUi = targetUi;
   }
 
   @Override public Observable<List<Uri>> react() {
     return startIntent.with(getFileChooserIntent()).react().map(new Func1<Intent, List<Uri>>() {
       @Override public List<Uri> call(Intent intent) {
-        if (intent.getData() != null) {
-          return Arrays.asList(intent.getData());
+        if (intent == null) {
+          return new ArrayList<>();
+        }
+
+        intent.addFlags(READ_WRITE_PERMISSIONS);
+
+        Uri pickedUri = intent.getData();
+        if (pickedUri != null) {
+          grantReadPermissionToUri(targetUi, pickedUri);
+
+          return Arrays.asList(pickedUri);
         } else {
-          return PickImages.this.getUris(intent);
+          return getUris(intent);
         }
       }
     });
@@ -53,6 +69,9 @@ public final class PickImages extends UseCase<List<Uri>> {
       for (int i = 0; i < clipData.getItemCount(); i++) {
         ClipData.Item item = clipData.getItemAt(i);
         Uri uri = item.getUri();
+
+        grantReadPermissionToUri(targetUi, uri);
+
         uris.add(uri);
       }
     }
@@ -70,5 +89,12 @@ public final class PickImages extends UseCase<List<Uri>> {
     }
 
     return intent;
+  }
+
+  private void grantReadPermissionToUri(TargetUi targetUi, Uri uri) {
+    String uiPackageName = targetUi.getContext().getPackageName();
+
+    targetUi.getContext()
+        .grantUriPermission(uiPackageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
   }
 }
