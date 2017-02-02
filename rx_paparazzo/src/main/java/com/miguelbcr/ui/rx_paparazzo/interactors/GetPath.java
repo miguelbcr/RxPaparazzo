@@ -49,11 +49,11 @@ public final class GetPath extends UseCase<String> {
 
   @SuppressLint("NewApi") private Observable<String> getPath() {
     boolean isFromKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT;
-    Context context = targetUi.activity();
+    Context context = targetUi.getContext();
     String filePath = null;
 
-    if (uri == null) {
-      return null;
+    if (uri == null || context == null) {
+      return Observable.error(new Throwable("Context is null"));
     }
 
     if (isFromKitKat && DocumentsContract.isDocumentUri(context, uri)) {
