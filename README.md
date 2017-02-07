@@ -261,7 +261,7 @@ RxPaparazzo.single(activityOrFragment)
 
 ### Media scanning
 
-To send files to the media scanner so that they can be indexed and available in applications such as the Gallery use `sendToMediaScanner()`.
+To send files to the media scanner so that they can be indexed and available in applications such as the Gallery use `sendToMediaScanner()`. If you are using `useInternalStorage()` then the media scanner will not be able to access the file.
 
 ### Picking files
 

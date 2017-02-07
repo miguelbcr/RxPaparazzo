@@ -16,8 +16,11 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
+import android.content.Context;
 import android.content.Intent;
+import android.media.MediaScannerConnection;
 import android.net.Uri;
+import android.util.Log;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
@@ -34,6 +37,7 @@ import io.reactivex.functions.Function;
 
 public final class SaveFile extends UseCase<FileData> {
 
+  private static final String TAG = SaveFile.class.getSimpleName();
   private static final String SAVED_FILE_PREFIX = "SAVED-";
 
   private final TargetUi targetUi;
@@ -70,7 +74,14 @@ public final class SaveFile extends UseCase<FileData> {
     FileData saved = save(dimens);
 
     if (config.isSendToMediaScanner()) {
-      sendToMediaScanner(saved);
+      if (config.isUseInternalStorage()) {
+        File file = fileData.getFile();
+        String message = String.format("Media scanner will not be able to access internal storage '%s'", file.getAbsolutePath());
+        Log.w(TAG, message);
+      }
+
+//      sendToMediaScanner(saved);
+      sendToMediaScannerIntent(saved);
     }
 
     return Observable.just(saved);
@@ -91,9 +102,7 @@ public final class SaveFile extends UseCase<FileData> {
     File destination = getOutputFile();
     imageUtils.copy(inputStream, destination);
 
-    FileData copied = FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
-
-    return copied;
+    return FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
   }
 
   private FileData saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
@@ -104,14 +113,26 @@ public final class SaveFile extends UseCase<FileData> {
     return scaled;
   }
 
+  // unused because MediaScannerConnection.scanFile causes memory leak
   private void sendToMediaScanner(FileData fileDataToScan) {
     File file = fileDataToScan.getFile();
     if (file.exists()) {
+      String[] mimeTypes = {fileDataToScan.getMimeType()};
+      String[] files = {fileDataToScan.getFile().getAbsolutePath()};
+
+      MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
+    }
+  }
+
+  private void sendToMediaScannerIntent(FileData fileDataToScan) {
+    File file = fileDataToScan.getFile();
+    if (file.exists()) {
       Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+      Context context = targetUi.getContext();
       Uri contentUri = Uri.fromFile(file);
       mediaScanIntent.setData(contentUri);
 
-      targetUi.getContext().sendBroadcast(mediaScanIntent);
+      context.sendBroadcast(mediaScanIntent);
     }
   }
 

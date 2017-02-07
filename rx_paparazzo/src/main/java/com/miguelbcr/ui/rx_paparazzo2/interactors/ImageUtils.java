@@ -65,8 +65,8 @@ public final class ImageUtils {
   }
 
   public File getOutputFile(String prefix, String extension) {
-    String dirname = getApplicationName(targetUi.getContext());
-    File dir = getDir(null, dirname);
+    String fileProviderDirectory = config.getFileProviderDirectory();
+    File dir = getDir(null, fileProviderDirectory);
 
     return createTimestampedFile(dir, prefix, extension);
   }
@@ -102,6 +102,7 @@ public final class ImageUtils {
 
   private String getApplicationName(Context context) {
     int stringId = context.getApplicationInfo().labelRes;
+
     return context.getString(stringId);
   }
 
@@ -123,10 +124,14 @@ public final class ImageUtils {
     File storageDir = null;
 
     if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-      File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot)
-          : Environment.getExternalStorageDirectory();
-      storageDir = new File(dir, dirname);
+      File dir;
+      if (dirRoot == null) {
+        dir = Environment.getExternalStorageDirectory();
+      } else {
+        dir = Environment.getExternalStoragePublicDirectory(dirRoot);
+      }
 
+      storageDir = new File(dir, dirname);
       if (!storageDir.exists() && !storageDir.mkdirs()) {
         storageDir = null;
       }
@@ -208,10 +213,9 @@ public final class ImageUtils {
   }
 
   public static String getMimeType(String path) {
-    String mimeType;
     String fileExtension = MimeTypeMap.getFileExtensionFromUrl(path);
-    mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
-    return mimeType;
+
+    return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
   }
 
   FileData scaleImage(FileData inputData, File destination, int[] dimens) {
@@ -246,7 +250,7 @@ public final class ImageUtils {
 
   private Bitmap.CompressFormat getCompressFormat(String filePath) {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
-    final String extension = getFileExtension(filePath);
+    String extension = getFileExtension(filePath);
 
     if (extension.toLowerCase().contains(PNG_FILE_EXTENSION)) {
       compressFormat = Bitmap.CompressFormat.PNG;
