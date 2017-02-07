@@ -16,7 +16,8 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-import android.media.MediaScannerConnection;
+import android.content.Intent;
+import android.net.Uri;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
@@ -104,11 +105,13 @@ public final class SaveFile extends UseCase<FileData> {
   }
 
   private void sendToMediaScanner(FileData fileDataToScan) {
-    if (fileDataToScan.getFile().exists()) {
-      String[] mimeTypes = {fileDataToScan.getMimeType()};
-      String[] files = {fileDataToScan.getFile().getAbsolutePath()};
+    File file = fileDataToScan.getFile();
+    if (file.exists()) {
+      Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+      Uri contentUri = Uri.fromFile(file);
+      mediaScanIntent.setData(contentUri);
 
-      MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
+      targetUi.getContext().sendBroadcast(mediaScanIntent);
     }
   }
 

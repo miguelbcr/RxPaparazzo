@@ -93,6 +93,8 @@ You will need to also add a FileProvider named `android.support.v4.content.FileP
 </provider>
 ```
 
+If you set the provider `android:authorities` attribute to a value other than `${applicationId}.file_provider` name you must set the configuration it using `RxPaparazzo.Builder.setFileProviderAuthority(String authority)`
+
 Example: file_provider_paths.xml
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -101,9 +103,8 @@ Example: file_provider_paths.xml
 </paths>
 ```
 
-If you wish to provide a custom authority name use the `RxPaparazzo.Builder.setFileProviderAuthority(String authority)`
-
-To change the path which files are exposed in the FileProvider you can set use `RxPaparazzo.Builder.setFileProviderDirectory(String authority)`
+The `file_provider_paths.xml` is where files are exposed in the FileProvider.
+If you set the files-path `path` attribute to a value other than `RxPaparazzo/` you must set the configuration using `RxPaparazzo.Builder.setFileProviderDirectory(String authority)`
 
 All features RxPaparazzo exposes can be accessed from both, an `activity` or a `fragment` instance.
 
