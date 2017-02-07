@@ -48,6 +48,8 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':rx_paparazzo')
 
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5'
 
     androidTestCompile ("com.android.support.test:runner:0.4.1") {
         exclude module: 'support-annotations'
