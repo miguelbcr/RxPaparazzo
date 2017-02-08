@@ -24,6 +24,7 @@ import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -35,9 +36,6 @@ import io.reactivex.schedulers.Schedulers;
 public class SampleActivity extends AppCompatActivity implements Testable {
     private static final String STATE_FILES = "FILES";
 
-    private Toolbar toolbar;
-    private ImageView imageView;
-    private TextView filenameView;
     private RecyclerView recyclerView;
     private ArrayList<FileData> fileDataList;
     private Size size;
@@ -72,15 +70,12 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void configureToolbar() {
-        toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(R.string.app_name);
     }
 
     private void initViews() {
-        imageView = (ImageView) findViewById(R.id.iv_image);
-        filenameView = (TextView) findViewById(R.id.iv_filename);
-
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
         recyclerView = (RecyclerView) findViewById(R.id.rv_images);
@@ -174,7 +169,6 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         this.size = size;
 
         RxPaparazzo.SingleSelectionBuilder<SampleActivity> resized = RxPaparazzo.single(this)
-                .useInternalStorage()
                 .size(size)
                 .sendToMediaScanner();
 
@@ -207,30 +201,16 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         this.size = size;
 
         return RxPaparazzo.multiple(this)
-                .useInternalStorage()
                 .crop()
                 .sendToMediaScanner()
                 .size(size);
     }
 
     private void loadImage(FileData fileData) {
-        this.fileDataList = new ArrayList<>(fileDataList);
-        fileDataList.add(fileData);
+        this.fileDataList = new ArrayList<>();
+        this.fileDataList.add(fileData);
 
-        imageView.setVisibility(View.VISIBLE);
-        imageView.setImageDrawable(null);
-
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setAdapter(null);
-
-        filenameView.setVisibility(View.VISIBLE);
-        filenameView.setText(fileData.describe());
-
-        Picasso.with(getApplicationContext()).setLoggingEnabled(true);
-        Picasso.with(getApplicationContext()).invalidate(fileData.getFile());
-        Picasso.with(getApplicationContext()).load(fileData.getFile())
-                .error(R.drawable.ic_description_black_48px)
-                .into(imageView);
+        loadImages();
     }
 
     private void loadImages(List<FileData> fileDataList) {
@@ -240,11 +220,6 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void loadImages() {
-        imageView.setVisibility(View.GONE);
-        imageView.setImageDrawable(null);
-
-        filenameView.setVisibility(View.GONE);
-
         if (fileDataList == null || fileDataList.isEmpty()) {
             return;
         }

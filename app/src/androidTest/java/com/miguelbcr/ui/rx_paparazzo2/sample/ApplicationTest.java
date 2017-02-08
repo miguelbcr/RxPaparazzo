@@ -61,11 +61,37 @@ import static org.junit.Assert.assertThat;
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ApplicationTest {
+
+    static class IsImageViewMatcher extends BoundedMatcher<View, ImageView> {
+
+        private int[] imageDimens = {0, 0};
+
+        public IsImageViewMatcher() {
+            super(ImageView.class);
+        }
+
+        @Override
+        public void describeTo(Description description) {
+            description.appendText("has drawable");
+        }
+
+        @Override
+        public boolean matchesSafely(ImageView imageView) {
+            Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
+            imageDimens = new int[]{bitmap.getWidth(), bitmap.getHeight()};
+
+            return imageView.getDrawable() != null;
+        }
+
+        public int[] getMatchedImageDimensions() {
+            return imageDimens;
+        }
+    }
+
     @Rule
     public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
 
     private UiDevice uiDevice;
-    private int[] imageDimens = {0, 0};
 
     @Before
     public void init() {
@@ -133,8 +159,12 @@ public class ApplicationTest {
     }
 
     private void takePhoto(boolean crop) {
-        if (crop) onView(withId(R.id.fab_camera_crop)).perform(click());
-        else onView(withId(R.id.fab_camera)).perform(click());
+        if (crop) {
+            onView(withId(R.id.fab_camera_crop)).perform(click());
+        } else {
+            onView(withId(R.id.fab_camera)).perform(click());
+        }
+
         waitTime();
 
         clickBottomMiddleScreen();
@@ -146,17 +176,18 @@ public class ApplicationTest {
             clickTopRightScreen();
         }
 
-        onView(withId(R.id.iv_image)).check(matches(getIsImageViewMatcher()));
-
-        checkDimensions();
+        checkImageDimensions(0);
     }
 
     private void pickUpPhoto(boolean onlyOne) {
         // With 4 items the recycler view do not scroll properly and do not find the item view and test crash in pos=2
         int imagesToPick = onlyOne ? 1 : 2;
 
-        if (onlyOne) onView(withId(R.id.fab_pickup_image)).perform(click());
-        else onView(withId(R.id.fab_pickup_images)).perform(click());
+        if (onlyOne) {
+            onView(withId(R.id.fab_pickup_image)).perform(click());
+        } else {
+            onView(withId(R.id.fab_pickup_images)).perform(click());
+        }
 
         waitTime();
 
@@ -174,38 +205,25 @@ public class ApplicationTest {
 
         waitTime();
 
-        if (onlyOne) onView(withId(R.id.iv_image)).check(matches(getIsImageViewMatcher()));
-        else {
-            for (int i = 0; i < imagesToPick; i++) {
-                onView(withId(R.id.rv_images)).perform(RecyclerViewActions.scrollToPosition(i));
-
-                waitTime();
-
-                Matcher<View> itemAtPosition = withRecyclerView(R.id.rv_images).atPositionOnView(i, R.id.iv_image);
-                onView(itemAtPosition).check(matches(getIsImageViewMatcher()));
-
-                checkDimensions();
-            }
+        for (int i = 0; i < imagesToPick; i++) {
+            checkImageDimensions(i);
         }
     }
 
-    private Matcher<View> getIsImageViewMatcher() {
-        return new BoundedMatcher<View, ImageView>(ImageView.class) {
-            @Override
-            public void describeTo(Description description) {
-                description.appendText("has drawable");
-            }
+    private void checkImageDimensions(int index) {
+        onView(withId(R.id.rv_images)).perform(RecyclerViewActions.scrollToPosition(index));
 
-            @Override
-            public boolean matchesSafely(ImageView imageView) {
-                Bitmap bitmap = ((BitmapDrawable) imageView.getDrawable()).getBitmap();
-                imageDimens = new int[]{bitmap.getWidth(), bitmap.getHeight()};
-                return imageView.getDrawable() != null;
-            }
-        };
+        waitTime();
+
+        Matcher<View> itemAtPosition = withRecyclerView(R.id.rv_images).atPositionOnView(index, R.id.iv_image);
+
+        IsImageViewMatcher isImageViewMatcher = new IsImageViewMatcher();
+        onView(itemAtPosition).check(matches(isImageViewMatcher));
+
+        checkDimensions(isImageViewMatcher.getMatchedImageDimensions());
     }
 
-    private void checkDimensions() {
+    private void checkDimensions(int[] observedDimensions) {
         Activity activity = ((SampleApplication) InstrumentationRegistry.getTargetContext().getApplicationContext()).getLiveActivity();
 
         if (activity instanceof Testable) {
@@ -225,8 +243,8 @@ public class ApplicationTest {
                 getDimens(size).with(fileData).react()
                         .subscribe(dimens -> {
                             int[] dimensPortrait = getDimensionsPortrait(dimens[0], dimens[1]);
-                            int[] imageDimensPortrait = getDimensionsPortrait(imageDimens[0], imageDimens[1]);
-                            int marginOfError = 150;
+                            int[] imageDimensPortrait = getDimensionsPortrait(observedDimensions[0], observedDimensions[1]);
+                            int marginOfError = 200;
                             assertThat(dimensPortrait[0], is(both(greaterThan(imageDimensPortrait[0] - marginOfError)).and(lessThan(imageDimensPortrait[0] + marginOfError))));
                             assertThat(dimensPortrait[1], is(both(greaterThan(imageDimensPortrait[1] - marginOfError)).and(lessThan(imageDimensPortrait[1] + marginOfError))));
                         });
@@ -255,18 +273,8 @@ public class ApplicationTest {
         rotateDevice();
         uiDevice.pressBack();
 
-        onView(withId(R.id.iv_image)).check(matches(new BoundedMatcher<View, ImageView>(ImageView.class) {
-            @Override
-            public void describeTo(Description description) {
-                imageDimens = new int[]{0, 0};
-                description.appendText("has not drawable");
-            }
+        withRecyclerView(R.id.rv_images).isEmpty();
 
-            @Override
-            public boolean matchesSafely(ImageView imageView) {
-                return imageView.getDrawable() == null;
-            }
-        }));
     }
 
     private void rotateDevice() {
@@ -292,7 +300,7 @@ public class ApplicationTest {
     private void clickTopRightScreen() {
         int width = getScreenDimensions()[0];
 
-        uiDevice.click(width - 50, 100);
+        uiDevice.click(width - 100, 150);
         waitTime();
     }
 
@@ -330,6 +338,7 @@ public class ApplicationTest {
         Display display = wm.getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
+
         return new int[]{size.x, size.y};
     }
 

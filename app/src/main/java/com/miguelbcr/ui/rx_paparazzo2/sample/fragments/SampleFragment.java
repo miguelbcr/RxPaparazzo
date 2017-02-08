@@ -37,16 +37,13 @@ import io.reactivex.schedulers.Schedulers;
 public class SampleFragment extends Fragment implements Testable {
     private static final String STATE_FILES = "FILES";
 
-    private ImageView imageView;
-    private TextView filenameView;
     private RecyclerView recyclerView;
     private ArrayList<FileData> fileDataList;
     private Size size;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.sample_layout, container, false);
-        return view;
+        return inflater.inflate(R.layout.sample_layout, container, false);
     }
 
     @Override
@@ -75,9 +72,6 @@ public class SampleFragment extends Fragment implements Testable {
 
     private void initViews() {
         View view = getView();
-
-        imageView = (ImageView) view.findViewById(R.id.iv_image);
-        filenameView = (TextView) view.findViewById(R.id.iv_filename);
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
@@ -174,7 +168,6 @@ public class SampleFragment extends Fragment implements Testable {
         this.size = size;
 
         RxPaparazzo.SingleSelectionBuilder<SampleFragment> resized = RxPaparazzo.single(this)
-                .useInternalStorage()
                 .sendToMediaScanner()
                 .size(size);
 
@@ -207,7 +200,6 @@ public class SampleFragment extends Fragment implements Testable {
         this.size = size;
 
         return RxPaparazzo.multiple(this)
-                .useInternalStorage()
                 .sendToMediaScanner()
                 .crop()
                 .size(size);
@@ -215,23 +207,10 @@ public class SampleFragment extends Fragment implements Testable {
 
 
     private void loadImage(FileData fileData) {
-        fileDataList.clear();
-        fileDataList.add(fileData);
+        this.fileDataList = new ArrayList<>();
+        this.fileDataList.add(fileData);
 
-        imageView.setVisibility(View.VISIBLE);
-        imageView.setImageDrawable(null);
-
-        filenameView.setVisibility(View.VISIBLE);
-        filenameView.setText(fileData.getFilename());
-
-        recyclerView.setVisibility(View.GONE);
-        recyclerView.setAdapter(null);
-
-        Picasso.with(getActivity()).setLoggingEnabled(true);
-        Picasso.with(getActivity()).invalidate(fileData.getFile());
-        Picasso.with(getActivity()).load(fileData.getFile())
-                .error(R.drawable.ic_description_black_48px)
-                .into(imageView);
+        loadImages();
     }
 
     private void loadImages() {
@@ -241,12 +220,6 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     private void loadImages(List<FileData> fileDataList) {
-
-        imageView.setVisibility(View.GONE);
-        imageView.setImageDrawable(null);
-
-        filenameView.setVisibility(View.GONE);
-
         if (fileDataList == null || fileDataList.isEmpty()) {
             return;
         }

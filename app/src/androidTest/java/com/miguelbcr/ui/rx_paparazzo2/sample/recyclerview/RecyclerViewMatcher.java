@@ -4,6 +4,7 @@ import android.content.res.Resources;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeMatcher;
@@ -19,6 +20,37 @@ public class RecyclerViewMatcher {
         return atPositionOnView(position, -1);
     }
 
+    public Matcher<View> isEmpty() {
+        return new TypeSafeMatcher<View>() {
+            Resources resources = null;
+
+            public void describeTo(Description description) {
+                String idDescription = getResourceName(resources, recyclerViewId);
+                description.appendText("Empty recycler view with id: " + idDescription);
+            }
+
+            public boolean matchesSafely(View view) {
+                this.resources = view.getResources();
+
+                RecyclerView recyclerView = (RecyclerView) view.getRootView().findViewById(recyclerViewId);
+                if (!(recyclerView != null && recyclerView.getId() == recyclerViewId)) {
+                    Log.i("MATCHER", "Recycler view missing");
+
+                    return false;
+                }
+
+                int childCount = recyclerView.getAdapter().getItemCount();
+                if (childCount > 0) {
+                    Log.i("MATCHER", "Recycler view only has " + childCount + " items, expected it was empty");
+
+                    return false;
+                }
+
+                return true;
+            }
+        };
+    }
+
     private String getResourceName(Resources resources, int id) {
         if (resources == null) {
             return String.valueOf(id);
@@ -26,7 +58,7 @@ public class RecyclerViewMatcher {
         try {
             return resources.getResourceName(id);
         } catch (Resources.NotFoundException var4) {
-            return String.format("%s (resource name not found)", Integer.valueOf(id));
+            return String.format("%s (resource name not found)", id);
         }
     }
 
@@ -83,10 +115,6 @@ public class RecyclerViewMatcher {
                 boolean isItemView = view.equals(targetView);
 
                 Log.i("MATCHER", targetView.toString() + " == " + view + " = " + isItemView);
-
-                if (isItemView) {
-                    return true;
-                }
 
                 return isItemView;
             }

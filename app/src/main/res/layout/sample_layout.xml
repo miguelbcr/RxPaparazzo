@@ -128,23 +128,6 @@
 
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/iv_image"
-        android:layout_width="wrap_content"
-        android:layout_height="200dp"
-        android:layout_gravity="center_horizontal|bottom"
-        android:layout_marginBottom="50dp"
-        android:adjustViewBounds="true"
-        android:background="@color/colorPrimary"
-        android:visibility="gone" />
-
-    <TextView
-        android:id="@+id/iv_filename"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal|bottom"
-        android:visibility="gone" />
-
     <android.support.v7.widget.RecyclerView
         android:id="@+id/rv_images"
         android:layout_width="match_parent"
