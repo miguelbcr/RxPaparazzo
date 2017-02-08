@@ -1,6 +1,10 @@
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-public final class Dimensions {
+import java.io.Serializable;
+
+public final class Dimensions implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private int width;
     private int height;
