@@ -35,6 +35,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SampleActivity extends AppCompatActivity implements Testable {
     private static final String STATE_FILES = "FILES";
+    public static final int ONE_MEGABYTE_IN_BYTES = 1000000;
 
     private RecyclerView recyclerView;
     private ArrayList<FileData> fileDataList;
@@ -169,6 +170,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         this.size = size;
 
         RxPaparazzo.SingleSelectionBuilder<SampleActivity> resized = RxPaparazzo.single(this)
+                .setMaximumFileSizeInBytes(ONE_MEGABYTE_IN_BYTES)
                 .size(size)
                 .sendToMediaScanner();
 
@@ -201,6 +203,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         this.size = size;
 
         return RxPaparazzo.multiple(this)
+                .setMaximumFileSizeInBytes(ONE_MEGABYTE_IN_BYTES)
                 .crop()
                 .sendToMediaScanner()
                 .size(size);
@@ -232,7 +235,10 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     public List<String> getFilePaths() {
         List<String> filesPaths = new ArrayList<>();
         for (FileData fileData : fileDataList) {
-            filesPaths.add(fileData.getFile().getAbsolutePath());
+            File file = fileData.getFile();
+            if (file != null) {
+                filesPaths.add(file.getAbsolutePath());
+            }
         }
         return filesPaths;
     }

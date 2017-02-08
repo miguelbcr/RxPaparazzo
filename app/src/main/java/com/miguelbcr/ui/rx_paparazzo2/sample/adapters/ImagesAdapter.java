@@ -1,5 +1,7 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample.adapters;
 
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,10 +51,20 @@ public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder
 
         void bind(FileData fileData) {
             filenameView.setText(fileData.describe());
-            Picasso.with(imageView.getContext())
-                    .load(fileData.getFile())
-                    .error(R.drawable.ic_description_black_48px)
-                    .into(imageView);;
+            File file = fileData.getFile();
+            if (file != null && file.exists()) {
+                Picasso.with(imageView.getContext())
+                        .load(file)
+                        .error(R.drawable.ic_description_black_48px)
+                        .into(imageView);
+            } else {
+                if (fileData.isExceededMaximumFileSize()) {
+                    filenameView.setText("MAXIMUM FILESIZE EXCEEDED");
+                }
+
+                Drawable drawable = AppCompatDrawableManager.get().getDrawable(imageView.getContext(), R.drawable.ic_description_black_48px);
+                imageView.setImageDrawable(drawable);
+            }
         }
     }
 }
