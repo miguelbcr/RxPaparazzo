@@ -26,9 +26,11 @@ public class Config {
 
   private static final String DEFAULT_FILE_PROVIDER_PATH = "RxPaparazzo";
   private static final String DEFAULT_FILE_PROVIDER_AUTHORITIES_SUFFIX = "file_provider";
+  private static final long NO_FILESIZE_LIMIT = Long.MAX_VALUE;
 
   private UCrop.Options options;
 
+  private long maximumFileSize;
   private Size size;
   private boolean doCrop;
   private boolean failCropIfNotImage;
@@ -53,6 +55,15 @@ public class Config {
     this.failCropIfNotImage = false;
     this.fileProviderAuthority = null;
     this.fileProviderDirectory = null;
+    this.maximumFileSize = NO_FILESIZE_LIMIT;
+  }
+
+  public void setMaximumFileSize(long maximumFileSize) {
+    this.maximumFileSize = maximumFileSize;
+  }
+
+  public long getMaximumFileSize() {
+    return maximumFileSize;
   }
 
   public Size getSize() {

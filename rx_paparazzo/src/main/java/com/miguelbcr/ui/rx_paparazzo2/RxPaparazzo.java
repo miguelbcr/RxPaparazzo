@@ -83,6 +83,11 @@ public final class RxPaparazzo {
       return config;
     }
 
+    public B setMaximumFileSizeInBytes(long maximumFileSizeInBytes) {
+      this.config.setMaximumFileSize(maximumFileSizeInBytes);
+      return self;
+    }
+
     /**
      * Sets this to the value of name attribute of {@link android.support.v4.content.FileProvider} in AndroidManifest.xml
      */

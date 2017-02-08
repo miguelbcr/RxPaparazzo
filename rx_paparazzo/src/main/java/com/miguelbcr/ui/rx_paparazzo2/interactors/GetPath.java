@@ -199,7 +199,7 @@ public final class GetPath extends UseCase<FileData> {
           file = null;
         }
 
-        return new FileData(file, false, fileName, mimeType, title);
+        return new FileData(file, false, fileName, mimeType, title, false);
       } else {
         return null;
       }

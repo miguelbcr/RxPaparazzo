@@ -80,8 +80,10 @@ public final class SaveFile extends UseCase<FileData> {
         Log.w(TAG, message);
       }
 
+      if (saved.getFile() != null && saved.getFile().exists()) {
 //      sendToMediaScanner(saved);
-      sendToMediaScannerIntent(saved);
+        sendToMediaScannerIntent(saved);
+      }
     }
 
     return Observable.just(saved);
@@ -98,6 +100,10 @@ public final class SaveFile extends UseCase<FileData> {
   private FileData saveToDestinationAndDeleteSourceFile(FileData fileData) throws Exception {
     File source = fileData.getFile();
 
+    if (isFileSizeLimitExceeded(source)) {
+      return FileData.exceededMaximumFileSize(fileData);
+    }
+
     InputStream inputStream = new BufferedInputStream(new FileInputStream(source));
     File destination = getOutputFile();
     imageUtils.copy(inputStream, destination);
@@ -108,9 +114,17 @@ public final class SaveFile extends UseCase<FileData> {
   private FileData saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
     FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
 
+    if (isFileSizeLimitExceeded(scaled.getFile())) {
+      scaled = FileData.exceededMaximumFileSize(fileData);
+    }
+
     FileData.deleteSourceFile(fileData);
 
     return scaled;
+  }
+
+  private boolean isFileSizeLimitExceeded(File scaledFile) {
+    return scaledFile.exists() && scaledFile.length() > config.getMaximumFileSize();
   }
 
   // unused because MediaScannerConnection.scanFile causes memory leak

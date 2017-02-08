@@ -16,6 +16,7 @@ public class FileData implements Serializable {
     private String mimeType;
     private String title;
     private boolean transientFile;
+    private boolean exceededMaximumFileSize;
 
     public static FileData toFileDataDeleteSourceFileIfTransient(FileData source, File file, boolean transientFile, String mimeType) {
         deleteSourceFile(source);
@@ -39,20 +40,25 @@ public class FileData implements Serializable {
         }
     }
 
+    public static FileData exceededMaximumFileSize(FileData fileData) {
+        return new FileData(null, true, fileData.getFilename(), fileData.getMimeType(), fileData.getTitle(), true);
+    }
+
     public FileData(FileData source, File file, boolean transientFile, String mimeType) {
-        this(file, transientFile, source.getFilename(), mimeType, source.getTitle());
+        this(file, transientFile, source.getFilename(), mimeType, source.getTitle(), false);
     }
 
     public FileData(File file, boolean transientFile, String filename, String mimeType) {
-        this(file, transientFile, filename, mimeType, null);
+        this(file, transientFile, filename, mimeType, null, false);
     }
 
-    public FileData(File file, boolean transientFile, String filename, String mimeType, String title) {
+    public FileData(File file, boolean transientFile, String filename, String mimeType, String title, boolean exceededMaximumFileSize) {
         this.filename = filename;
         this.transientFile = transientFile;
         this.mimeType = mimeType;
         this.file = file;
         this.title = title;
+        this.exceededMaximumFileSize = exceededMaximumFileSize;
     }
 
     public File getFile() {
@@ -73,6 +79,10 @@ public class FileData implements Serializable {
 
     public boolean isTransientFile() {
         return transientFile;
+    }
+
+    public boolean isExceededMaximumFileSize() {
+        return exceededMaximumFileSize;
     }
 
     public String describe() {
