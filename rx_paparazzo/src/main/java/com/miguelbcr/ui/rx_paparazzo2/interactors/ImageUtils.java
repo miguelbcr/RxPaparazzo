@@ -24,6 +24,7 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
@@ -45,6 +46,7 @@ import io.reactivex.exceptions.Exceptions;
 
 public final class ImageUtils {
 
+  private static final String TAG = ImageUtils.class.getSimpleName();
   private static final String DEFAULT_EXTENSION = "";
   public static final String JPG_FILE_EXTENSION = "jpg";
   private static final String PNG_FILE_EXTENSION = "png";
@@ -264,11 +266,11 @@ public final class ImageUtils {
     copyExifTags(input, fileOutput, dimens);
   }
 
-  public void copy(InputStream in, File dst) {
+  public void copy(InputStream in, File destination) {
     OutputStream out = null;
 
     try {
-      out = new FileOutputStream(dst);
+      out = new FileOutputStream(destination);
       byte[] buffer = new byte[1024];
       int length;
 
@@ -276,7 +278,9 @@ public final class ImageUtils {
         out.write(buffer, 0, length);
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = String.format("Could not copy file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     } finally {
       try {
@@ -293,23 +297,27 @@ public final class ImageUtils {
     }
   }
 
-  public void copy(File src, File dst) {
+  public void copy(File source, File destination) {
     try {
-      InputStream in = new FileInputStream(src);
-      copy(in, dst);
+      InputStream in = new FileInputStream(source);
+      copy(in, destination);
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = String.format("Could not copy file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     }
   }
 
-  private void bitmap2file(Bitmap bitmap, File file, Bitmap.CompressFormat compressFormat) {
+  private void bitmap2file(Bitmap bitmap, File destination, Bitmap.CompressFormat compressFormat) {
     FileOutputStream fileOutputStream = null;
     try {
-      fileOutputStream = new FileOutputStream(file);
+      fileOutputStream = new FileOutputStream(destination);
       bitmap.compress(compressFormat, 90, fileOutputStream);
     } catch (Exception e) {
-      e.printStackTrace();
+      String message = String.format("Could not save bitmap file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     } finally {
       try {
@@ -323,13 +331,13 @@ public final class ImageUtils {
     }
   }
 
-  private void copyExifTags(File srcFile, File dstFile, int[] dimens) {
+  private void copyExifTags(File source, File destination, int[] dimens) {
     try {
-      String dstFilePath = dstFile.getAbsolutePath();
-      String srcFilePath = srcFile.getAbsolutePath();
-      if (getCompressFormat(dstFilePath) == Bitmap.CompressFormat.JPEG) {
-          ExifInterface exifSource = new ExifInterface(srcFilePath);
-          ExifInterface exifDest = new ExifInterface(dstFilePath);
+      String destinationPath = destination.getAbsolutePath();
+      String sourcePath = source.getAbsolutePath();
+      if (getCompressFormat(destinationPath) == Bitmap.CompressFormat.JPEG) {
+          ExifInterface exifSource = new ExifInterface(sourcePath);
+          ExifInterface exifDest = new ExifInterface(destinationPath);
 
           for (String attribute : getExifTags()) {
             String tagValue = exifSource.getAttribute(attribute);
@@ -344,7 +352,8 @@ public final class ImageUtils {
           exifDest.saveAttributes();
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = String.format("Could not copy exif tags from '%s'", source.getAbsolutePath());
+      Log.d(TAG, message, e);
     }
   }
 
