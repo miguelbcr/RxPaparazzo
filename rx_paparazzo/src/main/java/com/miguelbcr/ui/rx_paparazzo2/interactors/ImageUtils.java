@@ -53,7 +53,7 @@ public final class ImageUtils {
   public static final String MIME_TYPE_JPEG = "image/jpeg";
   private static final String MIME_TYPE_PNG = "image/png";
 
-  private static final String DATE_FORMAT = "ddMMyyyy_HHmmss_SSS";
+  private static final String DATE_FORMAT = "yyyyMMdd_HHmm_ssSSS";
   private static final String LOCALE_EN = "en";
 
   private final TargetUi targetUi;
