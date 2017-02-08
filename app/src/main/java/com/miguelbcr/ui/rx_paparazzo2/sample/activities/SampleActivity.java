@@ -232,6 +232,11 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     @Override
+    public List<FileData> getFileDatas() {
+        return fileDataList;
+    }
+
+    @Override
     public List<String> getFilePaths() {
         List<String> filesPaths = new ArrayList<>();
         for (FileData fileData : fileDataList) {

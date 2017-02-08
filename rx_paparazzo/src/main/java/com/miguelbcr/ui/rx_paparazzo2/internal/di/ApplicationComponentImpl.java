@@ -4,7 +4,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.DownloadFile;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.GetDimens;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.ScaledImageDimensions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GetPath;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.ImageUtils;
@@ -24,9 +24,9 @@ class ApplicationComponentImpl extends ApplicationComponent {
     ImageUtils imageUtils = new ImageUtils(ui, config);
     DownloadFile downloadFile = new DownloadFile(ui, config, imageUtils);
     TakePhoto takePhoto = new TakePhoto(config, startIntent, ui, imageUtils);
-    GetDimens getDimens = new GetDimens(ui, config);
+    ScaledImageDimensions scaledImageDimensions = new ScaledImageDimensions(ui, config);
     CropImage cropImage = new CropImage(ui, config, startIntent, imageUtils);
-    SaveFile saveFile = new SaveFile(ui, config, getDimens, imageUtils);
+    SaveFile saveFile = new SaveFile(ui, config, scaledImageDimensions, imageUtils);
     GrantPermissions grantPermissions = new GrantPermissions(ui);
 
     this.getPath = new GetPath(config, ui, downloadFile);

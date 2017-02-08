@@ -229,6 +229,11 @@ public class SampleFragment extends Fragment implements Testable {
     }
 
     @Override
+    public List<FileData> getFileDatas() {
+        return fileDataList;
+    }
+
+    @Override
     public List<String> getFilePaths() {
         List<String> filesPaths = new ArrayList<>();
         for (FileData fileData : fileDataList) {

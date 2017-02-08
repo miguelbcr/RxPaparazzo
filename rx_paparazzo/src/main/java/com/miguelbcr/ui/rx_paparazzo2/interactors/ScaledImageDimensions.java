@@ -16,7 +16,6 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
-import android.graphics.BitmapFactory;
 import android.util.DisplayMetrics;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
@@ -26,65 +25,63 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.ScreenSize;
 
+import java.io.File;
+
 import io.reactivex.Observable;
 
-public final class GetDimens extends UseCase<int[]> {
+public final class ScaledImageDimensions extends UseCase<Dimensions> {
   private final TargetUi targetUi;
   private final Config config;
   private FileData fileData;
 
-  public GetDimens(TargetUi targetUi, Config config) {
+  public ScaledImageDimensions(TargetUi targetUi, Config config) {
     this.targetUi = targetUi;
     this.config = config;
   }
 
-  public GetDimens with(FileData fileData) {
+  public ScaledImageDimensions with(FileData fileData) {
     this.fileData = fileData;
     return this;
   }
 
-  @Override public Observable<int[]> react() {
+  @Override public Observable<Dimensions> react() {
     return Observable.just(getDimensions());
   }
 
-  private int[] getDimensions() {
+  private Dimensions getDimensions() {
+    File file = fileData.getFile();
     if (config.getSize() instanceof OriginalSize) {
-      String filePath = fileData.getFile().getAbsolutePath();
-      return GetDimens.this.getFileDimens(filePath);
+      return ImageUtils.getImageDimensions(file);
     } else if (config.getSize() instanceof CustomMaxSize) {
-      CustomMaxSize customMaxSize = (CustomMaxSize) config.getSize();
-      String filePath = fileData.getFile().getAbsolutePath();
-      return getCustomDimens(customMaxSize, filePath);
+      return getCustomDimens((CustomMaxSize) config.getSize(), file);
     } else if (config.getSize() instanceof ScreenSize) {
-      return GetDimens.this.getScreenDimens();
+      return ScaledImageDimensions.this.getScreenDimens();
     } else {
-      int[] dimens = GetDimens.this.getScreenDimens();
-      return new int[] { dimens[0] / 8, dimens[1] / 8 };
+      Dimensions dimens = ScaledImageDimensions.this.getScreenDimens();
+
+      return new Dimensions(dimens.getWidth() / 8, dimens.getHeight() / 8);
     }
   }
 
-  private int[] getScreenDimens() {
+  private Dimensions getScreenDimens() {
     DisplayMetrics metrics = targetUi.getContext().getResources().getDisplayMetrics();
-    return new int[] { metrics.widthPixels, metrics.heightPixels };
+
+    return new Dimensions(metrics.widthPixels, metrics.heightPixels);
   }
 
-  private int[] getFileDimens(String filePath) {
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inJustDecodeBounds = true;
-    BitmapFactory.decodeFile(filePath, options);
-    return new int[] { options.outWidth, options.outHeight };
-  }
-
-  private int[] getCustomDimens(CustomMaxSize customMaxSize, String filePath) {
+  private Dimensions getCustomDimens(CustomMaxSize customMaxSize, File file) {
     int maxSize = customMaxSize.getMaxImageSize();
-    int[] dimens = GetDimens.this.getFileDimens(filePath);
-    int maxFileSize = Math.max(dimens[0], dimens[1]);
+    Dimensions dimensions = ImageUtils.getImageDimensions(file);
+
+    int maxFileSize = Math.max(dimensions.getWidth(), dimensions.getHeight());
     if (maxFileSize < maxSize) {
-      return dimens;
+      return dimensions;
     }
+
     float scaleFactor = (float) maxSize / maxFileSize;
-    dimens[0] *= scaleFactor;
-    dimens[1] *= scaleFactor;
-    return dimens;
+    float scaledWidth = dimensions.getWidth() * scaleFactor;
+    float scaledHeight = dimensions.getHeight() * scaleFactor;
+
+    return new Dimensions((int)scaledWidth, (int)scaledHeight);
   }
 }

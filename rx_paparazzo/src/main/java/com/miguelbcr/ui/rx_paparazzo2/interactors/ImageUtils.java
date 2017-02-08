@@ -220,7 +220,16 @@ public final class ImageUtils {
     return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
   }
 
-  FileData scaleImage(FileData inputData, File destination, int[] dimens) {
+  public static Dimensions getImageDimensions(File file) {
+    String filePath = file.getAbsolutePath();
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true;
+    BitmapFactory.decodeFile(filePath, options);
+
+    return new Dimensions(options.outWidth, options.outHeight);
+  }
+
+  FileData scaleImage(FileData inputData, File destination, Dimensions dimens) {
     File input = inputData.getFile();
     String mimeType;
 
@@ -228,7 +237,7 @@ public final class ImageUtils {
       copyFileAndExifTags(input, destination, dimens);
       mimeType = inputData.getMimeType();
     } else {
-      Bitmap bitmap = sampleBitmap(input, dimens[0], dimens[1]);
+      Bitmap bitmap = sampleBitmap(input, dimens.getWidth(), dimens.getHeight());
       if (bitmap == null) {
         copyFileAndExifTags(input, destination, dimens);
         mimeType = inputData.getMimeType();
@@ -261,7 +270,7 @@ public final class ImageUtils {
     return compressFormat;
   }
 
-  private void copyFileAndExifTags(File input, File fileOutput, int[] dimens) {
+  private void copyFileAndExifTags(File input, File fileOutput, Dimensions dimens) {
     copy(input, fileOutput);
     copyExifTags(input, fileOutput, dimens);
   }
@@ -331,7 +340,7 @@ public final class ImageUtils {
     }
   }
 
-  private void copyExifTags(File source, File destination, int[] dimens) {
+  private void copyExifTags(File source, File destination, Dimensions dimens) {
     try {
       String destinationPath = destination.getAbsolutePath();
       String sourcePath = source.getAbsolutePath();
@@ -347,8 +356,8 @@ public final class ImageUtils {
             }
           }
 
-          exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens[0]));
-          exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens[1]));
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens.getWidth()));
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens.getHeight()));
           exifDest.saveAttributes();
       }
     } catch (IOException e) {
@@ -411,12 +420,12 @@ public final class ImageUtils {
 
   private int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {
     int inSampleSize = 1;
-    int[] dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
-    int[] maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
-    float width = dimensPortrait[0];
-    float height = dimensPortrait[1];
-    float newMaxWidth = maxDimensPortrait[0];
-    float newMaxHeight = maxDimensPortrait[1];
+    Dimensions dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
+    Dimensions maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
+    float width = dimensPortrait.getWidth();
+    float height = dimensPortrait.getHeight();
+    float newMaxWidth = maxDimensPortrait.getWidth();
+    float newMaxHeight = maxDimensPortrait.getHeight();
 
     if (height > newMaxHeight || width > newMaxWidth) {
       int heightRatio = Math.round(height / newMaxHeight);
@@ -433,11 +442,11 @@ public final class ImageUtils {
     return inSampleSize;
   }
 
-  private int[] getDimensionsPortrait(int width, int height) {
+  private Dimensions getDimensionsPortrait(int width, int height) {
     if (width < height) {
-      return new int[] { width, height };
+      return new Dimensions(width, height);
     } else {
-      return new int[] { height, width };
+      return new Dimensions(height, width);
     }
   }
 }

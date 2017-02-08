@@ -18,7 +18,6 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaScannerConnection;
 import android.net.Uri;
 import android.util.Log;
 
@@ -42,15 +41,15 @@ public final class SaveFile extends UseCase<FileData> {
 
   private final TargetUi targetUi;
   private final Config config;
-  private final GetDimens getDimens;
+  private final ScaledImageDimensions scaledImageDimensions;
   private final ImageUtils imageUtils;
 
   private FileData fileData;
 
-  public SaveFile(TargetUi targetUi, Config config, GetDimens getDimens, ImageUtils imageUtils) {
+  public SaveFile(TargetUi targetUi, Config config, ScaledImageDimensions scaledImageDimensions, ImageUtils imageUtils) {
     this.targetUi = targetUi;
     this.config = config;
-    this.getDimens = getDimens;
+    this.scaledImageDimensions = scaledImageDimensions;
     this.imageUtils = imageUtils;
   }
 
@@ -62,16 +61,16 @@ public final class SaveFile extends UseCase<FileData> {
 
   @Override
   public Observable<FileData> react() {
-    return getDimens.with(fileData).react().flatMap(new Function<int[], ObservableSource<FileData>>() {
+    return scaledImageDimensions.with(fileData).react().flatMap(new Function<Dimensions, ObservableSource<FileData>>() {
       @Override
-      public ObservableSource<FileData> apply(int[] dimens) throws Exception {
-        return saveAndSendToMediaScanner(dimens);
+      public ObservableSource<FileData> apply(Dimensions scaledDimensions) throws Exception {
+        return saveAndSendToMediaScanner(scaledDimensions);
       }
     });
   }
 
-  private ObservableSource<FileData> saveAndSendToMediaScanner(int[] dimens) throws Exception {
-    FileData saved = save(dimens);
+  private ObservableSource<FileData> saveAndSendToMediaScanner(Dimensions scaledDimensions) throws Exception {
+    FileData saved = save(scaledDimensions);
 
     if (config.isSendToMediaScanner()) {
       if (config.isUseInternalStorage()) {
@@ -89,9 +88,13 @@ public final class SaveFile extends UseCase<FileData> {
     return Observable.just(saved);
   }
 
-  private FileData save(int[] dimens) throws Exception {
-    if (imageUtils.isImage(fileData.getFile())) {
-      return saveImageAndDeleteSourceFile(fileData, dimens);
+  private FileData save(Dimensions scaledDimensions) throws Exception {
+    Dimensions imageDimensions = ImageUtils.getImageDimensions(fileData.getFile());
+    boolean isImage = imageDimensions.hasSize();
+    if (isImage) {
+      FileData withDimensions = new FileData(fileData, imageDimensions);
+
+      return saveImageAndDeleteSourceFile(withDimensions, scaledDimensions);
     } else {
       return saveToDestinationAndDeleteSourceFile(fileData);
     }
@@ -111,8 +114,8 @@ public final class SaveFile extends UseCase<FileData> {
     return FileData.toFileDataDeleteSourceFileIfTransient(fileData, destination, true, fileData.getMimeType());
   }
 
-  private FileData saveImageAndDeleteSourceFile(FileData fileData, int[] dimens) {
-    FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimens);
+  private FileData saveImageAndDeleteSourceFile(FileData fileData, Dimensions dimensions) {
+    FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimensions);
 
     if (isFileSizeLimitExceeded(scaled.getFile())) {
       scaled = FileData.exceededMaximumFileSize(fileData);
@@ -125,17 +128,6 @@ public final class SaveFile extends UseCase<FileData> {
 
   private boolean isFileSizeLimitExceeded(File scaledFile) {
     return scaledFile.exists() && scaledFile.length() > config.getMaximumFileSize();
-  }
-
-  // unused because MediaScannerConnection.scanFile causes memory leak
-  private void sendToMediaScanner(FileData fileDataToScan) {
-    File file = fileDataToScan.getFile();
-    if (file.exists()) {
-      String[] mimeTypes = {fileDataToScan.getMimeType()};
-      String[] files = {fileDataToScan.getFile().getAbsolutePath()};
-
-      MediaScannerConnection.scanFile(targetUi.getContext(), files, mimeTypes, null);
-    }
   }
 
   private void sendToMediaScannerIntent(FileData fileDataToScan) {
