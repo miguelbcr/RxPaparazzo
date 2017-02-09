@@ -9,6 +9,9 @@ public final class Dimensions implements Serializable {
     private int width;
     private int height;
 
+    public Dimensions() {
+    }
+
     public Dimensions(int width, int height) {
         this.width = width;
         this.height = height;
