@@ -104,6 +104,8 @@ public final class SaveFile extends UseCase<FileData> {
     File source = fileData.getFile();
 
     if (isFileSizeLimitExceeded(source)) {
+      FileData.deleteSourceFile(fileData);
+
       return FileData.exceededMaximumFileSize(fileData);
     }
 
@@ -118,7 +120,10 @@ public final class SaveFile extends UseCase<FileData> {
     FileData scaled = imageUtils.scaleImage(fileData, getOutputFile(), dimensions);
 
     if (isFileSizeLimitExceeded(scaled.getFile())) {
-      scaled = FileData.exceededMaximumFileSize(fileData);
+      FileData.deleteSourceFile(fileData);
+      FileData.deleteSourceFile(scaled);
+
+      return FileData.exceededMaximumFileSize(fileData);
     }
 
     FileData.deleteSourceFile(fileData);
