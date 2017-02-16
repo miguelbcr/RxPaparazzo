@@ -43,7 +43,7 @@ class UiActions {
             onView(withId(R.id.fab_camera)).perform(click());
         }
 
-        waitTime();
+        waitTimeLong();
 
         clickBottomMiddleScreen();
         rotateDevice();
@@ -53,6 +53,8 @@ class UiActions {
             rotateDevice();
             clickTopRightScreen();
         }
+
+        waitTimeLong();
 
         checkImageDimensions(0);
     }
@@ -66,23 +68,22 @@ class UiActions {
             onView(withId(R.id.fab_pickup_images)).perform(click());
         }
 
-        waitTime();
+        waitTimeLong();
 
         clickImagesOnScreen(imagesToPick);
 
         // Open selected images
         if (!onlyOne) {
-            clickTopRightScreen(250);
+            clickTopRightScreen(DeviceConfig.CURRENT.getMultipleImageConfirmOffset());
         }
 
-        waitTime();
+        waitTimeLong();
 
         // Close crop screen/s
         for (int i = 0; i < imagesToPick; i++) {
             clickTopRightScreen();
+            waitTimeLong();
         }
-
-        waitTime();
 
         for (int i = 0; i < imagesToPick; i++) {
             checkImageDimensions(i);
@@ -93,7 +94,7 @@ class UiActions {
     private void checkImageDimensions(int index) {
         onView(withId(R.id.rv_images)).perform(RecyclerViewActions.scrollToPosition(index));
 
-        waitTime();
+        waitTimeLong();
 
         Matcher<View> itemAtPosition = withRecyclerView(R.id.rv_images).atPositionOnView(index, R.id.iv_image);
 
@@ -148,9 +149,9 @@ class UiActions {
     private void rotateDevice() {
         try {
             uiDevice.setOrientationLeft();
-            waitTime();
+            waitTimeLong();
             uiDevice.setOrientationNatural();
-            waitTime();
+            waitTimeLong();
         } catch (RemoteException e) {
             e.printStackTrace();
         }
@@ -162,7 +163,7 @@ class UiActions {
         int height = screenDimens[1];
 
         uiDevice.click(width / 2, height - 100);
-        waitTime();
+        waitTimeLong();
     }
 
     private void clickTopRightScreen() {
@@ -176,22 +177,11 @@ class UiActions {
         waitTime();
     }
 
-//    private void closeDrawer() {
-//        int screenDimens[] = getScreenDimensions();
-//        int width = screenDimens[0];
-//        int height = screenDimens[1];
-//
-//        uiDevice.click(width - 50, height / 2);
-//        waitTime();
-//    }
-
     private void clickImagesOnScreen(int imagesToPick) {
         int screenDimens[] = getScreenDimensions();
         int width = screenDimens[0];
         int height = screenDimens[1];
         int y = 0;
-
-        //closeDrawer();
 
         for (int i = 0; i < imagesToPick; i++) {
             int widthQuarter = width / 4;
@@ -204,7 +194,7 @@ class UiActions {
                 uiDevice.swipe(x, y, x, y, 500);
             }
 
-            waitTime();
+            waitTimeLong();
         }
     }
 
@@ -218,8 +208,16 @@ class UiActions {
     }
 
     private void waitTime() {
+        waitTime(DeviceConfig.CURRENT.getShortWaitTime());
+    }
+
+    private void waitTimeLong() {
+        waitTime(DeviceConfig.CURRENT.getLongWaitTime());
+    }
+
+    private void waitTime(long time) {
         try {
-            Thread.sleep(3000);
+            Thread.sleep(time);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
