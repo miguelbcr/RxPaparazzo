@@ -16,6 +16,8 @@
 
 package com.miguelbcr.ui.rx_paparazzo.interactors;
 
+import android.content.Context;
+import android.content.Intent;
 import android.media.MediaScannerConnection;
 import android.net.Uri;
 
@@ -56,14 +58,24 @@ public final class SaveImage extends UseCase<String> {
                 String filePathScaled = imageUtils.scaleImage(filePath, filePathOutput, dimens);
                 new File(filePath).delete();
 
-                MediaScannerConnection.scanFile(targetUi.getContext(),
-                    new String[] { filePathScaled }, new String[] { "image/*" }, null);
+                sendToMediaScannerIntent(new File(filePathScaled));
 
                 return filePathScaled;
               }
             });
       }
     });
+  }
+
+  private void sendToMediaScannerIntent(File fileToScan) {
+    if (fileToScan.exists()) {
+      Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+      Context context = targetUi.getContext();
+      Uri contentUri = Uri.fromFile(fileToScan);
+      mediaScanIntent.setData(contentUri);
+
+      context.sendBroadcast(mediaScanIntent);
+    }
   }
 
   private Observable<Uri> getOutputUri() {
