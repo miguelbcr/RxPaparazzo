@@ -20,26 +20,51 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import io.reactivex.Observable;
-import io.reactivex.functions.Function;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public final class PickImages extends UseCase<List<Uri>> {
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
+
+public class PickFiles extends UseCase<List<Uri>> {
+
+  public static final String DEFAULT_MIME_TYPE = "*/*";
+
+  private final TargetUi targetUi;
+  private final Config config;
   private final StartIntent startIntent;
 
-  public PickImages(StartIntent startIntent) {
+  public PickFiles(TargetUi targetUi, Config config, StartIntent startIntent) {
+    this.targetUi = targetUi;
+    this.config = config;
     this.startIntent = startIntent;
+  }
+
+  public String getDefaultMimeType() {
+    return DEFAULT_MIME_TYPE;
   }
 
   @Override public Observable<List<Uri>> react() {
     return startIntent.with(getFileChooserIntent()).react().map(new Function<Intent, List<Uri>>() {
       @Override public List<Uri> apply(Intent intent) throws Exception {
-        if (intent.getData() != null) {
-          return Arrays.asList(intent.getData());
+        if (intent == null) {
+          return new ArrayList<>();
+        }
+
+        intent.addFlags(PermissionUtil.READ_WRITE_PERMISSIONS);
+
+        Uri pickedUri = intent.getData();
+        if (pickedUri != null) {
+          PermissionUtil.grantReadPermissionToUri(targetUi, pickedUri);
+
+          return Arrays.asList(pickedUri);
         } else {
-          return PickImages.this.getUris(intent);
+          return getUris(intent);
         }
       }
     });
@@ -53,6 +78,9 @@ public final class PickImages extends UseCase<List<Uri>> {
       for (int i = 0; i < clipData.getItemCount(); i++) {
         ClipData.Item item = clipData.getItemAt(i);
         Uri uri = item.getUri();
+
+        PermissionUtil.grantReadPermissionToUri(targetUi, uri);
+
         uris.add(uri);
       }
     }
@@ -61,9 +89,19 @@ public final class PickImages extends UseCase<List<Uri>> {
   }
 
   private Intent getFileChooserIntent() {
+    String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
-    intent.setType("image/*");
-    intent.setAction(Intent.ACTION_GET_CONTENT);
+    intent.setType(mimeType);
+
+    if (config.isUseDocumentPicker() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
+      intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
+    } else {
+      intent.setAction(Intent.ACTION_GET_CONTENT);
+    }
+
+    if (config.isPickOpenableOnly()) {
+      intent.addCategory(Intent.CATEGORY_OPENABLE);
+    }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
       intent.putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true);

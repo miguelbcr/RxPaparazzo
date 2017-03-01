@@ -24,11 +24,14 @@ import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Environment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
-import io.reactivex.exceptions.Exceptions;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -39,7 +42,22 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
+import io.reactivex.exceptions.Exceptions;
+
 public final class ImageUtils {
+
+  private static final String TAG = ImageUtils.class.getSimpleName();
+  private static final String DEFAULT_EXTENSION = "";
+  public static final String JPG_FILE_EXTENSION = "jpg";
+  private static final String PNG_FILE_EXTENSION = "png";
+
+  public static final String MIME_TYPE_IMAGE_WILDCARD = "image/*";
+  public static final String MIME_TYPE_JPEG = "image/jpeg";
+  private static final String MIME_TYPE_PNG = "image/png";
+
+  private static final String DATE_FORMAT = "yyyyMMdd_HHmm_ssSSS";
+  private static final String LOCALE_EN = "en";
+
   private final TargetUi targetUi;
   private final Config config;
 
@@ -48,41 +66,52 @@ public final class ImageUtils {
     this.config = config;
   }
 
-  File getOutputFile(String extension) {
-    String dirname = getApplicationName(targetUi.getContext());
-    File dir = getDir(null, dirname);
-    return getFile(dir, extension);
+  public File getOutputFile(String prefix, String extension) {
+    String fileProviderDirectory = config.getFileProviderDirectory();
+    File dir = getDir(null, fileProviderDirectory);
+
+    return createTimestampedFile(dir, prefix, extension);
   }
 
-  private File getFile(File dir, String extension) {
-    SimpleDateFormat simpleDateFormat =
-        new SimpleDateFormat(Constants.DATE_FORMAT, new Locale(Constants.LOCALE_EN));
-    String datetime = simpleDateFormat.format(new Date());
-    File file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
+  private File createTimestampedFile(File dir, String prefix, String extension) {
+    File file = new File(dir.getAbsolutePath(), createTimestampedFilename(prefix, extension));
 
     while (file.exists()) {
-      datetime = simpleDateFormat.format(new Date());
-      file = new File(dir.getAbsolutePath(), "IMG-" + datetime + extension);
+      String filename = createTimestampedFilename(prefix, extension);
+      file = new File(dir.getAbsolutePath(), filename);
     }
 
     return file;
   }
 
-  File getPrivateFile(String filename) {
-    File dir = new File(targetUi.getContext().getFilesDir(), Constants.SUBDIR);
+  public String createTimestampedFilename(String prefix, String extension) {
+    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT, new Locale(LOCALE_EN));
+    String datetime = simpleDateFormat.format(new Date());
+
+    if (!TextUtils.isEmpty(extension) && !extension.startsWith(".")) {
+      extension = "." + extension;
+    }
+
+    return prefix + datetime + extension;
+  }
+
+  public File getPrivateFile(String directory, String filename) {
+    File dir = new File(targetUi.getContext().getFilesDir(), directory);
     dir.mkdirs();
+
     return new File(dir, filename);
   }
 
   private String getApplicationName(Context context) {
     int stringId = context.getApplicationInfo().labelRes;
+
     return context.getString(stringId);
   }
 
   private File getDir(String dirRoot, String dirname) {
     File storageDir = null;
 
-    if (!config.useInternalStorage()) {
+    if (!config.isUseInternalStorage()) {
       storageDir = getPublicDir(dirRoot, dirname);
     }
 
@@ -97,10 +126,14 @@ public final class ImageUtils {
     File storageDir = null;
 
     if (Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)) {
-      File dir = (dirRoot != null) ? Environment.getExternalStoragePublicDirectory(dirRoot)
-          : Environment.getExternalStorageDirectory();
-      storageDir = new File(dir, dirname);
+      File dir;
+      if (dirRoot == null) {
+        dir = Environment.getExternalStorageDirectory();
+      } else {
+        dir = Environment.getExternalStoragePublicDirectory(dirRoot);
+      }
 
+      storageDir = new File(dir, dirname);
       if (!storageDir.exists() && !storageDir.mkdirs()) {
         storageDir = null;
       }
@@ -121,70 +154,132 @@ public final class ImageUtils {
     return storageDir;
   }
 
-  String getFileExtension(String filepath) {
+  public static String getFileName(String filepath) {
+    File file = new File(filepath);
+
+    return file.getName();
+  }
+
+  public static String stripPathFromFilename(String fileName) {
+    int lastSlash = fileName.lastIndexOf("/");
+    if (lastSlash == -1) {
+      return fileName;
+    } else {
+      return fileName.substring(lastSlash + 1);
+    }
+  }
+
+  public String getFileExtension(String filepath) {
+    return getFileExtension(filepath, DEFAULT_EXTENSION);
+  }
+
+  public String getFileExtension(String filepath, String defaultExtension) {
     String extension = "";
 
     if (filepath != null) {
       int i = filepath.lastIndexOf('.');
-      extension = i > 0 ? filepath.substring(i) : "";
+      if (i > 0) {
+        extension = filepath.substring(i + 1);
+      } else {
+        extension = "";
+      }
     }
 
-    return (TextUtils.isEmpty(extension)) ? ".jpg" : extension;
+    if (TextUtils.isEmpty(extension) && !TextUtils.isEmpty(defaultExtension)) {
+      extension = defaultExtension;
+    }
+
+    return extension;
   }
 
   String getFileExtension(Uri uri) {
+    String mimeType = getMimeType(targetUi.getContext(), uri);
+
+    if (TextUtils.isEmpty(mimeType)) {
+      return getFileExtension(uri.getLastPathSegment());
+    } else {
+      return mimeType.split("/")[1];
+    }
+  }
+
+  public static String getMimeType(Context context, Uri uri) {
     String mimeType;
 
     if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT)) {
-      mimeType = targetUi.getContext().getContentResolver().getType(uri);
+      mimeType = context.getContentResolver().getType(uri);
     } else {
-      String fileExtension = MimeTypeMap.getFileExtensionFromUrl(uri.toString());
-      mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+      String path = uri.toString();
+      mimeType = getMimeType(path);
     }
-
-    return (TextUtils.isEmpty(mimeType)) ? getFileExtension(uri.getLastPathSegment())
-        : "." + mimeType.split("/")[1];
+    return mimeType;
   }
 
-  String scaleImage(String filePath, String filePathOutput, int[] dimens) {
+  public static String getMimeType(String path) {
+    String fileExtension = MimeTypeMap.getFileExtensionFromUrl(path);
+
+    return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension.toLowerCase());
+  }
+
+  public static Dimensions getImageDimensions(File file) {
+    String filePath = file.getAbsolutePath();
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true;
+    BitmapFactory.decodeFile(filePath, options);
+
+    return new Dimensions(options.outWidth, options.outHeight);
+  }
+
+  FileData scaleImage(FileData inputData, File destination, Dimensions dimens) {
+    File input = inputData.getFile();
+    String mimeType;
+
     if (config.getSize() instanceof OriginalSize) {
-      copyFileAndExifTags(filePath, filePathOutput, dimens);
-      return filePathOutput;
+      copyFileAndExifTags(input, destination, dimens);
+      mimeType = inputData.getMimeType();
+    } else {
+      Bitmap bitmap = sampleBitmap(input, dimens.getWidth(), dimens.getHeight());
+      if (bitmap == null) {
+        copyFileAndExifTags(input, destination, dimens);
+        mimeType = inputData.getMimeType();
+      } else {
+        Bitmap.CompressFormat compressFormat = getCompressFormat(destination.getName());
+        if (Bitmap.CompressFormat.JPEG == compressFormat) {
+          mimeType = MIME_TYPE_JPEG;
+        } else if (Bitmap.CompressFormat.PNG == compressFormat) {
+          mimeType = MIME_TYPE_PNG;
+        } else {
+          throw new IllegalStateException(String.format("Received unexpected compression format '%s'", compressFormat));
+        }
+
+        bitmap2file(bitmap, destination, compressFormat);
+        copyExifTags(input, destination, dimens);
+      }
     }
 
-    Bitmap bitmap = handleBitmapSampling(filePath, dimens[0], dimens[1]);
-    if (bitmap == null) {
-      copyFileAndExifTags(filePath, filePathOutput, dimens);
-      return filePathOutput;
-    }
-
-    bitmap2file(bitmap, new File(filePathOutput), getCompressFormat(filePathOutput));
-    copyExifTags(filePath, filePathOutput, dimens);
-
-    return filePathOutput;
+    return new FileData(inputData, destination, true, mimeType);
   }
 
   private Bitmap.CompressFormat getCompressFormat(String filePath) {
     Bitmap.CompressFormat compressFormat = Bitmap.CompressFormat.JPEG;
-    final String extension = getFileExtension(filePath);
+    String extension = getFileExtension(filePath);
 
-    if (extension.toLowerCase().contains(Constants.EXT_PNG)) {
+    if (extension.toLowerCase().contains(PNG_FILE_EXTENSION)) {
       compressFormat = Bitmap.CompressFormat.PNG;
     }
 
     return compressFormat;
   }
 
-  private void copyFileAndExifTags(String filePath, String filePathOutput, int[] dimens) {
-    copy(new File(filePath), new File(filePathOutput));
-    copyExifTags(filePath, filePathOutput, dimens);
+  private void copyFileAndExifTags(File input, File fileOutput, Dimensions dimens) {
+    copy(input, fileOutput);
+    copyExifTags(input, fileOutput, dimens);
   }
 
-  public void copy(InputStream in, File dst) {
+  public void copy(InputStream in, File destination) {
     OutputStream out = null;
 
     try {
-      out = new FileOutputStream(dst);
+      out = new FileOutputStream(destination);
       byte[] buffer = new byte[1024];
       int length;
 
@@ -192,7 +287,9 @@ public final class ImageUtils {
         out.write(buffer, 0, length);
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = String.format("Could not copy file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     } finally {
       try {
@@ -209,23 +306,27 @@ public final class ImageUtils {
     }
   }
 
-  public void copy(File src, File dst) {
+  public void copy(File source, File destination) {
     try {
-      InputStream in = new FileInputStream(src);
-      copy(in, dst);
+      InputStream in = new FileInputStream(source);
+      copy(in, destination);
     } catch (IOException e) {
-      e.printStackTrace();
+      String message = String.format("Could not copy file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     }
   }
 
-  private void bitmap2file(Bitmap bitmap, File file, Bitmap.CompressFormat compressFormat) {
+  private void bitmap2file(Bitmap bitmap, File destination, Bitmap.CompressFormat compressFormat) {
     FileOutputStream fileOutputStream = null;
     try {
-      fileOutputStream = new FileOutputStream(file);
+      fileOutputStream = new FileOutputStream(destination);
       bitmap.compress(compressFormat, 90, fileOutputStream);
     } catch (Exception e) {
-      e.printStackTrace();
+      String message = String.format("Could not save bitmap file to '%s'", destination.getAbsolutePath());
+      Log.e(TAG, message, e);
+
       throw Exceptions.propagate(e);
     } finally {
       try {
@@ -239,26 +340,29 @@ public final class ImageUtils {
     }
   }
 
-  private void copyExifTags(String srcFilePath, String dstFilePath, int[] dimens) {
-    if (getCompressFormat(dstFilePath) == Bitmap.CompressFormat.JPEG) {
-      try {
-        ExifInterface exifSource = new ExifInterface(srcFilePath);
-        ExifInterface exifDest = new ExifInterface(dstFilePath);
+  private void copyExifTags(File source, File destination, Dimensions dimens) {
+    try {
+      String destinationPath = destination.getAbsolutePath();
+      String sourcePath = source.getAbsolutePath();
+      if (getCompressFormat(destinationPath) == Bitmap.CompressFormat.JPEG) {
+          ExifInterface exifSource = new ExifInterface(sourcePath);
+          ExifInterface exifDest = new ExifInterface(destinationPath);
 
-        for (String attribute : getExifTags()) {
-          String tagValue = exifSource.getAttribute(attribute);
+          for (String attribute : getExifTags()) {
+            String tagValue = exifSource.getAttribute(attribute);
 
-          if (!TextUtils.isEmpty(tagValue)) {
-            exifDest.setAttribute(attribute, tagValue);
+            if (!TextUtils.isEmpty(tagValue)) {
+              exifDest.setAttribute(attribute, tagValue);
+            }
           }
-        }
 
-        exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens[0]));
-        exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens[1]));
-        exifDest.saveAttributes();
-      } catch (IOException e) {
-        e.printStackTrace();
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_WIDTH, String.valueOf(dimens.getWidth()));
+          exifDest.setAttribute(ExifInterface.TAG_IMAGE_LENGTH, String.valueOf(dimens.getHeight()));
+          exifDest.saveAttributes();
       }
+    } catch (IOException e) {
+      String message = String.format("Could not copy exif tags from '%s'", source.getAbsolutePath());
+      Log.d(TAG, message, e);
     }
   }
 
@@ -278,29 +382,50 @@ public final class ImageUtils {
     };
   }
 
-  private Bitmap handleBitmapSampling(String filePath, int maxWidth, int maxHeight) {
-    BitmapFactory.Options options = new BitmapFactory.Options();
-    options.inJustDecodeBounds = true;
-    BitmapFactory.decodeFile(filePath, options);
-    options.inSampleSize =
-        (maxWidth <= 0 || maxHeight <= 0) ? 1 : calculateInSampleSize(options, maxWidth, maxHeight);
-
+  private Bitmap sampleBitmap(File input, int maxWidth, int maxHeight) {
+    BitmapFactory.Options options = sampleSize(input, maxWidth, maxHeight);
     if (options.inSampleSize == 1) {
       return null;
     }
 
     options.inJustDecodeBounds = false;
+
+    String filePath = input.getAbsolutePath();
+
     return BitmapFactory.decodeFile(filePath, options);
+  }
+
+  public boolean isImage(File input) {
+    BitmapFactory.Options options = sampleSize(input, 0, 0);
+
+    return options.outWidth > 0 && options.outHeight > 0;
+  }
+
+  private BitmapFactory.Options sampleSize(File input, int maxWidth, int maxHeight) {
+    BitmapFactory.Options options = new BitmapFactory.Options();
+    options.inJustDecodeBounds = true;
+
+    // load dimensions
+    String filePath = input.getAbsolutePath();
+    BitmapFactory.decodeFile(filePath, options);
+
+    if (maxWidth <= 0 || maxHeight <= 0) {
+      options.inSampleSize = 1;
+    } else {
+      options.inSampleSize = calculateInSampleSize(options, maxWidth, maxHeight);
+    }
+
+    return options;
   }
 
   private int calculateInSampleSize(BitmapFactory.Options options, int maxWidth, int maxHeight) {
     int inSampleSize = 1;
-    int[] dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
-    int[] maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
-    float width = dimensPortrait[0];
-    float height = dimensPortrait[1];
-    float newMaxWidth = maxDimensPortrait[0];
-    float newMaxHeight = maxDimensPortrait[1];
+    Dimensions dimensPortrait = getDimensionsPortrait(options.outWidth, options.outHeight);
+    Dimensions maxDimensPortrait = getDimensionsPortrait(maxWidth, maxHeight);
+    float width = dimensPortrait.getWidth();
+    float height = dimensPortrait.getHeight();
+    float newMaxWidth = maxDimensPortrait.getWidth();
+    float newMaxHeight = maxDimensPortrait.getHeight();
 
     if (height > newMaxHeight || width > newMaxWidth) {
       int heightRatio = Math.round(height / newMaxHeight);
@@ -317,11 +442,11 @@ public final class ImageUtils {
     return inSampleSize;
   }
 
-  private int[] getDimensionsPortrait(int width, int height) {
+  private Dimensions getDimensionsPortrait(int width, int height) {
     if (width < height) {
-      return new int[] { width, height };
+      return new Dimensions(width, height);
     } else {
-      return new int[] { height, width };
+      return new Dimensions(height, width);
     }
   }
 }

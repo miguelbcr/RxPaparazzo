@@ -1,6 +1,5 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample.fragments;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.content.ContextCompat;
@@ -10,175 +9,237 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
-import com.miguelbcr.ui.rx_paparazzo2.entities.Options;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
+import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
+import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.OriginalSize;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.SmallSize;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;
+import com.miguelbcr.ui.rx_paparazzo2.sample.activities.PickerUtil;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.Testable;
 import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
 import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.schedulers.Schedulers;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 public class SampleFragment extends Fragment implements Testable {
-    private ImageView imageView;
+    private static final String STATE_FILES = "FILES";
+
     private RecyclerView recyclerView;
-    private List<String> filesPaths;
+    private ArrayList<FileData> fileDataList;
     private Size size;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.sample_layout, container, false);
-        return view;
+        return inflater.inflate(R.layout.sample_layout, container, false);
     }
 
     @Override
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        initViews();
-        filesPaths = new ArrayList<>();
+
+        fileDataList = new ArrayList<>();
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(STATE_FILES)) {
+                List files = (List) savedInstanceState.getSerializable(STATE_FILES);
+                fileDataList.addAll(files);
+            }
+        }
+
         size = new OriginalSize();
+
+        initViews();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putSerializable(STATE_FILES, fileDataList);
     }
 
     private void initViews() {
-        imageView = (ImageView) getView().findViewById(R.id.iv_image);
-        recyclerView = (RecyclerView) getView().findViewById(R.id.rv_images);
+        View view = getView();
 
-        recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+        recyclerView = (RecyclerView) view.findViewById(R.id.rv_images);
+        recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
-        getView().findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
-        getView().findViewById(R.id.fab_camera_crop).setOnClickListener(v -> captureImageWithCrop());
-        getView().findViewById(R.id.fab_pickup_image).setOnClickListener(v -> pickupImage());
-        getView().findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
+        view.findViewById(R.id.fab_camera).setOnClickListener(v -> captureImage());
+        view.findViewById(R.id.fab_camera_crop).setOnClickListener(v -> captureImageWithCrop());
+        view.findViewById(R.id.fab_pickup_image).setOnClickListener(v -> pickupImage());
+        view.findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
+        view.findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
+        view.findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+
+        loadImages();
     }
 
     private void captureImage() {
-        size = new SmallSize();
-        RxPaparazzo.takeImage(this)
-                .size(size)
-                .usingCamera()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
-                        response.targetUI().loadImage(response.data());
-                    }
-                });
+        SmallSize size = new SmallSize();
+
+        Observable<Response<SampleFragment, FileData>> takeOnePhoto = pickSingle(null, size)
+                .usingCamera();
+
+        processSingle(takeOnePhoto);
     }
 
     private void captureImageWithCrop() {
-        Options options = new Options();
-        options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorAccent));
-        options.setAspectRatio(25, 75);
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorAccent));
+        options.setToolbarTitle("Cropping single photo");
+        options.withAspectRatio(25, 75);
 
-        size = new OriginalSize();
-        RxPaparazzo.takeImage(this)
-                .size(size)
-                .crop(options)
-                .usingCamera()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
-                        response.targetUI().loadImage(response.data());
-                    }
-                });
+        OriginalSize size = new OriginalSize();
+
+        Observable<Response<SampleFragment, FileData>> takePhotoAndCrop = pickSingle(options, size)
+                .usingCamera();
+
+        processSingle(takePhotoAndCrop);
     }
 
     private void pickupImage() {
         UCrop.Options options = new UCrop.Options();
-        options.setToolbarColor(ContextCompat.getColor(getActivity(), R.color.colorPrimaryDark));
+        options.setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+        options.setToolbarTitle("Cropping single image");
 
-        size = new SmallSize();
-        RxPaparazzo.takeImage(this)
-                .useInternalStorage()
-                .crop(options)
-                .size(size)
-                .usingGallery()
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
-                        response.targetUI().loadImage(response.data());
-                    }
-                });
+        Observable<Response<SampleFragment, FileData>> pickUsingGallery = pickSingle(options, new SmallSize())
+                .usingGallery();
+
+        processSingle(pickUsingGallery);
     }
 
     private void pickupImages() {
-        size = new SmallSize();
-        RxPaparazzo.takeImages(this)
-                .useInternalStorage()
-                .crop()
-                .size(size)
-                .usingGallery()
+        Observable<Response<SampleFragment, List<FileData>>> pickMultiple = pickMultiple(new SmallSize())
+                .usingGallery();
+
+        processMultiple(pickMultiple);
+    }
+
+    private void pickupFile() {
+        UCrop.Options options = new UCrop.Options();
+        options.setToolbarColor(ContextCompat.getColor(getContext(), R.color.colorPrimaryDark));
+        options.setToolbarTitle("Cropping single file");
+
+        Observable<Response<SampleFragment, FileData>> pickUsingGallery = pickSingle(options, new CustomMaxSize(500))
+                .usingFiles();
+
+        processSingle(pickUsingGallery);
+    }
+
+    private void pickupFiles() {
+        Size size = new SmallSize();
+
+        Observable<Response<SampleFragment, List<FileData>>> pickMultiple = pickMultiple(size)
+                .usingFiles();
+
+        processMultiple(pickMultiple);
+    }
+
+    private void processSingle(Observable<Response<SampleFragment, FileData>> pickUsingGallery) {
+        pickUsingGallery
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(response -> {
-                    if (checkResultCode(response.resultCode())) {
-                        if (response.data().size() == 1)
-                            response.targetUI().loadImage(response.data().get(0));
-                        else response.targetUI().loadImages(response.data());
+                    if (PickerUtil.checkResultCode(getContext(), response.resultCode())) {
+                        response.targetUI().loadImage(response.data());
                     }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
                 });
     }
 
-    private boolean checkResultCode(int code) {
-        if (code == RxPaparazzo.RESULT_DENIED_PERMISSION) {
-            showUserDidNotGrantPermissions();
-        } else if (code == RxPaparazzo.RESULT_DENIED_PERMISSION_NEVER_ASK) {
-            showUserDidNotGrantPermissionsNeverAsk();
-        } else if (code != Activity.RESULT_OK) {
-            showUserCanceled();
+    private RxPaparazzo.SingleSelectionBuilder<SampleFragment> pickSingle(UCrop.Options options, Size size) {
+        this.size = size;
+
+        RxPaparazzo.SingleSelectionBuilder<SampleFragment> resized = RxPaparazzo.single(this)
+                .sendToMediaScanner()
+                .size(size);
+
+        if (options != null) {
+            resized.crop(options);
         }
 
-        return code == Activity.RESULT_OK;
+        return resized;
     }
 
-    private void loadImage(String filePath) {
-        filesPaths.clear();
-        filesPaths.add(filePath);
-        imageView.setVisibility(View.VISIBLE);
-        recyclerView.setVisibility(View.GONE);
-        File imageFile = new File(filePath);
-
-        Picasso.with(getActivity()).setLoggingEnabled(true);
-        Picasso.with(getActivity()).invalidate(new File(filePath));
-        Picasso.with(getActivity()).load(imageFile).into(imageView);
+    private Disposable processMultiple(Observable<Response<SampleFragment, List<FileData>>> pickMultiple) {
+        return pickMultiple
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(response -> {
+                    if (PickerUtil.checkResultCode(getContext(), response.resultCode())) {
+                        if (response.data().size() == 1) {
+                            response.targetUI().loadImage(response.data().get(0));
+                        } else {
+                            response.targetUI().loadImages(response.data());
+                        }
+                    }
+                }, throwable -> {
+                    throwable.printStackTrace();
+                    Toast.makeText(getContext(), "ERROR " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                });
     }
 
-    private void loadImages(List<String> filesPaths) {
-        this.filesPaths = filesPaths;
-        imageView.setVisibility(View.GONE);
+    private RxPaparazzo.MultipleSelectionBuilder<SampleFragment> pickMultiple(Size size) {
+        this.size = size;
+
+        return RxPaparazzo.multiple(this)
+                .sendToMediaScanner()
+                .crop()
+                .size(size);
+    }
+
+
+    private void loadImage(FileData fileData) {
+        this.fileDataList = new ArrayList<>();
+        this.fileDataList.add(fileData);
+
+        loadImages();
+    }
+
+    private void loadImages() {
+        this.fileDataList = new ArrayList<>(fileDataList);
+
+        loadImages(fileDataList);
+    }
+
+    private void loadImages(List<FileData> fileDataList) {
+        if (fileDataList == null || fileDataList.isEmpty()) {
+            return;
+        }
+
         recyclerView.setVisibility(View.VISIBLE);
-        recyclerView.setAdapter(new ImagesAdapter(filesPaths));
+        recyclerView.setAdapter(new ImagesAdapter(fileDataList));
     }
 
-    private void showUserCanceled() {
-        Toast.makeText(getActivity(), getString(R.string.user_canceled), Toast.LENGTH_SHORT).show();
-    }
-
-    private void showUserDidNotGrantPermissions() {
-        Toast.makeText(getActivity(), getString(R.string.user_did_not_grant_permissions), Toast.LENGTH_SHORT).show();
-    }
-
-    private void showUserDidNotGrantPermissionsNeverAsk() {
-        Toast.makeText(getActivity(), getString(R.string.user_did_not_grant_permissions_never_ask), Toast.LENGTH_SHORT).show();
+    @Override
+    public List<FileData> getFileDatas() {
+        return fileDataList;
     }
 
     @Override
     public List<String> getFilePaths() {
+        List<String> filesPaths = new ArrayList<>();
+        for (FileData fileData : fileDataList) {
+            filesPaths.add(fileData.getFile().getAbsolutePath());
+        }
+
         return filesPaths;
     }
 

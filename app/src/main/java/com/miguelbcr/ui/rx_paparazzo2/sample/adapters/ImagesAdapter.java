@@ -1,23 +1,25 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample.adapters;
 
+import android.graphics.drawable.Drawable;
+import android.support.v7.widget.AppCompatDrawableManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.util.List;
 
-/**
- * Created by miguel on 16/03/2016.
- */public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder>{
-    private List<String> urlImages;
+public class ImagesAdapter extends RecyclerView.Adapter<ImagesAdapter.ViewHolder> {
+    private List<FileData> urlImages;
 
-    public ImagesAdapter(List<String> urlImages) {
+    public ImagesAdapter(List<FileData> urlImages) {
         this.urlImages = urlImages;
     }
 
@@ -37,16 +39,32 @@ import java.util.List;
         return urlImages == null ? 0 : urlImages.size();
     }
 
-    protected static class ViewHolder extends RecyclerView.ViewHolder {
+    static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imageView;
+        TextView filenameView;
 
         ViewHolder(View itemView) {
             super(itemView);
             imageView = (ImageView)itemView.findViewById(R.id.iv_image);
+            filenameView = (TextView)itemView.findViewById(R.id.iv_filename);
         }
 
-        public void bind(String imageUrl) {
-            Picasso.with(imageView.getContext()).load(new File(imageUrl)).into(imageView);
+        void bind(FileData fileData) {
+            filenameView.setText(fileData.describe());
+            File file = fileData.getFile();
+            if (file != null && file.exists()) {
+                Picasso.with(imageView.getContext())
+                        .load(file)
+                        .error(R.drawable.ic_description_black_48px)
+                        .into(imageView);
+            } else {
+                if (fileData.isExceededMaximumFileSize()) {
+                    filenameView.setText("MAXIMUM FILESIZE EXCEEDED");
+                }
+
+                Drawable drawable = AppCompatDrawableManager.get().getDrawable(imageView.getContext(), R.drawable.ic_description_black_48px);
+                imageView.setImageDrawable(drawable);
+            }
         }
     }
 }

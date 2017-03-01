@@ -18,76 +18,83 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
+
+import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+
 import io.reactivex.Observable;
 import io.reactivex.functions.Function;
-import java.io.File;
-import java.util.List;
 
-public final class TakePhoto extends UseCase<Uri> {
-  private static final int READ_WRITE_PERMISSIONS =
-      Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
+public final class TakePhoto extends UseCase<FileData> {
+  private static final String PHOTO_FILE_PREFIX = "PHOTO-";
+
+  private final Config config;
   private final StartIntent startIntent;
   private final TargetUi targetUi;
   private final ImageUtils imageUtils;
 
-  public TakePhoto(StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
+  public TakePhoto(Config config, StartIntent startIntent, TargetUi targetUi, ImageUtils imageUtils) {
+    this.config = config;
     this.startIntent = startIntent;
     this.targetUi = targetUi;
     this.imageUtils = imageUtils;
   }
 
-  @Override public Observable<Uri> react() {
-    final Uri uri = getUri();
-    return startIntent.with(getIntentCamera(uri)).react().map(new Function<Intent, Uri>() {
-      @Override public Uri apply(Intent data) throws Exception {
-        revokeFileReadWritePermissions(uri);
-        return uri;
-      }
-    });
+  @Override
+  public Observable<FileData> react() {
+    final File file = getOutputFile();
+    Uri uri = getUri(file);
+
+    return startIntent.with(getIntentCamera(uri))
+            .react()
+            .map(revokeFileReadWritePermissions(targetUi, uri))
+            .map(new Function<Uri, FileData>() {
+              @Override
+              public FileData apply(Uri uri) throws Exception {
+                if (!file.exists()) {
+                  throw new FileNotFoundException(String.format("Camera file not saved", file.getAbsolutePath()));
+                }
+
+                return new FileData(file, true, file.getName(), ImageUtils.MIME_TYPE_JPEG);
+              }
+            });
   }
 
-  private Uri getUri() {
+  private Function<Intent, Uri> revokeFileReadWritePermissions(final TargetUi targetUi, final Uri uri) {
+    return new Function<Intent, Uri>() {
+      @Override public Uri apply(Intent data) throws Exception {
+        PermissionUtil.revokeFileReadWritePermissions(targetUi, uri);
+
+        return uri;
+      }
+    };
+  }
+
+  private Uri getUri(File file) {
     Context context = targetUi.getContext();
-    File file = imageUtils.getPrivateFile(Constants.SHOOT_APPEND);
-    String authority = context.getPackageName() + "." + Constants.FILE_PROVIDER;
+    String authority = config.getFileProviderAuthority(context);
+
     return FileProvider.getUriForFile(context, authority, file);
+  }
+
+  private File getOutputFile() {
+    String filename = imageUtils.createTimestampedFilename(PHOTO_FILE_PREFIX, ImageUtils.JPG_FILE_EXTENSION);
+    String directory = config.getFileProviderDirectory();
+    return imageUtils.getPrivateFile(directory, filename);
   }
 
   private Intent getIntentCamera(Uri uri) {
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-    intent.addFlags(READ_WRITE_PERMISSIONS);
     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
-    grantFileReadWritePermissions(intent, uri);
-    return intent;
+
+    return PermissionUtil.requestReadWritePermission(targetUi, intent, uri);
   }
 
-  /**
-   * Workaround for Android bug.<br/>
-   * See https://code.google.com/p/android/issues/detail?id=76683 <br/>
-   * See http://stackoverflow.com/questions/18249007/how-to-use-support-fileprovider-for-sharing-content-to-other-apps
-   */
-  private void grantFileReadWritePermissions(Intent intent, Uri uri) {
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-      List<ResolveInfo> resInfoList = targetUi.getContext()
-          .getPackageManager()
-          .queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
-      for (ResolveInfo resolveInfo : resInfoList) {
-        String packageName = resolveInfo.activityInfo.packageName;
-        targetUi.getContext().grantUriPermission(packageName, uri, READ_WRITE_PERMISSIONS);
-      }
-    }
-  }
-
-  private void revokeFileReadWritePermissions(Uri uri) {
-    if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
-      targetUi.getContext().revokeUriPermission(uri, READ_WRITE_PERMISSIONS);
-    }
-  }
 }

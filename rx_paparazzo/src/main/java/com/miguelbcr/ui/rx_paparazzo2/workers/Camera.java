@@ -20,15 +20,20 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.net.Uri;
+
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
+import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Ignore;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.CropImage;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.GrantPermissions;
-import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveImage;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.PermissionUtil;
+import com.miguelbcr.ui.rx_paparazzo2.interactors.SaveFile;
 import com.miguelbcr.ui.rx_paparazzo2.interactors.TakePhoto;
+
+import java.util.Arrays;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
@@ -36,76 +41,80 @@ import io.reactivex.functions.Function;
 public final class Camera extends Worker {
   private final TakePhoto takePhoto;
   private final CropImage cropImage;
-  private final SaveImage saveImage;
+  private final SaveFile saveFile;
   private final GrantPermissions grantPermissions;
   private final TargetUi targetUi;
   private final Config config;
 
-  public Camera(TakePhoto takePhoto, CropImage cropImage, SaveImage saveImage,
+  public Camera(TakePhoto takePhoto, CropImage cropImage, SaveFile saveFile,
       GrantPermissions grantPermissions, TargetUi targetUi, Config config) {
     super(targetUi);
     this.takePhoto = takePhoto;
     this.cropImage = cropImage;
-    this.saveImage = saveImage;
+    this.saveFile = saveFile;
     this.grantPermissions = grantPermissions;
     this.targetUi = targetUi;
     this.config = config;
   }
 
-  public <T> Observable<Response<T, String>> takePhoto() {
+  public <T> Observable<Response<T, FileData>> takePhoto() {
     return grantPermissions.with(permissions())
         .react()
-        .flatMap(new Function<Ignore, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Ignore ignore) throws Exception {
+        .flatMap(new Function<Ignore, ObservableSource<FileData>>() {
+          @Override public ObservableSource<FileData> apply(Ignore ignore) throws Exception {
             return takePhoto.react();
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<Uri>>() {
-          @Override public ObservableSource<Uri> apply(Uri uri) throws Exception {
-            return cropImage.with(uri).react();
+        .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+          @Override public ObservableSource<FileData> apply(FileData fileData) throws Exception {
+            return handleSavingFile(fileData);
           }
         })
-        .flatMap(new Function<Uri, ObservableSource<String>>() {
-          @Override public ObservableSource<String> apply(Uri uri) throws Exception {
-            return saveImage.with(uri).react();
+        .map(new Function<FileData, Response<T, FileData>>() {
+          @Override public Response<T, FileData> apply(FileData fileData) throws Exception {
+            return new Response<>((T) targetUi.ui(), fileData, Activity.RESULT_OK);
           }
         })
-        .map(new Function<String, Response<T, String>>() {
-          @Override public Response<T, String> apply(String path) throws Exception {
-            return new Response<>((T) targetUi.ui(), path, Activity.RESULT_OK);
-          }
-        })
-        .compose(this.<Response<T, String>>applyOnError());
+        .compose(this.<Response<T, FileData>>applyOnError());
+  }
+
+  private Observable<FileData> handleSavingFile(final FileData sourceFileData) {
+    return cropImage.with(sourceFileData).react()
+            .flatMap(new Function<FileData, ObservableSource<FileData>>() {
+                  public ObservableSource<FileData> apply(FileData cropped) throws Exception {
+                    return saveFile.with(cropped).react();
+                  }
+            });
   }
 
   private String[] permissions() {
-    if (config.useInternalStorage()) {
-      if (hasCameraPermissionInManifest()) {
-        return new String[] { Manifest.permission.CAMERA };
-      } else {
-        return new String[] {};
-      }
-    } else {
-      if (hasCameraPermissionInManifest()) {
-        return new String[] {
-            Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-      } else {
-        return new String[] {
-            Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE
-        };
-      }
+    String[] storagePermission = PermissionUtil.getReadAndWriteStoragePermissions(config.isUseInternalStorage());
+    String[] cameraPermission = getCameraPermission();
+
+    return concat(storagePermission, cameraPermission);
+  }
+
+  private String[] getCameraPermission() {
+    if (hasCameraPermissionInManifest()) {
+      return new String[] { Manifest.permission.CAMERA };
     }
+
+    return new String[] {};
+  }
+
+  private static <T> T[] concat(T[] first, T[] second) {
+    T[] result = Arrays.copyOf(first, first.length + second.length);
+    System.arraycopy(second, 0, result, first.length, second.length);
+
+    return result;
   }
 
   private boolean hasCameraPermissionInManifest() {
-    final String packageName = targetUi.getContext().getPackageName();
     try {
-      final PackageInfo packageInfo = targetUi.getContext()
-          .getPackageManager()
-          .getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
-      final String[] declaredPermissions = packageInfo.requestedPermissions;
+      String packageName = targetUi.getContext().getPackageName();
+      PackageManager pm = targetUi.getContext().getPackageManager();
+      PackageInfo packageInfo = pm.getPackageInfo(packageName, PackageManager.GET_PERMISSIONS);
+      String[] declaredPermissions = packageInfo.requestedPermissions;
       if (declaredPermissions != null && declaredPermissions.length > 0) {
         for (String p : declaredPermissions) {
           if (p.equals(Manifest.permission.CAMERA)) {

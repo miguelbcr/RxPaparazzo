@@ -5,22 +5,32 @@
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
-        android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:name="com.miguelbcr.ui.rx_paparazzo2.sample.SampleApplication"
         android:label="@string/app_name"
         android:supportsRtl="true"
+        android:allowBackup="false"
         android:theme="@style/AppTheme.NoActionBar">
 
-        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.StartActivity"
-            android:configChanges="orientation|screenSize">
+        <provider
+            android:name="android.support.v4.content.FileProvider"
+            android:authorities="${applicationId}.file_provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/rx_paparazzo_file_paths"/>
+        </provider>
+
+        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.SampleActivity"/>
+        <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.SampleActivity"
+            android:configChanges="orientation" />
 
         <activity android:name="com.miguelbcr.ui.rx_paparazzo2.sample.activities.HostActivitySampleFragment"/>
 
