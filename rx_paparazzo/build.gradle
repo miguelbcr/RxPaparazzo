@@ -76,7 +76,7 @@ install {
                 name 'com.github.miguelbcr'
                 pom.groupId = 'com.github.miguelbcr'
                 pom.artifactId = 'RxPaparazzo'
-                pom.version = '2.x-agrimap'
+                pom.version = '2.x-SNAPSHOT'
             }
         }
     }
