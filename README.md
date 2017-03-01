@@ -39,7 +39,7 @@ allprojects {
 Add dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.miguelbcr:RxPaparazzo:0.4.4"
+    compile "com.github.miguelbcr:RxPaparazzo:0.4.7"
     compile 'io.reactivex:rxandroid:1.2.1'
 }
 ```
