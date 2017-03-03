@@ -104,7 +104,7 @@ Example: file_provider_paths.xml
 ```
 
 The `file_provider_paths.xml` is where files are exposed in the FileProvider.
-If you set the files-path `path` attribute to a value other than `RxPaparazzo/` you must set the configuration using `RxPaparazzo.Builder.setFileProviderPath(String authority)`
+If you set the files-path `path` attribute to a value other than `RxPaparazzo/` you must set the configuration using `RxPaparazzo.Builder.setFileProviderPath(String path)`
 
 All features RxPaparazzo exposes can be accessed from both, an `activity` or a `fragment` instance.
 
