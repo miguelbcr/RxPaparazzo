@@ -79,8 +79,8 @@ public class PickFile extends UseCase<Uri> {
   private OnPreResult getOnPreResultProcessing() {
     return new OnPreResult() {
       @Override
-      public Observable<Uri> response(int responseCode, @Nullable final Intent intent) {
-        if (responseCode == Activity.RESULT_OK && intent != null && intent.getData() != null) {
+      public Observable<Uri> response(int requestCode, int resultCode, @Nullable final Intent intent) {
+        if (resultCode == Activity.RESULT_OK && intent != null && intent.getData() != null) {
 
           Uri pickedUri = intent.getData();
           PermissionUtil.grantReadPermissionToUri(targetUi, pickedUri);
