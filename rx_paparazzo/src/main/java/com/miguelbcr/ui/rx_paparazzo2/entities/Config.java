@@ -149,7 +149,7 @@ public class Config {
   }
 
   public String getFileProviderAuthority(Context context) {
-    if (fileProviderAuthority == null) {
+    if (fileProviderAuthority == null || fileProviderAuthority.trim().length() == 0) {
       return context.getPackageName() + "." + DEFAULT_FILE_PROVIDER_AUTHORITIES_SUFFIX;
     }
 
@@ -161,7 +161,7 @@ public class Config {
   }
 
   public String getFileProviderDirectory() {
-    if (fileProviderDirectory == null) {
+    if (fileProviderDirectory == null || fileProviderDirectory.trim().length() == 0) {
       return DEFAULT_FILE_PROVIDER_PATH;
     }
 

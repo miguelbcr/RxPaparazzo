@@ -37,9 +37,39 @@ import rx_activity_result2.RxActivityResult;
 public final class RxPaparazzo {
   public static final int RESULT_DENIED_PERMISSION = 2;
   public static final int RESULT_DENIED_PERMISSION_NEVER_ASK = 3;
+  private static String fileProviderAuthority;
+  private static String fileProviderPath;
 
-  public static void register(Application application) {
+  private RxPaparazzo() {
+  }
+
+  public static RegisterBuilder register(Application application) {
     RxActivityResult.register(application);
+    return new RegisterBuilder();
+  }
+
+  public static class RegisterBuilder {
+    private final RegisterBuilder self;
+
+    RegisterBuilder() {
+      this.self = this;
+    }
+
+    /**
+     * Sets this to the value of name attribute of {@link android.support.v4.content.FileProvider} in AndroidManifest.xml
+     */
+    public RegisterBuilder withFileProviderAuthority(String authority) {
+      fileProviderAuthority = authority;
+      return self;
+    }
+
+    /**
+     * Sets this to the path to use in the {@link android.support.v4.content.FileProvider} xml file
+     */
+    public RegisterBuilder withFileProviderPath(String path) {
+      fileProviderPath = path;
+      return self;
+    }
   }
 
   public static <T extends Activity> SingleSelectionBuilder<T> single(T activity) {
@@ -65,13 +95,15 @@ public final class RxPaparazzo {
   }
 
   private abstract static class Builder<T, B extends Builder<T, B>> {
-    private final Config config;
     private final ApplicationComponent applicationComponent;
     private final B self;
+    private final Config config;
 
     Builder(T ui) {
       this.self = (B)this;
       this.config = new Config();
+      this.config.setFileProviderAuthority(fileProviderAuthority);
+      this.config.setFileProviderPath(fileProviderPath);
       this.applicationComponent = ApplicationComponent.create(new ApplicationModule(config, ui));
     }
 
@@ -85,22 +117,6 @@ public final class RxPaparazzo {
 
     public B setMaximumFileSizeInBytes(long maximumFileSizeInBytes) {
       this.config.setMaximumFileSize(maximumFileSizeInBytes);
-      return self;
-    }
-
-    /**
-     * Sets this to the value of name attribute of {@link android.support.v4.content.FileProvider} in AndroidManifest.xml
-     */
-    public B setFileProviderAuthority(String authority) {
-      this.config.setFileProviderAuthority(authority);
-      return self;
-    }
-
-    /**
-     * Sets this to the path to use in the {@link android.support.v4.content.FileProvider} xml file
-     */
-    public B setFileProviderPath(String authority) {
-      this.config.setFileProviderPath(authority);
       return self;
     }
 

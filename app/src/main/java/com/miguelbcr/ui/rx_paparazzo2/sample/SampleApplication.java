@@ -18,7 +18,10 @@ public class SampleApplication extends Application {
 
     @Override public void onCreate() {
         super.onCreate();
-        RxPaparazzo.register(this);
+        RxPaparazzo.register(this)
+            .withFileProviderAuthority("")
+            .withFileProviderPath("");
+
         AppCare.YesSir.takeCareOn(this);
 
         if (LeakCanary.isInAnalyzerProcess(this)) {
