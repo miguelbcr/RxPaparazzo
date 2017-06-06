@@ -8,10 +8,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
-
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
@@ -21,17 +18,14 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.SmallSize;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;
 import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
-import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SampleActivity extends AppCompatActivity implements Testable {
     private static final String STATE_FILES = "FILES";
