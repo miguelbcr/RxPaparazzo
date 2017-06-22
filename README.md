@@ -79,7 +79,7 @@ public class SampleApp extends Application {
 }
 ```
 
-You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to your `AndroidManifest.xml` and create a paths xml file in your `src/main/res/xml directory.
+You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to your `AndroidManifest.xml` and create a paths xml file in your `src/main/res/xml directory`.
 
 ```xml
  <provider
