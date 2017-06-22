@@ -58,14 +58,14 @@ allprojects {
 Add dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.miguelbcr:RxPaparazzo:0.5.3-2.x"
+    compile "com.github.miguelbcr:RxPaparazzo:0.5.4-2.x"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 }
 ```
 
 
 ## Usage
-Because RxPaparazzo uses RxActivityResult to deal with intent calls, all its requirements and features are inherited too.
+Because RxPaparazzo uses [RxActivityResult](https://github.com/VictorAlbertos/RxActivityResult) to deal with intent calls, all its requirements and features are inherited too.
 
 Before attempting to use RxPaparazzo, you need to call `RxPaparazzo.register` in your Android Application's `onCreate` supplying the current Application instance.
         
@@ -79,7 +79,7 @@ public class SampleApp extends Application {
 }
 ```
 
-You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to your `AndroidManifest.xml` and create a paths xml file in your src/main/res/xml directory.
+You will need to also add a FileProvider named `android.support.v4.content.FileProvider` to your `AndroidManifest.xml` and create a paths xml file in your `src/main/res/xml directory.
 
 ```xml
  <provider
@@ -95,7 +95,7 @@ You will need to also add a FileProvider named `android.support.v4.content.FileP
 
 If you set the provider `android:authorities` attribute to a value other than `${applicationId}.file_provider` name you must set the configuration it using `RxPaparazzo.Builder.setFileProviderAuthority(String authority)`
 
-Example: file_provider_paths.xml
+Example: `file_provider_paths.xml`
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <paths>
