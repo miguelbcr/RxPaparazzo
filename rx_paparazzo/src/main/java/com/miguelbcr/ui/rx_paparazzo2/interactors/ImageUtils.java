@@ -435,7 +435,7 @@ public final class ImageUtils {
       float totalReqPixels = newMaxWidth * newMaxHeight * 2;
 
       while (totalPixels / (inSampleSize * inSampleSize) > totalReqPixels) {
-        inSampleSize++;
+        inSampleSize*=2;
       }
     }
 
