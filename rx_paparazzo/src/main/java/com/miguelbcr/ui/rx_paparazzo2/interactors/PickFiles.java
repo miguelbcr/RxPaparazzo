@@ -89,9 +89,13 @@ public class PickFiles extends UseCase<List<Uri>> {
   }
 
   private Intent getFileChooserIntent() {
-    String mimeType = config.getMimeType(getDefaultMimeType());
     Intent intent = new Intent();
-    intent.setType(mimeType);
+    if (config.getMultipleMimeTypes() == null) {
+      intent.setType(config.getMimeType(getDefaultMimeType()));
+    } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+      intent.setType(DEFAULT_MIME_TYPE);
+      intent.putExtra(Intent.EXTRA_MIME_TYPES, config.getMultipleMimeTypes());
+    }
 
     if (config.isUseDocumentPicker() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
       intent.setAction(Intent.ACTION_OPEN_DOCUMENT);
