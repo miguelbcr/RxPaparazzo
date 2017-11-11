@@ -49,6 +49,8 @@ dependencies {
     debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
     releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
 
+    androidTestCompile 'com.github.VictorAlbertos:DeviceAnimationTestRule:0.0.2'
+
     androidTestCompile ("com.android.support.test:runner:0.4.1") {
         exclude module: 'support-annotations'
     }

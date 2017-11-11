@@ -8,11 +8,14 @@ import android.support.test.uiautomator.UiDevice;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.StartActivity;
 
 import org.junit.Before;
+import org.junit.ClassRule;
 import org.junit.FixMethodOrder;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
+
+import io.victoralbertos.device_animation_test_rule.DeviceAnimationTestRule;
 
 import static android.support.test.espresso.Espresso.onView;
 import static android.support.test.espresso.action.ViewActions.click;
@@ -27,6 +30,8 @@ import static android.support.test.espresso.matcher.ViewMatchers.withId;
 @RunWith(AndroidJUnit4.class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class ApplicationTest extends UiActions {
+    @ClassRule
+    static public DeviceAnimationTestRule deviceAnimationTestRule = new DeviceAnimationTestRule();
 
     @Rule
     public ActivityTestRule<StartActivity> activityRule = new ActivityTestRule<>(StartActivity.class);
