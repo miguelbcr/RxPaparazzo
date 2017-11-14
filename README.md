@@ -58,7 +58,7 @@ allprojects {
 Add dependencies in the build.gradle of the module:
 ```gradle
 dependencies {
-    compile "com.github.miguelbcr:RxPaparazzo:0.5.4-2.x"
+    compile "com.github.miguelbcr:RxPaparazzo:0.5.5-2.x"
     compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
 }
 ```
@@ -265,7 +265,7 @@ To send files to the media scanner so that they can be indexed and available in 
 
 ### Picking files
 
-If you wish to limit the type of images or files then use `setMimeType(String mimeType)` to specify a specific mime type for the Intent.
+If you wish to limit the type of images or files then use `setMimeType(String mimeType)` to specify a specific mime type for the Intent. You can also use `.setMultipleMimeType(String... mimeType)` to specify multiple mime types.
 By default `Intent.ACTION_GET_CONTENT` is used to request images and files. If you wish to edit the original file call `useDocumentPicker()`, this will allow greater, possiblty persistent access to the source file.
 
 ## Proguard
