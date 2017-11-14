@@ -37,6 +37,7 @@ public class Config {
   private boolean useInternalStorage;
 
   private String pickMimeType;
+  private String[] pickMultipleMimeTypes;
   private boolean pickOpenableOnly;
   private boolean useDocumentPicker;
   private boolean sendToMediaScanner;
@@ -51,6 +52,7 @@ public class Config {
     this.useDocumentPicker = false;
     this.pickOpenableOnly = false;
     this.pickMimeType = null;
+    this.pickMultipleMimeTypes = null;
     this.sendToMediaScanner = false;
     this.failCropIfNotImage = false;
     this.fileProviderAuthority = null;
@@ -114,6 +116,18 @@ public class Config {
     }
 
     return pickMimeType;
+  }
+
+  public void setPickMultipleMimeTypes(String... pickMultipleMimeTypes) {
+    this.pickMultipleMimeTypes = pickMultipleMimeTypes;
+  }
+
+  public String[] getMultipleMimeTypes() {
+    if (this.pickMultipleMimeTypes == null) {
+      return null;
+    }
+
+    return pickMultipleMimeTypes;
   }
 
   public void setPickOpenableOnly(boolean pickOpenableOnly) {

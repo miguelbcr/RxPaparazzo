@@ -155,6 +155,14 @@ public final class RxPaparazzo {
     }
 
     /**
+     * Sets the mime types of the picker.
+     */
+    public B setMultipleMimeType(String... mimeType) {
+      this.config.setPickMultipleMimeTypes(mimeType);
+      return self;
+    }
+
+    /**
      * Enables cropping of images.
      */
     public B crop() {

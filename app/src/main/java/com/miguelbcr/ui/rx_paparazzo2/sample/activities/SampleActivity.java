@@ -18,6 +18,7 @@ import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.SmallSize;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;
 import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
+import com.miguelbcr.ui.rx_paparazzo2.sample.fragments.SampleFragment;
 import com.yalantis.ucrop.UCrop;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -83,6 +84,10 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
         findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
         findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+        findViewById(R.id.fab_pickup_multiple_types_file)
+                .setOnClickListener(v -> pickupMultipleTypesFile());
+        findViewById(R.id.fab_pickup_multiple_types_files)
+                .setOnClickListener(v -> pickupMultipleTypesFiles());
 
         loadImages();
     }
@@ -142,6 +147,28 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
         Observable<Response<SampleActivity, List<FileData>>> pickMultiple = pickMultiple(size)
                 .usingFiles();
+
+        processMultiple(pickMultiple);
+    }
+
+    private void pickupMultipleTypesFile() {
+        Observable<Response<SampleActivity, FileData>> pickUsingFiles =
+                pickSingle(null, new SmallSize())
+                        .setMultipleMimeType("image/jpeg", "image/jpg", "image/png", "application/pdf")
+                        .useInternalStorage()
+                        .useDocumentPicker()
+                        .usingFiles();
+
+        processSingle(pickUsingFiles);
+    }
+
+    private void pickupMultipleTypesFiles() {
+        Observable<Response<SampleActivity, List<FileData>>> pickMultiple =
+                pickMultiple(new SmallSize())
+                        .setMultipleMimeType("image/jpeg", "image/jpg", "image/png", "application/pdf")
+                        .useInternalStorage()
+                        .useDocumentPicker()
+                        .usingFiles();
 
         processMultiple(pickMultiple);
     }

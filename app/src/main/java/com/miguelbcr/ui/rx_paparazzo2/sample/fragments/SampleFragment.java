@@ -8,8 +8,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
@@ -23,7 +21,6 @@ import com.miguelbcr.ui.rx_paparazzo2.sample.R;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.PickerUtil;
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.Testable;
 import com.miguelbcr.ui.rx_paparazzo2.sample.adapters.ImagesAdapter;
-import com.squareup.picasso.Picasso;
 import com.yalantis.ucrop.UCrop;
 
 import java.util.ArrayList;
@@ -85,6 +82,10 @@ public class SampleFragment extends Fragment implements Testable {
         view.findViewById(R.id.fab_pickup_images).setOnClickListener(v -> pickupImages());
         view.findViewById(R.id.fab_pickup_file).setOnClickListener(v -> pickupFile());
         view.findViewById(R.id.fab_pickup_files).setOnClickListener(v -> pickupFiles());
+        view.findViewById(R.id.fab_pickup_multiple_types_file)
+                .setOnClickListener(v -> pickupMultipleTypesFile());
+        view.findViewById(R.id.fab_pickup_multiple_types_files)
+                .setOnClickListener(v -> pickupMultipleTypesFiles());
 
         loadImages();
     }
@@ -146,6 +147,28 @@ public class SampleFragment extends Fragment implements Testable {
 
         Observable<Response<SampleFragment, List<FileData>>> pickMultiple = pickMultiple(size)
                 .usingFiles();
+
+        processMultiple(pickMultiple);
+    }
+
+    private void pickupMultipleTypesFile() {
+        Observable<Response<SampleFragment, FileData>> pickUsingFiles =
+                pickSingle(null, new SmallSize())
+                        .setMultipleMimeType("image/jpeg", "image/jpg", "image/png", "application/pdf")
+                        .useInternalStorage()
+                        .useDocumentPicker()
+                        .usingFiles();
+
+        processSingle(pickUsingFiles);
+    }
+
+    private void pickupMultipleTypesFiles() {
+        Observable<Response<SampleFragment, List<FileData>>> pickMultiple =
+                pickMultiple(new SmallSize())
+                        .setMultipleMimeType("image/jpeg", "image/jpg", "image/png", "application/pdf")
+                        .useInternalStorage()
+                        .useDocumentPicker()
+                        .usingFiles();
 
         processMultiple(pickMultiple);
     }
