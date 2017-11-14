@@ -26,6 +26,7 @@ import android.os.Environment;
 import android.provider.DocumentsContract;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
@@ -37,6 +38,7 @@ import io.reactivex.Observable;
 
 public final class GetPath extends UseCase<FileData> {
 
+  private static final String TAG = GetPath.class.getSimpleName();
   private static final String URI_SCHEME_CONTENT = "content";
   private static final String URI_SCHEME_FILE = "file";
   private static final String PUBLIC_DOWNLOADS_URI = "content://downloads/public_downloads";
@@ -142,7 +144,15 @@ public final class GetPath extends UseCase<FileData> {
   private FileData getDownloadsDocument(Context context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
       String id = DocumentsContract.getDocumentId(uri);
-      Uri contentUri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_URI), Long.valueOf(id));
+      Uri contentUri;
+
+      try {
+        contentUri = ContentUris.withAppendedId(Uri.parse(PUBLIC_DOWNLOADS_URI), Long.valueOf(id));
+      } catch (NumberFormatException e) {
+        Log.e(TAG, e.getMessage());
+        e.printStackTrace();
+        contentUri = uri;
+      }
 
       return getDataColumn(context, contentUri, null, null);
     }
