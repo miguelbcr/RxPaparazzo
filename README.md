@@ -24,26 +24,6 @@ This library does that (well not really). But it is a cool name.
 - Crop and rotate images. RxPaparazzo relies on [UCrop](https://github.com/Yalantis/uCrop) to perform beautiful cuts to any face, body or place.
 - Honors the observable chain (it means you can go crazy chaining operators). [RxOnActivityResult](https://github.com/VictorAlbertos/RxActivityResult) allows RxPaparazzo to transform every intent into an observable for a wonderful chaining process.
 
-
-## Setup RxJava1 [DEPRECATED]
-Add the JitPack repository in your build.gradle (top level module):
-```gradle
-allprojects {
-    repositories {
-        jcenter()
-        maven { url "https://jitpack.io" }
-    }
-}
-```
-
-Add dependencies in the build.gradle of the module:
-```gradle
-dependencies {
-    compile "com.github.miguelbcr:RxPaparazzo:0.4.7"
-    compile 'io.reactivex:rxandroid:1.2.1'
-}
-```
-
 ## Setup RxJava2
 Add the JitPack repository in your build.gradle (top level module):
 ```gradle
