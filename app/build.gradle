@@ -11,13 +11,13 @@ buildscript {
 }
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 27
+    buildToolsVersion '27.0.3'
 
     defaultConfig {
         applicationId "com.miguelbcr.ui.rx_paparazzo2.sample"
         minSdkVersion 16
-        targetSdkVersion 26
+        targetSdkVersion 27
         versionCode 1
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -40,14 +40,14 @@ android {
 dependencies {
     compile fileTree(include: ['*.jar'], dir: 'libs')
     testCompile 'junit:junit:4.12'
-    compile 'com.android.support:appcompat-v7:26.1.0'
-    compile 'com.android.support:design:26.1.0'
-    compile 'io.reactivex.rxjava2:rxandroid:2.0.1'
+    compile 'com.android.support:appcompat-v7:27.1.1'
+    compile 'com.android.support:design:27.1.1'
+    compile 'io.reactivex.rxjava2:rxandroid:2.0.2'
     compile 'com.squareup.picasso:picasso:2.5.2'
     compile project(':rx_paparazzo')
 
-    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.5.4'
-    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.5.4'
+    debugCompile 'com.squareup.leakcanary:leakcanary-android:1.6.1'
+    releaseCompile 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.1'
 
     androidTestCompile 'com.github.VictorAlbertos:DeviceAnimationTestRule:0.0.2'
 
