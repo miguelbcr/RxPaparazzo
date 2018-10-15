@@ -44,6 +44,7 @@ public class Config {
 
   private String fileProviderAuthority;
   private String fileProviderDirectory;
+  private CameraMode cameraMode;
 
   public Config() {
     this.size = new ScreenSize();
@@ -58,6 +59,7 @@ public class Config {
     this.fileProviderAuthority = null;
     this.fileProviderDirectory = null;
     this.maximumFileSize = NO_FILESIZE_LIMIT;
+    this.cameraMode = CameraMode.BACK;
   }
 
   public void setMaximumFileSize(long maximumFileSize) {
@@ -182,4 +184,11 @@ public class Config {
     return fileProviderDirectory;
   }
 
+  public CameraMode getCameraMode() {
+    return cameraMode;
+  }
+
+  public void setCameraMode(CameraMode cameraMode) {
+    this.cameraMode = cameraMode;
+  }
 }
