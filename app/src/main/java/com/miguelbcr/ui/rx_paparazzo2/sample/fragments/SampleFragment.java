@@ -8,9 +8,11 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
+import com.miguelbcr.ui.rx_paparazzo2.entities.CameraMode;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
@@ -37,6 +39,7 @@ public class SampleFragment extends Fragment implements Testable {
     private RecyclerView recyclerView;
     private ArrayList<FileData> fileDataList;
     private Size size;
+    private boolean isFrontCameraMode = false;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -72,7 +75,7 @@ public class SampleFragment extends Fragment implements Testable {
 
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        recyclerView = (RecyclerView) view.findViewById(R.id.rv_images);
+        recyclerView = view.findViewById(R.id.rv_images);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -86,6 +89,8 @@ public class SampleFragment extends Fragment implements Testable {
                 .setOnClickListener(v -> pickupMultipleTypesFile());
         view.findViewById(R.id.fab_pickup_multiple_types_files)
                 .setOnClickListener(v -> pickupMultipleTypesFiles());
+        ((Switch)view.findViewById(R.id.switch_camera_mode))
+            .setOnCheckedChangeListener((buttonView, isChecked) -> switchCameraMode(isChecked));
 
         loadImages();
     }
@@ -94,6 +99,7 @@ public class SampleFragment extends Fragment implements Testable {
         SmallSize size = new SmallSize();
 
         Observable<Response<SampleFragment, FileData>> takeOnePhoto = pickSingle(null, size)
+                .setCameraMode(isFrontCameraMode ? CameraMode.FRONT : CameraMode.BACK)
                 .usingCamera();
 
         processSingle(takeOnePhoto);
@@ -108,6 +114,7 @@ public class SampleFragment extends Fragment implements Testable {
         OriginalSize size = new OriginalSize();
 
         Observable<Response<SampleFragment, FileData>> takePhotoAndCrop = pickSingle(options, size)
+                .setCameraMode(isFrontCameraMode ? CameraMode.FRONT : CameraMode.BACK)
                 .usingCamera();
 
         processSingle(takePhotoAndCrop);
@@ -249,6 +256,10 @@ public class SampleFragment extends Fragment implements Testable {
 
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setAdapter(new ImagesAdapter(fileDataList));
+    }
+
+    private void switchCameraMode(boolean isChecked) {
+        this.isFrontCameraMode = isChecked;
     }
 
     @Override

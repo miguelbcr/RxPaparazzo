@@ -8,8 +8,10 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.Switch;
 import android.widget.Toast;
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
+import com.miguelbcr.ui.rx_paparazzo2.entities.CameraMode;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.CustomMaxSize;
@@ -35,6 +37,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private RecyclerView recyclerView;
     private ArrayList<FileData> fileDataList;
     private Size size;
+    private boolean isFrontCameraMode = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +69,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     }
 
     private void configureToolbar() {
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle(R.string.app_name);
     }
@@ -74,7 +77,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
     private void initViews() {
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
         layoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        recyclerView = (RecyclerView) findViewById(R.id.rv_images);
+        recyclerView = findViewById(R.id.rv_images);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
 
@@ -88,6 +91,8 @@ public class SampleActivity extends AppCompatActivity implements Testable {
                 .setOnClickListener(v -> pickupMultipleTypesFile());
         findViewById(R.id.fab_pickup_multiple_types_files)
                 .setOnClickListener(v -> pickupMultipleTypesFiles());
+        ((Switch)findViewById(R.id.switch_camera_mode))
+            .setOnCheckedChangeListener((buttonView, isChecked) -> switchCameraMode(isChecked));
 
         loadImages();
     }
@@ -96,6 +101,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
         CustomMaxSize size = new CustomMaxSize(512);
 
         Observable<Response<SampleActivity, FileData>> takeOnePhoto = pickSingle(null, size)
+                .setCameraMode(isFrontCameraMode ? CameraMode.FRONT : CameraMode.BACK)
                 .usingCamera();
 
         processSingle(takeOnePhoto);
@@ -108,6 +114,7 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
         OriginalSize size = new OriginalSize();
         Observable<Response<SampleActivity, FileData>> takePhotoAndCrop = pickSingle(options, size)
+                .setCameraMode(isFrontCameraMode ? CameraMode.FRONT : CameraMode.BACK)
                 .usingCamera();
 
         processSingle(takePhotoAndCrop);
@@ -250,6 +257,10 @@ public class SampleActivity extends AppCompatActivity implements Testable {
 
         recyclerView.setVisibility(View.VISIBLE);
         recyclerView.setAdapter(new ImagesAdapter(fileDataList));
+    }
+
+    private void switchCameraMode(boolean isChecked) {
+        this.isFrontCameraMode = isChecked;
     }
 
     @Override

@@ -20,6 +20,7 @@ import android.app.Activity;
 import android.app.Application;
 import android.support.v4.app.Fragment;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.CameraMode;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
@@ -192,6 +193,11 @@ public final class RxPaparazzo {
      */
     public B useDocumentPicker() {
       this.config.setUseDocumentPicker(true);
+      return self;
+    }
+
+    public B setCameraMode(CameraMode cameraMode) {
+      this.config.setCameraMode(cameraMode);
       return self;
     }
 

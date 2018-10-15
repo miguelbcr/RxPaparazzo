@@ -18,10 +18,12 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.content.Context;
 import android.content.Intent;
+import android.hardware.Camera;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 
+import com.miguelbcr.ui.rx_paparazzo2.entities.CameraMode;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
@@ -69,7 +71,7 @@ public final class TakePhoto extends UseCase<FileData> {
 
   private Function<Intent, Uri> revokeFileReadWritePermissions(final TargetUi targetUi, final Uri uri) {
     return new Function<Intent, Uri>() {
-      @Override public Uri apply(Intent data) throws Exception {
+      @Override public Uri apply(Intent data) {
         PermissionUtil.revokeFileReadWritePermissions(targetUi, uri);
 
         return uri;
@@ -93,6 +95,16 @@ public final class TakePhoto extends UseCase<FileData> {
   private Intent getIntentCamera(Uri uri) {
     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
     intent.putExtra(MediaStore.EXTRA_OUTPUT, uri);
+
+    if (CameraMode.FRONT.equals(config.getCameraMode())) {
+      intent.putExtra("android.intent.extras.CAMERA_FACING", android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT);
+      intent.putExtra("android.intent.extras.LENS_FACING_FRONT", 1);
+      intent.putExtra("android.intent.extra.USE_FRONT_CAMERA", true);
+    } else {
+      intent.putExtra("android.intent.extras.CAMERA_FACING", Camera.CameraInfo.CAMERA_FACING_BACK);
+      intent.putExtra("android.intent.extras.LENS_FACING_FRONT", 0);
+      intent.putExtra("android.intent.extra.USE_FRONT_CAMERA", false);
+    }
 
     return PermissionUtil.requestReadWritePermission(targetUi, intent, uri);
   }
