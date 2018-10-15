@@ -159,6 +159,14 @@
                 android:layout_weight="1"/>
         </LinearLayout>
 
+        <Switch
+            android:id="@+id/switch_camera_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:switchPadding="10dp"
+            android:padding="10dp"
+            android:text="Camera Front"/>
+
     </LinearLayout>
 
     <android.support.v7.widget.RecyclerView

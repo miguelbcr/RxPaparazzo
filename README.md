@@ -210,7 +210,15 @@ RxPaparazzo.multiple(activityOrFragment)
                 .size(new ScreenSize())
                 .usingGallery()
 ```                 
-                
+
+### Camera mode
+Switching camera for front or back. By default back set
+```java
+RxPaparazzo.single(activityOrFragment)
+        .setCameraMode(CameraMode.FRONT)
+        .usingCamera()
+```
+
 ### Cropping support for image.
 This feature is available thanks to the amazing library [uCrop](https://github.com/Yalantis/uCrop) authored by [Yalantis](https://github.com/Yalantis) group. 
 

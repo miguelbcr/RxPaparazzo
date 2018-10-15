@@ -3,6 +3,8 @@
     package="com.miguelbcr.ui.rx_paparazzo2.sample">
 
     <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.front" android:required="false" />
 
     <application
         android:icon="@mipmap/ic_launcher"
