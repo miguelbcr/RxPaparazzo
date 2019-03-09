@@ -1,9 +1,9 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.rule.ActivityTestRule;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.test.uiautomator.UiDevice;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.rule.ActivityTestRule;
+import androidx.test.runner.AndroidJUnit4;
+import androidx.test.uiautomator.UiDevice;
 
 import com.miguelbcr.ui.rx_paparazzo2.sample.activities.StartActivity;
 
@@ -17,9 +17,9 @@ import org.junit.runners.MethodSorters;
 
 import io.victoralbertos.device_animation_test_rule.DeviceAnimationTestRule;
 
-import static android.support.test.espresso.Espresso.onView;
-import static android.support.test.espresso.action.ViewActions.click;
-import static android.support.test.espresso.matcher.ViewMatchers.withId;
+import static androidx.test.espresso.Espresso.onView;
+import static androidx.test.espresso.action.ViewActions.click;
+import static androidx.test.espresso.matcher.ViewMatchers.withId;
 
 /**
  * TESTED ON:

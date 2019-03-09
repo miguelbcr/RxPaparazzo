@@ -18,8 +18,8 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.net.Uri;
 import android.os.Build;
-import android.support.v4.provider.DocumentFile;
 
+import androidx.documentfile.provider.DocumentFile;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;

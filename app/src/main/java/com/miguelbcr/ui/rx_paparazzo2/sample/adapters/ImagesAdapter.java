@@ -1,14 +1,14 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample.adapters;
 
 import android.graphics.drawable.Drawable;
-import android.support.v7.widget.AppCompatDrawableManager;
-import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.appcompat.widget.AppCompatDrawableManager;
+import androidx.recyclerview.widget.RecyclerView;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;
 import com.squareup.picasso.Picasso;

@@ -18,9 +18,9 @@ package com.miguelbcr.ui.rx_paparazzo2.interactors;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
 
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentActivity;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 import com.miguelbcr.ui.rx_paparazzo2.entities.UserCanceledException;
 import io.reactivex.Observable;

@@ -16,7 +16,7 @@
 
 package com.miguelbcr.ui.rx_paparazzo2.entities;
 
-import android.support.annotation.IntRange;
+import androidx.annotation.IntRange;
 import com.yalantis.ucrop.UCrop;
 
 public class Options extends UCrop.Options {
