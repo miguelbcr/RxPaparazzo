@@ -88,7 +88,7 @@ If you set the files-path `path` attribute to a value other than `RxPaparazzo/` 
 
 All features RxPaparazzo exposes can be accessed from both, an `activity` or a `fragment` instance.
 
-**Limitation:**: Your fragments need to extend from `android.support.v4.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified.
+**Limitation:**: Your fragments need to extend from `androidx.core.app.Fragment` instead of `android.app.Fragment`, otherwise they won't be notified.
 
 The generic type of the `observable` returned by RxPaparazzo when subscribing to any of its features is always an instance of [Response](https://github.com/miguelbcr/RxPaparazzo/blob/2.x/rx_paparazzo/src/main/java/com/miguelbcr/ui/rx_paparazzo2/entities/Response.java) class.
 

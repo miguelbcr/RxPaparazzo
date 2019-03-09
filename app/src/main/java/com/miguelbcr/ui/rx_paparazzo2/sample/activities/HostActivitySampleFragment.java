@@ -1,8 +1,8 @@
 package com.miguelbcr.ui.rx_paparazzo2.sample.activities;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 
+import androidx.appcompat.app.AppCompatActivity;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.size.Size;
 import com.miguelbcr.ui.rx_paparazzo2.sample.R;

@@ -3,8 +3,8 @@ package com.miguelbcr.ui.rx_paparazzo2.sample;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.support.annotation.Nullable;
 
+import androidx.annotation.Nullable;
 import com.miguelbcr.ui.rx_paparazzo2.RxPaparazzo;
 import com.squareup.leakcanary.LeakCanary;
 import com.squareup.leakcanary.RefWatcher;

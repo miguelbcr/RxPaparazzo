@@ -20,8 +20,8 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.Nullable;
 
+import androidx.annotation.Nullable;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.TargetUi;
 

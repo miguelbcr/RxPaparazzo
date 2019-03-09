@@ -19,7 +19,7 @@ package com.miguelbcr.ui.rx_paparazzo2.sample;
 import android.app.Activity;
 import android.app.Application;
 import android.os.Bundle;
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 /**
  * Track the current activity using the LifecycleCallback application
@@ -68,7 +68,8 @@ public enum AppCare {
         });
     }
 
-    @Nullable public Activity getLiveActivityOrNull() {
+    @Nullable
+    public Activity getLiveActivityOrNull() {
         return liveActivityOrNull;
     }
 }

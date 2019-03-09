@@ -18,8 +18,8 @@ package com.miguelbcr.ui.rx_paparazzo2;
 
 import android.app.Activity;
 import android.app.Application;
-import android.support.v4.app.Fragment;
 
+import androidx.fragment.app.Fragment;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Config;
 import com.miguelbcr.ui.rx_paparazzo2.entities.FileData;
 import com.miguelbcr.ui.rx_paparazzo2.entities.Response;
@@ -56,7 +56,7 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Sets this to the value of name attribute of {@link android.support.v4.content.FileProvider} in AndroidManifest.xml
+     * Sets this to the value of name attribute of {@link androidx.core.content.FileProvider} in AndroidManifest.xml
      */
     public RegisterBuilder withFileProviderAuthority(String authority) {
       fileProviderAuthority = authority;
@@ -64,7 +64,7 @@ public final class RxPaparazzo {
     }
 
     /**
-     * Sets this to the path to use in the {@link android.support.v4.content.FileProvider} xml file
+     * Sets this to the path to use in the {@link androidx.core.content.FileProvider} xml file
      */
     public RegisterBuilder withFileProviderPath(String path) {
       fileProviderPath = path;
