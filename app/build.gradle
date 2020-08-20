@@ -42,31 +42,30 @@ dependencies {
     implementation project(':rx_paparazzo')
     implementation fileTree(include: ['*.jar'], dir: 'libs')
     testImplementation 'junit:junit:4.12'
-    implementation 'androidx.appcompat:appcompat:1.1.0-alpha02'
-    implementation 'com.google.android.material:material:1.1.0-alpha04'
-    implementation 'io.reactivex.rxjava2:rxandroid:2.1.0'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
+    implementation 'com.google.android.material:material:1.1.0'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
     implementation 'com.squareup.picasso:picasso:2.5.2'
 
-    debugImplementation 'com.squareup.leakcanary:leakcanary-android:1.6.3'
-    releaseImplementation 'com.squareup.leakcanary:leakcanary-android-no-op:1.6.3'
+    debugImplementation 'com.squareup.leakcanary:leakcanary-android:2.4'
 
-    androidTestImplementation 'com.github.VictorAlbertos:DeviceAnimationTestRule:0.0.2'
+    androidTestImplementation 'com.github.VictorAlbertos:DeviceAnimationTestRule:0.0.3'
 
-    androidTestImplementation ('androidx.test:runner:1.1.0-alpha4') {
+    androidTestImplementation ('androidx.test:runner:1.1.0') {
         exclude module: 'support-annotations'
     }
-    androidTestImplementation ('androidx.test:rules:1.1.0-alpha4') {
+    androidTestImplementation ('androidx.test:rules:1.1.0') {
         exclude module: 'support-annotations'
     }
 
-    androidTestImplementation ('androidx.test.espresso:espresso-intents:3.1.0-alpha4') {
+    androidTestImplementation ('androidx.test.espresso:espresso-intents:3.1.0') {
         exclude module: 'support-annotations'
         exclude module: 'support-v4'
         exclude module: 'support-v13'
         exclude module: 'recyclerview-v7'
     }
 
-    androidTestImplementation ('androidx.test.espresso:espresso-contrib:3.1.0-alpha4') {
+    androidTestImplementation ('androidx.test.espresso:espresso-contrib:3.1.0') {
         exclude module: 'support-annotations'
         exclude module: 'support-v4'
         exclude module: 'support-v13'
